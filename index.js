@@ -52,7 +52,7 @@ async function get_stats(configuration) {
         let max = -Infinity;
         let sum = 0;
         for (let sample of samples) {
-            sum += sample[key];
+            sum = sum + sample[key];
             if (sample[key] < min) {
                 min = sample[key];
             }
@@ -63,9 +63,11 @@ async function get_stats(configuration) {
         let avg = sum / n;
         let stdevsum = 0;
         for (let sample of samples) {
-            stdevsum += Math.pow((sample - avg), 2);
+            stdevsum = stdevsum + Math.pow((sample[key] - avg), 2);
         }
+        console.log("stdevsum:" + stdevsum);
         let stdev = Math.sqrt(stdevsum / n);
+        console.log("stdev:" + stdev);
         results[key]["min"] = min;
         results[key]["max"] = max;
         results[key]["avg"] = avg;
@@ -87,8 +89,9 @@ function get_weakest_form() {
         let form = active_forms[configuration];
         let score = 0;
         for (let key of Object.keys(fitness_weights)) {
-            score += fitness_weights[key] * form["stats"][key];
+            score = score + fitness_weights[key] * form["stats"][key]["avg"];
         }
+        console.log("score:" + score);
         if (score < lowest_score) {
             lowest_score = score;
             lowest_score_configuration = configuration;
@@ -98,9 +101,13 @@ function get_weakest_form() {
             highest_score_configuration = configuration;
         }
     }
-    console.log("Topstats:");
-    console.log("    Gen:" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["avg"] * 100) / 100) + " RF/t");
-    console.log("    Eat:" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["avg"] * 100) / 100) + " RF/t");
+    console.log(JSON.stringify(highest_score_configuration));
+    console.log(JSON.stringify(lowest_score_configuration));
+    if (highest_score_configuration != "") {
+        console.log("Topstats:");
+        console.log("    Gen:" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["stdev"] * 100) / 100) + " RF/t");
+        console.log("    Eat:" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["stdev"] * 100) / 100) + " mB/t");
+    }
     return lowest_score_configuration;
 }
 
