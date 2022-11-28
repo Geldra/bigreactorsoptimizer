@@ -108,8 +108,9 @@ ii = 1;
 const starttime = Date.now();
 async function main() {
     for (ii = 1; ii < iterations + 1; ii++) {
+        let weakest = get_weakest_form();
         if (Object.keys(active_forms).length >= max_forms) {
-            delete active_forms[get_weakest_form()];
+            delete active_forms[weakest];
         }
         let whatareyoudoing;
         if (Object.keys(active_forms).length == 0) {
