@@ -1,0 +1,43 @@
+{
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX": {
+        "age": 0,
+        "stats": {
+            "coolantTemperature": {
+                "min": 20,
+                "max": 20,
+                "avg": 20,
+                "stdev": 0
+            },
+            "fuelConsumption": {
+                "min": 11.428526803558949,
+                "max": 11.538064863167541,
+                "avg": 11.495795532301354,
+                "stdev": 0.03036467933198853
+            },
+            "fuelFertility": {
+                "min": 529.9458,
+                "max": 535.0786,
+                "avg": 531.907919,
+                "stdev": 1.4134257849102185
+            },
+            "fuelHeat": {
+                "min": 3651.4463,
+                "max": 3655.3826,
+                "avg": 3653.3794399999992,
+                "stdev": 1.1398286758982468
+            },
+            "output": {
+                "min": 179791.20680147078,
+                "max": 180122.85232843173,
+                "avg": 179964.4758884805,
+                "stdev": 98.71317646731231
+            },
+            "reactorHeat": {
+                "min": 2958.6003,
+                "max": 2964.021,
+                "avg": 2961.432320000001,
+                "stdev": 1.6134484124384176
+            }
+        }
+    }
+}

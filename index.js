@@ -8,7 +8,7 @@ const active_forms = {};
 const max_forms = 10;
 const iterations = 10000000;
 const log_interval = 100; //interval to save a snapshot of active_forms in ./log/
-
+fs.mkdirSync("./log", { recursive: true });
 // https://br.sidoh.org/api/simulate?definition=%7B%22xSize%22%3A15%2C%22zSize%22%3A15%2C%22height%22%3A15%2C%22layout%22%3A%22XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%22%2C%22isActivelyCooled%22%3Afalse%2C%22controlRodInsertion%22%3A0%7D
 const set_parameters = {
     "xSize": 15,
