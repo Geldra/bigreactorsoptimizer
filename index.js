@@ -81,6 +81,8 @@ String.prototype.replaceAt = function (index, replacement) {
 function get_weakest_form() {
     let lowest_score = Infinity;
     let lowest_score_configuration = "";
+    let highest_score = -Infinity;
+    let highest_score_configuration = "";
     for (let configuration of Object.keys(active_forms)) {
         let form = active_forms[configuration];
         let score = 0;
@@ -91,7 +93,14 @@ function get_weakest_form() {
             lowest_score = score;
             lowest_score_configuration = configuration;
         }
+        if (score > highest_score) {
+            highest_score = score;
+            highest_score_configuration = configuration;
+        }
     }
+    console.log("Topstats:");
+    console.log("    Gen:" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["avg"] * 100) / 100) + " RF/t");
+    console.log("    Eat:" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["avg"] * 100) / 100) + " RF/t");
     return lowest_score_configuration;
 }
 
@@ -112,6 +121,7 @@ async function main() {
         let new_configuration = make_permutation(whatareyoudoing);
         active_forms[new_configuration] = { "age": 0 };
         active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
+
         if (ii % log_interval == 0) {
             fs.writeFileSync("./log/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
         }
