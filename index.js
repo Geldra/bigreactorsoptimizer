@@ -133,7 +133,7 @@ async function main() {
         if (ii % log_interval == 0) {
             fs.writeFileSync("./log/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
         }
-        fs.writeFileSync("./log/curent.json", JSON.stringify(active_forms, null, 4), { encoding: false });
+        fs.writeFileSync("./log/current.json", JSON.stringify(active_forms, null, 4), { encoding: false });
 
         for (let configuration of Object.keys(active_forms)) {
             active_forms[configuration]["age"]++;
