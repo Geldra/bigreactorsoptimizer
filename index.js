@@ -1,7 +1,7 @@
 const fs = require("fs");
 const bent = require("bent");
-const getJSON = bent("json");
-const apiurls = process.argv[2].split(",");
+const post = bent("http://localhost:8081/", "POST", "json", 200);
+const apiurls = [post];
 let aggrocalls = 0;
 const active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
@@ -9,18 +9,28 @@ const max_forms = 10;
 const iterations = 10000000;
 const log_interval = 100; //interval to save a snapshot of active_forms in ./log/
 fs.mkdirSync("./log", { recursive: true });
-// https://br.sidoh.org/api/simulate?definition=%7B%22xSize%22%3A15%2C%22zSize%22%3A15%2C%22height%22%3A15%2C%22layout%22%3A%22XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%22%2C%22isActivelyCooled%22%3Afalse%2C%22controlRodInsertion%22%3A0%7D
+
+// curl -b u1 -c u1 -X POST -H "Content-Type: application/json" -d '{"xSize":7,"zSize":7,"height":7,"layout":"XXXXXXXXXXXXXXXXXXXXXXXXX","isActivelyCooled":false,"controlRodInsertion":0}' localhost:8081/api/simulate
+/*{
+    "xSize":7,
+    "zSize":7,
+    "height":7,
+    "layout":"XXXXXXXXXXXXXXXXXXXXXXXXX",
+    "isActivelyCooled":false,
+    "controlRodInsertion":0
+}*/
+
 const set_parameters = {
-    "xSize": 15,
-    "zSize": 15,
-    "height": 15,
+    "xSize": 100,
+    "zSize": 100,
+    "height": 256,
     "isActivelyCooled": false,
     "controlRodInsertion": 0
 }
 
 const fitness_weights = {
     "output": 1,
-    "fuelConsumption": 0.1
+    "fuelConsumption": -0.5
 }
 
 const components = { "C": "Gelid Cryotheum", "E": "Liquid Ender", "D": "Diamond Block", "G": "Graphite Block", "R": "Destabilized Redstone", "X": "Control Rod", "L": "Block of Gold", "O": "Air" }
@@ -34,7 +44,7 @@ function make_permutation(parent_configuration) {
     return configuration;
 }
 
-const n = 10;
+const n = 5;
 async function get_stats(configuration) {
     let samples = [];
     for (let i = 0; i < n; i++) {
@@ -42,8 +52,9 @@ async function get_stats(configuration) {
         let thisdef = {};
         Object.assign(thisdef, set_parameters);
         thisdef["layout"] = configuration;
-        samples.push(await givemetheresultalready(apiurls[allcalls % apiurls.length] + "?definition=" + encodeURIComponent(JSON.stringify(thisdef))));
+        samples.push(givemetheresultalready(thisdef));
     }
+    samples = await Promise.all(samples);
     let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
     let results = {};
     for (let key of keys_to_stat) {
@@ -125,7 +136,7 @@ async function main() {
         } else {
             whatareyoudoing = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
         }
-        console.log(whatareyoudoing);
+        //console.log(whatareyoudoing);
         let new_configuration = make_permutation(whatareyoudoing);
         active_forms[new_configuration] = { "age": 0 };
         active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
@@ -145,7 +156,7 @@ async function main() {
 
 let allcalls = 0;
 let errorcalls = 0;
-async function givemetheresultalready(url) {
+async function givemetheresultalready(data) {
     let complete = false;
     let tries = 0;
     let result = {};
@@ -161,7 +172,7 @@ async function givemetheresultalready(url) {
             let remaining = Math.floor(((iterations - ii) * n + thiscall) / speed);
             console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Making a call... (ETA: " + remaining + " minutes) [" + Math.round(((ii * n + thiscall) / (iterations * n)) * 1000) / 100 + "% progress] {" + Math.round((errorcalls / allcalls) * 1000) / 100 + "% fail rate}");
             allcalls++;
-            result = await getJSON(url);
+            result = await post("api/simulate", data);
             complete = true;
         } catch (err) {
             errorcalls++;
@@ -169,6 +180,7 @@ async function givemetheresultalready(url) {
             complete = false;
         }
     }
+    console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Complete.");
     return result;
 }
 
@@ -176,4 +188,67 @@ async function sleep(ms) {
     console.log("ZzZZz... (" + ms + "ms)");
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+startupArt();
 main();
+
+
+
+function startupArt() {
+    console.log(""
+        + "  $$$$$$$\\  $$$$$$\\  $$$$$$\\                                                              \n"
+        + "  $$  __$$\\ \\_$$  _|$$  __$$\\                                      .          .           \n"
+        + "  $$ |  $$ |  $$ |  $$ /  \\__|                                   :+-         =-           \n"
+        + "  $$$$$$$\\ |  $$ |  $$ |$$$$\\                                   =++-      .-++-           \n"
+        + "  $$  __$$\\   $$ |  $$ |\\_$$ |                                -++++-     -++++-           \n"
+        + "  $$ |  $$ |  $$ |  $$ |  $$ |                              :++++++-   :++++++-           \n"
+        + "  $$$$$$$  |$$$$$$\\ \\$$$$$$  |                            :=+++++++- .=+++++++-           \n"
+        + "  \\_______/ \\______| \\______/                            -+++++++++-=+++++++++-           \n"
+        + "       ______   ______  __       __                     .+++++++++++++++++++++-           \n"
+        + "      /      \\ |      \\|  \\     /  \\                    .+++++++++++++++++++++-           \n"
+        + "     |  $$$$$$\\ \\$$$$$$| $$\\   /  $$                    .+++++++++++++++++++++-           \n"
+        + "     | $$___\\$$  | $$  | $$$\\ /  $$$         -:         .+++++++++++++++++++++-           \n"
+        + "      \\$$    \\   | $$  | $$$$\\  $$$$+:       -+=:       .++++++++++++*+==+*+++-           \n"
+        + "      _\\$$$$$$\\  | $$  | $$\\$$ $$ $$++=.     -+++=.     .+++++++++++*=    .#++-           \n"
+        + "     |  \\__| $$ _| $$_ | $$ \\$$$| $$++++-    -+++++-    .+++++++++++++    -*++-           \n"
+        + "      \\$$    $$|   $$ \\| $$  \\$ | $$++++++:  -+++++++:  .+++++++++++++*++*++++-           \n"
+        + "       \\$$$$$$  \\$$$$$$ \\$$      \\$$+++++++=.-++++++++=..+++++++++++++++++++++-           \n"
+        + "                        ----------=+++++++++++++++++++++-:++++++++++++++++++++-           \n"
+        + "                       .+++++++++++++++++++++++++++++++++.=+++++++++++++++++++-           \n"
+        + "                       .+++++++++++++++++++++++++++++++++= +++++++++++++++++++-           \n"
+        + "                       -++++++++++++++++++++++++++++++++++-.+++++++=++++++++++:           \n"
+        + "                     .=++++++++++++++++++++++++++++++++++++.:++++- -++++++++=.            \n"
+        + "                   .=++++++++++++++++++++++++++++++++++++++= -+=.  -++++++=:              \n"
+        + "                  :+++++++++++++++++++++++++++++++++++++++++- :    -+++++:                \n"
+        + "                .+++++++++++++++++++++++++++++++++++++++++++-      -+++-                  \n"
+        + "              .=++++++++++++++++++++++++++++++++++++++++++-.       -+=.                   \n"
+        + "             =+++++++++++++++++++++++++++++++++++++++++++.         :.                     \n"
+        + "            :+++++++++++++++++++++++++++++++++++++++++++-                                 \n"
+        + "            :++++++++++++++++++++++++++++++++-++++++++++-                                 \n"
+        + "            :+++++++++++++++++++++++++++++++= ++++++++++-                                 \n"
+        + "             -++++++++++++++++++++++++++++++= ++++++++++-                                 \n"
+        + "              .=++++++++++++++++++++++++++++= ++++++++++-                                 \n"
+        + "                .=++++++++++++++++++++++++++= ++++++++++-                                 \n"
+        + "                  .+++++++++++++++++++++++++= ++++++++++-                                 \n"
+        + "                    -++++++++++=:+++++++++++= ++++++++++-                                 \n"
+        + "                     .=+++++++++.+++++++++++= ++++++++++-                                 \n"
+        + "                       :++++++++ +++++++++++= ++++++++++-                                 \n"
+        + "                       .++++++++.+++++++++++= ++++++++++-                                 \n"
+        + "                       .++++++++.+++++++++++= ++++++++++-                                 \n"
+        + "                       -++++++++:-++++++++++= ++++++++++:                                 \n"
+        + "                     .=++++++++-.=+++++++++=. ++++++++=.                                  \n"
+        + "                   .=++++++++=:-+++++++++=:   ++++++=.                                    \n"
+        + "                  :++++++++=::++++++++++:     +++++:                                      \n"
+        + "                .+++++++++::=+++++++++-       +++=                                        \n"
+        + "              .=++++++++-:=+++++++++=:        +=.                                         \n"
+        + "             =+++++++++.:++++++++++:          .                                           \n"
+        + "            :++++++++++.++++++++++-                                                       \n"
+        + "            :++++++++++ ++++++++++-                                                       \n"
+        + "            :++++++++++.=+++++++++-                                                       \n"
+        + "             -+++++++++-:+++++++++-                                                       \n"
+        + "              .=+++++++- .=+++++++-                                                       \n"
+        + "                .=+++++-   :=+++++-                                                       \n"
+        + "                  .++++-     :++++-                                                       \n"
+        + "                    -++-       :++-                                                       \n"
+        + "                     .--        .--                                                       \n"
+        + "                                                                                          ");
+}

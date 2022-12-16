@@ -17,11 +17,11 @@ jobs:
 
     steps:
     - continue-on-error: true
-      run: sudo systemctl is-active reactoroptimize && sudo systemctl stop reactoroptimize
+      run: sudo systemctl is-active bigreactorsoptimizer && sudo systemctl stop bigreactorsoptimizer
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
-    - run: sudo systemctl start reactoroptimize
+    - run: sudo systemctl start bigreactorsoptimizer

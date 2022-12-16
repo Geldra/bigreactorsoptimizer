@@ -1,1 +1,3 @@
-test.sh
+test_main.sh
+test_profile.sh
+rod_profile
