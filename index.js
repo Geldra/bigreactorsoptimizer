@@ -5,10 +5,10 @@ const apiurls = [post];
 let aggrocalls = 0;
 const active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
-const max_forms = 10;
+const max_forms = 20;
 const iterations = 10000000;
 const log_interval = 100; //interval to save a snapshot of active_forms in ./log/
-fs.mkdirSync("./log", { recursive: true });
+fs.mkdirSync("../../../reactorsaves", { recursive: true });
 
 // curl -b u1 -c u1 -X POST -H "Content-Type: application/json" -d '{"xSize":7,"zSize":7,"height":7,"layout":"XXXXXXXXXXXXXXXXXXXXXXXXX","isActivelyCooled":false,"controlRodInsertion":0}' localhost:8081/api/simulate
 /*{
@@ -23,7 +23,7 @@ fs.mkdirSync("./log", { recursive: true });
 const set_parameters = {
     "xSize": 100,
     "zSize": 100,
-    "height": 256,
+    "height": 5,
     "isActivelyCooled": false,
     "controlRodInsertion": 0
 }
@@ -36,9 +36,24 @@ const fitness_weights = {
 const components = { "C": "Gelid Cryotheum", "E": "Liquid Ender", "D": "Diamond Block", "G": "Graphite Block", "R": "Destabilized Redstone", "X": "Control Rod", "L": "Block of Gold", "O": "Air" }
 
 //const seed = "X".repeat((set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2));
+let init_iteration = 1;
 const seed = buildrandomseed();
 
 function buildrandomseed() {
+    if (fs.existsSync("../../../reactorsaves/current.json")) {
+        let highest_iteration = 1;
+        for (let file of fs.readdirSync("../../../reactorsaves").filter(ifile => ![".", "..", "current.json"].includes(ifile))) {
+            let new_num = parseInt(file.replace(".json", ""));
+            if (new_num > highest_iteration) {
+                highest_iteration = new_num;
+            }
+        }
+        init_iteration = highest_iteration;
+        let import_forms = JSON.parse(fs.readFileSync("../../../reactorsaves/current.json"));
+        for (let key of Object.keys(import_forms)) {
+            active_forms[key] = import_forms[key];
+        }
+    }
     let newseed = "";
     let keys = Object.keys(components);
     for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
@@ -136,7 +151,7 @@ ii = 1;
 const starttime = Date.now();
 var loggedinit = false;
 async function main() {
-    for (ii = 1; ii < iterations + 1; ii++) {
+    for (ii = init_iteration; ii < iterations + 1; ii++) {
         let weakest = get_weakest_form();
         if (Object.keys(active_forms).length >= max_forms) {
             delete active_forms[weakest];
@@ -153,18 +168,18 @@ async function main() {
         active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
 
         if (ii % log_interval == 0 || (loggedinit == false && Object.keys(active_forms).length >= max_forms)) {
-            fs.writeFileSync("./log/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
+            fs.writeFileSync("../../../reactorsaves/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
             if (loggedinit === false) {
                 loggedinit = true;
             }
         }
-        fs.writeFileSync("./log/current.json", JSON.stringify(active_forms, null, 4), { encoding: false });
+        fs.writeFileSync("../../../reactorsaves/current.json", JSON.stringify(active_forms, null, 4), { encoding: false });
 
         for (let configuration of Object.keys(active_forms)) {
             active_forms[configuration]["age"]++;
         }
     }
-    fs.writeFileSync("./log/final.json", JSON.stringify(active_forms, null, 4), { encoding: false });
+    fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(active_forms, null, 4), { encoding: false });
 }
 
 
