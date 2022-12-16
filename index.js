@@ -152,7 +152,7 @@ async function main() {
         active_forms[new_configuration] = { "age": 0 };
         active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
 
-        if (ii % log_interval == 0 || loggedinit == false && Object.keys(active_forms).length >= max_forms) {
+        if (ii % log_interval == 0 || (loggedinit == false && Object.keys(active_forms).length >= max_forms)) {
             fs.writeFileSync("./log/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
             if (loggedinit === false) {
                 loggedinit = true;
