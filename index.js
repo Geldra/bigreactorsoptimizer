@@ -30,12 +30,22 @@ const set_parameters = {
 
 const fitness_weights = {
     "output": 1,
-    "fuelConsumption": -0.5
+    "fuelConsumption": -1000
 }
 
 const components = { "C": "Gelid Cryotheum", "E": "Liquid Ender", "D": "Diamond Block", "G": "Graphite Block", "R": "Destabilized Redstone", "X": "Control Rod", "L": "Block of Gold", "O": "Air" }
 
-const seed = "X".repeat((set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2));
+//const seed = "X".repeat((set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2));
+const seed = buildrandomseed();
+
+function buildrandomseed() {
+    let newseed = "";
+    let keys = Object.keys(components);
+    for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
+        newseed = newseed + keys[Math.round(Math.random() * (keys.length - 1))]
+    }
+    return newseed;
+}
 
 function make_permutation(parent_configuration) {
     let pos = Math.round(Math.random() * (parent_configuration.length - 1));
