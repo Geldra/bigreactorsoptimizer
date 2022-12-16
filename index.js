@@ -134,6 +134,7 @@ function get_weakest_form() {
 
 ii = 1;
 const starttime = Date.now();
+var loggedinit = false;
 async function main() {
     for (ii = 1; ii < iterations + 1; ii++) {
         let weakest = get_weakest_form();
@@ -151,7 +152,7 @@ async function main() {
         active_forms[new_configuration] = { "age": 0 };
         active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
 
-        if (ii % log_interval == 0) {
+        if (ii % log_interval == 0 || loggedinit == false && Object.keys(active_forms).length == max_forms) {
             fs.writeFileSync("./log/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
         }
         fs.writeFileSync("./log/current.json", JSON.stringify(active_forms, null, 4), { encoding: false });
