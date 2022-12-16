@@ -62,11 +62,16 @@ function buildrandomseed() {
     return newseed;
 }
 
-function make_permutation(parent_configuration) {
+function make_permutation(parent_configuration, mutations_left = 0) {
     let pos = Math.round(Math.random() * (parent_configuration.length - 1));
     let insert = Object.keys(components)[Math.round(Math.random() * (Object.keys(components).length - 1))];
     let configuration = parent_configuration.replaceAt(pos, insert);
-    return configuration;
+    if (mutations_left === 0) {
+        return configuration;
+    } else {
+        return make_permutation(configuration, mutations_left - 1);
+    }
+
 }
 
 const n = 5;
@@ -164,7 +169,7 @@ async function main() {
             whatareyoudoing = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
         }
         //console.log(whatareyoudoing);
-        let new_configuration = make_permutation(whatareyoudoing);
+        let new_configuration = make_permutation(whatareyoudoing, Date.now()%100);
         active_forms[new_configuration] = { "age": 0 };
         active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
 
