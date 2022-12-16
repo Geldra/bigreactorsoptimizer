@@ -169,9 +169,10 @@ async function main() {
             whatareyoudoing = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
         }
         //console.log(whatareyoudoing);
-        let new_configuration = make_permutation(whatareyoudoing, Date.now()%100);
+        let new_configuration = make_permutation(whatareyoudoing, Date.now() % 100);
         active_forms[new_configuration] = { "age": 0 };
         active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
+        active_forms[new_configuration]["ancestor"] = whatareyoudoing;
 
         if (ii % log_interval == 0 || (loggedinit == false && Object.keys(active_forms).length >= max_forms)) {
             fs.writeFileSync("../../../reactorsaves/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
