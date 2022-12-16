@@ -127,6 +127,7 @@ function get_weakest_form() {
         for (let key of Object.keys(fitness_weights)) {
             score = score + fitness_weights[key] * form["stats"][key]["avg"];
         }
+        active_forms[configuration]["score"] = score;
         console.log("score:" + score);
         if (score < lowest_score) {
             lowest_score = score;
