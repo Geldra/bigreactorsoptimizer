@@ -121,7 +121,7 @@ String.prototype.replaceAt = function (index, replacement) {
     return this.substring(0, index) + replacement + this.substring(index + replacement.length);
 }
 
-function get_weakest_form() {
+function get_weakest_and_strongest_form() {
     let lowest_score = Infinity;
     let lowest_score_configuration = "";
     let highest_score = -Infinity;
@@ -150,7 +150,10 @@ function get_weakest_form() {
         console.log("    Gen:" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["stdev"] * 100) / 100) + " RF/t");
         console.log("    Eat:" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["stdev"] * 100) / 100) + " mB/t");
     }
-    return lowest_score_configuration;
+    return {
+        "lowest": lowest_score_configuration,
+        "highest": highest_score_configuration
+    };
 }
 
 ii = 1;
@@ -159,10 +162,13 @@ var loggedinit = false;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         let weakest;
+        let champs = get_weakest_and_strongest_form();
         if (Math.random() > 0.2) {
-            weakest = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
+            //usually we will kill any non-strongest form
+            weakest = Object.keys(active_forms).filter(iform => iform != champs["highest"])[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
         } else {
-            weakest = get_weakest_form();
+            //rarely we will simply kill the lowest form
+            weakest = champs["lowest"];
         }
 
         if (Object.keys(active_forms).length >= max_forms) {
