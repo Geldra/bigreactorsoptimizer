@@ -5,8 +5,8 @@ const apiurls = [post];
 let aggrocalls = 0;
 const active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
-const max_forms = 20;
-const iterations = 10000000;
+const max_forms = 100;
+const iterations = 100000000;
 const log_interval = 100; //interval to save a snapshot of active_forms in ./log/
 fs.mkdirSync("../../../reactorsaves", { recursive: true });
 
@@ -158,7 +158,13 @@ const starttime = Date.now();
 var loggedinit = false;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
-        let weakest = get_weakest_form();
+        let weakest;
+        if (Math.random() > 0.2) {
+            weakest = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
+        } else {
+            weakest = get_weakest_form();
+        }
+
         if (Object.keys(active_forms).length >= max_forms) {
             delete active_forms[weakest];
         }
