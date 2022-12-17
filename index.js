@@ -199,7 +199,7 @@ async function givemetheresultalready(data) {
     let thiscall = aggrocalls % n + 1;
     aggrocalls++;
     while (complete == false) {
-        await sleep(Math.floor((50 + Math.random() * 50) / apiurls.length));
+        //await sleep(Math.floor((50 + Math.random() * 50) / apiurls.length));
         tries++;
         try {
             let time_elapsed = (Date.now() - starttime) / 60000;
