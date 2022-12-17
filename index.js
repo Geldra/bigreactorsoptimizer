@@ -161,30 +161,35 @@ const starttime = Date.now();
 var loggedinit = false;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
-        let weakest;
-        let champs = get_weakest_and_strongest_form();
-        if (Math.random() > 0.2) {
-            //usually we will kill any non-strongest form
-            weakest = Object.keys(active_forms).filter(iform => iform != champs["highest"])[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
-        } else {
-            //rarely we will simply kill the lowest form
-            weakest = champs["lowest"];
+        for (let j = 0; j < Math.round(Math.random() * 10 + 1); j++) {
+            let weakest;
+            let champs = get_weakest_and_strongest_form();
+            if (Math.random() > 0.2) {
+                //usually we will kill any non-strongest form
+                weakest = Object.keys(active_forms).filter(iform => iform != champs["highest"])[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
+            } else {
+                //rarely we will simply kill the lowest form
+                weakest = champs["lowest"];
+            }
+            if (Object.keys(active_forms).length >= max_forms / 2) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
+                delete active_forms[weakest];
+            }
         }
 
-        if (Object.keys(active_forms).length >= max_forms) {
-            delete active_forms[weakest];
+        while (Object.keys(active_forms).length < max_forms) {
+            //repopulate
+            let mutation_ancestor;
+            if (Object.keys(active_forms).length == 0) {
+                mutation_ancestor = seed;
+            } else {
+                mutation_ancestor = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
+            }
+
+            let new_configuration = make_permutation(mutation_ancestor, (Date.now() % 1000) * 2);
+            active_forms[new_configuration] = { "age": 0 };
+            active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
+            active_forms[new_configuration]["ancestor"] = mutation_ancestor;
         }
-        let whatareyoudoing;
-        if (Object.keys(active_forms).length == 0) {
-            whatareyoudoing = seed;
-        } else {
-            whatareyoudoing = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
-        }
-        //console.log(whatareyoudoing);
-        let new_configuration = make_permutation(whatareyoudoing, (Date.now() % 1000) * 2);
-        active_forms[new_configuration] = { "age": 0 };
-        active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
-        active_forms[new_configuration]["ancestor"] = whatareyoudoing;
 
         if (ii % log_interval == 0 || (loggedinit == false && Object.keys(active_forms).length >= max_forms)) {
             fs.writeFileSync("../../../reactorsaves/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
