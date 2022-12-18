@@ -18,20 +18,22 @@ async function buildgraph(stat = "output") {
     const files_length = files.length;
     let filebatch = [];
     for (let file of files) {
-        if (filebatch.length > 5) {
+        if (filebatch.length > 50) {
             await Promise.all(filebatch);
             filebatch = [];
         }
         filebatch.push(parsefile(file));
     }
     async function parsefile(file) {
+        files_parsed++;
+        const this_file_parse = files_parsed;
         let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file));
         let iteration = parseInt(file.replace(".json", ""));
         if (iteration > maxx) {
             maxx = iteration;
         }
-        let conf_length = Object.keys(data).length;
-        let conf_prog = 0;
+        /*let conf_length = Object.keys(data).length;
+        let conf_prog = 0;*/
         let confbatch = [];
         for (let conf of Object.keys(data)) {
             confbatch.push(parseconf(conf));
@@ -40,7 +42,10 @@ async function buildgraph(stat = "output") {
         async function parseconf(conf) {
             let thisone = crypto.createHash("sha512").update(conf).digest("hex");
             let ancestor = crypto.createHash("sha512").update(data[conf]["ancestor"]).digest("hex");
-            let stats = data[conf]["stats"][stat];
+            let stats = {};
+            Object.assign(stats, data[conf]["stats"][stat]);
+            data[conf] = null;//maybe this keeps things more freed up
+            delete data[conf];//I'm not sure which will work best
             if (!Object.keys(relations).includes(thisone)) {
                 relations[thisone] = {
                     "ancestor": ancestor,
@@ -58,19 +63,18 @@ async function buildgraph(stat = "output") {
                     file
                 ])
             }
-            if (data[conf]["stats"][stat]["avg"] < miny) {
-                miny = data[conf]["stats"][stat]["avg"] + 0;
+            if (stats["avg"] < miny) {
+                miny = stats["avg"] + 0;
             }
-            if (data[conf]["stats"][stat]["avg"] > maxy) {
-                maxy = data[conf]["stats"][stat]["avg"] + 0;
+            if (stats["avg"] > maxy) {
+                maxy = stats["avg"] + 0;
             }
             stats = null;
-            conf_prog++;
-            console.log(`${thisone} (${conf_prog}/${conf_length}) (${files_parsed}/${files_length})`);
+            /*conf_prog++;
+            console.log(`${thisone} (${this_file_parse}/${files_length})`);*/
         }
         data = null;
-        files_parsed++;
-        console.log(`Completed parsing ${file} (${files_parsed}/${files_length})`);
+        console.log(`Completed parsing ${file} (${this_file_parse}/${files_length})`);
     }
     console.log(`-- Parsing complete, moving to building (${Date.now() - fullstart} ms)`);
     //sweep again to build the data
