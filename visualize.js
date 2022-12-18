@@ -1,7 +1,8 @@
 const sharp = require("sharp");
 const fs = require("fs");
-const image_width = 2000;
-const image_height = 1000;
+const crypto = require("crypto");
+const image_width = 10000;
+const image_height = 2500;
 const point_radius = 3;
 
 async function buildgraph(stat = "output") {
@@ -10,6 +11,7 @@ async function buildgraph(stat = "output") {
     let miny = Infinity;
     let maxy = 0;
     let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json"].includes(thing));
+    let relations = {}; // hash:{"ancestor":hash, "color":color}
     //sweep files once to get bounds
     for (let file of files) {
         let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file));
@@ -18,6 +20,26 @@ async function buildgraph(stat = "output") {
             maxx = iteration;
         }
         for (let conf of Object.keys(data)) {
+            let thisone = crypto.createHash("sha512").update(conf).digest("hex");
+            let ancestor = crypto.createHash("sha512").update(data[conf]["ancestor"]).digest("hex");
+            let stats = data[conf]["stats"][stat];
+            if (!Object.keys(relations).includes(thisone)) {
+                relations[thisone] = {
+                    "ancestor": ancestor,
+                    "color": ("#" + Math.floor(Math.random() * 16777215).toString(16)),
+                    "coords": [[
+                        iteration,
+                        stats["avg"],
+                        file
+                    ]]
+                }
+            } else {
+                relations[thisone]["coords"].push([
+                    iteration,
+                    stats["avg"],
+                    file
+                ])
+            }
             if (data[conf]["stats"][stat]["avg"] < miny) {
                 miny = data[conf]["stats"][stat]["avg"];
             }
@@ -27,19 +49,36 @@ async function buildgraph(stat = "output") {
         }
     }
     //sweep again to build the data
-    for (let file of files) {
-        let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file));
-        let color = "#" + Math.floor(Math.random() * 16777215).toString(16);
-        let iteration = parseInt(file.replace(".json", ""));
-        for (let conf of Object.keys(data)) {
-            let stats = data[conf]["stats"][stat];
+    for (let relation_ref of Object.keys(relations)) {
+        relations[relation_ref]["coords"].sort((a, b) => { return a[0] - b[0] });
+        for (let coord of relations[relation_ref]["coords"]) {
             svgelms.push(`
-                <circle cx="${Math.round((iteration / maxx) * image_width)}" cy="${image_height - Math.round(((stats["avg"] - miny) / (maxy - miny)) * image_height)}" r="${point_radius}" fill="${color}" />
+                <circle cx="${getx(coord[0])}" cy="${gety(coord[1])}" r="${point_radius}" fill="${relations[relation_ref]["color"]}" />
+            `)
+        }
+        let start_coord = relations[relation_ref]["coords"][0];
+        let end_coord = relations[relation_ref]["coords"][relations[relation_ref]["coords"].length - 1];
+        svgelms.push(`
+            <line x1="${getx(start_coord[0])}" y1="${gety(start_coord[1])}" x2="${getx(end_coord[0])}" y2="${gety(end_coord[1])}" stroke-width="${Math.ceil(point_radius / 1.2)}" stroke="${relations[relation_ref]["color"]}" />
+        `)
+        if (start_coord[1]!=end_coord[1]){
+            console.log(`What happened here:\nstart = (${getx(start_coord[0])}, ${gety(start_coord[1])})\nstart = (${getx(end_coord[0])}, ${gety(end_coord[1])})`);
+        }
+        if (Object.keys(relations).includes(relations[relation_ref]["ancestor"])) {
+            let end_ancestor = relations[relations[relation_ref]["ancestor"]]["coords"][relations[relations[relation_ref]["ancestor"]]["coords"].length - 1];
+            svgelms.push(`
+                <line x1="${getx(start_coord[0])}" y1="${gety(end_ancestor[1])}" x2="${getx(start_coord[0])}" y2="${gety(start_coord[1])}" stroke-width="${Math.ceil(point_radius / 4)}" stroke="${relations[relation_ref]["color"]}" />
             `)
         }
     }
     let fullsvg = `<svg>${svgelms.join("")}</svg>`
-    fs.writeFileSync("./visualizations/test.png", await sharp(Buffer.from(fullsvg)).png().toBuffer());
+    fs.writeFileSync("./visualizations/test.png", await sharp(Buffer.from(fullsvg), { unlimited: true }).png().toBuffer());
+    function getx(rawx) {
+        return Math.round((rawx / maxx) * image_width);
+    }
+    function gety(rawy) {
+        return image_height - Math.round(((rawy - miny) / (maxy - miny)) * image_height);
+    }
 }
 
 buildgraph();
