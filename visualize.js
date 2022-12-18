@@ -18,7 +18,7 @@ async function buildgraph(stat = "output") {
     const files_length = files.length;
     let filebatch = [];
     for (let file of files) {
-        if (filebatch.length > 50) {
+        if (filebatch.length >= 500) {
             await Promise.all(filebatch);
             filebatch = [];
         }
@@ -70,8 +70,7 @@ async function buildgraph(stat = "output") {
                 maxy = stats["avg"] + 0;
             }
             stats = null;
-            /*conf_prog++;
-            console.log(`${thisone} (${this_file_parse}/${files_length})`);*/
+            console.log(`${thisone} (${this_file_parse}/${files_length})`);
         }
         data = null;
         console.log(`Completed parsing ${file} (${this_file_parse}/${files_length})`);
