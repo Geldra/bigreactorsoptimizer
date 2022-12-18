@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "bent": "^7.3.12",
-    "sharp": "^0.31.2"
+    "metrohash": "^2.8.0",
+    "sharp": "^0.31.2",
+    "xxhash": "^0.3.0"
   }
 }
