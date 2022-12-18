@@ -6,6 +6,7 @@ const image_height = 2500;
 const point_radius = 3;
 
 async function buildgraph(stat = "output") {
+    const fullstart = Date.now();
     let svgelms = [];
     let maxx = 0;
     let miny = Infinity;
@@ -13,6 +14,8 @@ async function buildgraph(stat = "output") {
     let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json"].includes(thing));
     let relations = {}; // hash:{"ancestor":hash, "color":color}
     //sweep files once to get bounds
+    let files_parsed = 0;
+    const files_length = files.length;
     for (let file of files) {
         let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file));
         let iteration = parseInt(file.replace(".json", ""));
@@ -47,8 +50,13 @@ async function buildgraph(stat = "output") {
                 maxy = data[conf]["stats"][stat]["avg"];
             }
         }
+        files_parsed++;
+        console.log(`Completed parsing ${file} (${files_parsed}/${files_length})`);
     }
+    console.log(`-- Parsing complete, moving to building (${Date.now() - fullstart} ms)`);
     //sweep again to build the data
+    let relations_built = 0;
+    const relations_length = Object.keys(relations).length;
     for (let relation_ref of Object.keys(relations)) {
         relations[relation_ref]["coords"].sort((a, b) => { return a[0] - b[0] });
         for (let coord of relations[relation_ref]["coords"]) {
@@ -61,7 +69,7 @@ async function buildgraph(stat = "output") {
         svgelms.push(`
             <line x1="${getx(start_coord[0])}" y1="${gety(start_coord[1])}" x2="${getx(end_coord[0])}" y2="${gety(end_coord[1])}" stroke-width="${Math.ceil(point_radius / 1.2)}" stroke="${relations[relation_ref]["color"]}" />
         `)
-        if (start_coord[1]!=end_coord[1]){
+        if (start_coord[1] != end_coord[1]) {
             console.log(`What happened here:\nstart = (${getx(start_coord[0])}, ${gety(start_coord[1])})\nstart = (${getx(end_coord[0])}, ${gety(end_coord[1])})`);
         }
         if (Object.keys(relations).includes(relations[relation_ref]["ancestor"])) {
@@ -70,8 +78,11 @@ async function buildgraph(stat = "output") {
                 <line x1="${getx(start_coord[0])}" y1="${gety(end_ancestor[1])}" x2="${getx(start_coord[0])}" y2="${gety(start_coord[1])}" stroke-width="${Math.ceil(point_radius / 4)}" stroke="${relations[relation_ref]["color"]}" />
             `)
         }
+        relations_built++;
+        console.log(`built ${relation_ref} (${relations_built}/${relations_length})`);
     }
-    let fullsvg = `<svg>${svgelms.join("")}</svg>`
+    console.log(`-- Building complete, moving to export (${Date.now() - fullstart} ms)`);
+    let fullsvg = `<svg>${svgelms.join("")}</svg>`;
     fs.writeFileSync("./visualizations/test.png", await sharp(Buffer.from(fullsvg), { unlimited: true }).png().toBuffer());
     function getx(rawx) {
         return Math.round((rawx / maxx) * image_width);
@@ -79,6 +90,7 @@ async function buildgraph(stat = "output") {
     function gety(rawy) {
         return image_height - Math.round(((rawy - miny) / (maxy - miny)) * image_height);
     }
+    console.log(`Complete! (${Date.now() - fullstart} ms)`)
 }
 
 buildgraph();
