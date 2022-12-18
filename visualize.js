@@ -22,6 +22,8 @@ async function buildgraph(stat = "output") {
         if (iteration > maxx) {
             maxx = iteration;
         }
+        let conf_length = Object.keys(data).length;
+        let conf_prog = 0;
         for (let conf of Object.keys(data)) {
             let thisone = crypto.createHash("sha512").update(conf).digest("hex");
             let ancestor = crypto.createHash("sha512").update(data[conf]["ancestor"]).digest("hex");
@@ -32,24 +34,28 @@ async function buildgraph(stat = "output") {
                     "color": ("#" + Math.floor(Math.random() * 16777215).toString(16)),
                     "coords": [[
                         iteration,
-                        stats["avg"],
+                        stats["avg"] + 0,
                         file
                     ]]
                 }
             } else {
                 relations[thisone]["coords"].push([
                     iteration,
-                    stats["avg"],
+                    stats["avg"] + 0,
                     file
                 ])
             }
             if (data[conf]["stats"][stat]["avg"] < miny) {
-                miny = data[conf]["stats"][stat]["avg"];
+                miny = data[conf]["stats"][stat]["avg"] + 0;
             }
             if (data[conf]["stats"][stat]["avg"] > maxy) {
-                maxy = data[conf]["stats"][stat]["avg"];
+                maxy = data[conf]["stats"][stat]["avg"] + 0;
             }
+            stats = null;
+            conf_prog++;
+            console.log(`    Completed ${thisone} (${conf_prog}/${conf_length})`);
         }
+        data = null;
         files_parsed++;
         console.log(`Completed parsing ${file} (${files_parsed}/${files_length})`);
     }
