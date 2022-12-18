@@ -16,7 +16,15 @@ async function buildgraph(stat = "output") {
     //sweep files once to get bounds
     let files_parsed = 0;
     const files_length = files.length;
+    let filebatch = [];
     for (let file of files) {
+        if (filebatch.length > 5) {
+            await Promise.all(filebatch);
+            filebatch = [];
+        }
+        filebatch.push(parsefile(file));
+    }
+    async function parsefile(file) {
         let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file));
         let iteration = parseInt(file.replace(".json", ""));
         if (iteration > maxx) {
@@ -24,7 +32,12 @@ async function buildgraph(stat = "output") {
         }
         let conf_length = Object.keys(data).length;
         let conf_prog = 0;
+        let confbatch = [];
         for (let conf of Object.keys(data)) {
+            confbatch.push(parseconf(conf));
+        }
+        await Promise.all(confbatch);
+        async function parseconf(conf) {
             let thisone = crypto.createHash("sha512").update(conf).digest("hex");
             let ancestor = crypto.createHash("sha512").update(data[conf]["ancestor"]).digest("hex");
             let stats = data[conf]["stats"][stat];
@@ -53,7 +66,7 @@ async function buildgraph(stat = "output") {
             }
             stats = null;
             conf_prog++;
-            console.log(`    Completed ${thisone} (${conf_prog}/${conf_length})`);
+            console.log(`${thisone} (${conf_prog}/${conf_length}) (${files_parsed}/${files_length})`);
         }
         data = null;
         files_parsed++;
