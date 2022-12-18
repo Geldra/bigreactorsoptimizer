@@ -1,8 +1,8 @@
 const sharp = require("sharp");
 const fs = require("fs");
 //const crypto = require("crypto");
-const xxh = require("xxhash");
-//const mh = require("metrohash").MetroHash128;
+//const xxh = require("xxhash");
+const mh = require("metrohash").MetroHash128;
 const image_width = 10000;
 const image_height = 2500;
 const point_radius = 3;
@@ -45,10 +45,10 @@ async function buildgraph(stat = "output") {
             const thisconfid = confbatch.length;
             //let thisone = crypto.createHash("sha512").update(conf).digest("hex");
             //let ancestor = crypto.createHash("sha512").update(data[conf]["ancestor"]).digest("hex");
-            let thisone = xxh.hash64(Buffer.from(conf, "ascii"), 666, "hex");
-            let ancestor = xxh.hash64(Buffer.from(data[conf]["ancestor"], "ascii"), 666, "hex");
-            //let thisone = (new mh(666)).update(conf).digest();
-            //let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
+            //let thisone = xxh.hash64(Buffer.from(conf, "ascii"), 666, "hex");
+            //let ancestor = xxh.hash64(Buffer.from(data[conf]["ancestor"], "ascii"), 666, "hex");
+            let thisone = (new mh(666)).update(conf).digest();
+            let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
             let stats = {};
             Object.assign(stats, data[conf]["stats"][stat]);
             data[conf] = null;//maybe this keeps things more freed up
