@@ -32,14 +32,15 @@ async function buildgraph(stat = "output") {
         if (iteration > maxx) {
             maxx = iteration;
         }
-        /*let conf_length = Object.keys(data).length;
-        let conf_prog = 0;*/
         let confbatch = [];
+        const conflength = Object.keys(data).length;
         for (let conf of Object.keys(data)) {
             confbatch.push(parseconf(conf));
         }
         await Promise.all(confbatch);
         async function parseconf(conf) {
+            const startConfTime=Date.now();
+            const thisconfid = confbatch.length;
             let thisone = crypto.createHash("sha512").update(conf).digest("hex");
             let ancestor = crypto.createHash("sha512").update(data[conf]["ancestor"]).digest("hex");
             let stats = {};
@@ -70,7 +71,7 @@ async function buildgraph(stat = "output") {
                 maxy = stats["avg"] + 0;
             }
             stats = null;
-            console.log(`${thisone} (${this_file_parse}/${files_length})`);
+            console.log(`${thisone} (${this_file_parse}/${files_length}) (${Date.now()-startConfTime} ms) (${thisconfid}/${conflength})`);
         }
         data = null;
         console.log(`Completed parsing ${file} (${this_file_parse}/${files_length})`);
