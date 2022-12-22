@@ -74,8 +74,10 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json"].includes(thing)).sort((a, b) => { return parseInt(a.replace(".json", "")) - parseInt(b.replace(".json", "")) }).slice(-last_iterations);
     let maxx = parseInt(files[files.length - 1].replace(".json", ""));
     let minx = parseInt(files[0].replace(".json", ""));
-    last_max_iteration = maxx;
-    last_max_iteration_high_stats = getHighestStats(files[files.length - 1]);
+    if (last_max_iteration === 0) {
+        last_max_iteration = min;
+        last_max_iteration_high_stats = getHighestStats(files[0]);
+    }
     let relations = new Map(); // [hash,{"ancestor":hash, "color":color}]
     //sweep files once to get bounds
     let files_parsed = 0;
@@ -193,7 +195,9 @@ async function buildgraph(stat = "output", last_iterations = 500) {
         rawy = rawy > maxy ? maxy : rawy;
         return image_height - Math.round(((rawy - miny) / (maxy - miny)) * image_height);
     }
-    console.log(`Complete! (${Date.now() - fullstart} ms)`)
+    console.log(`Complete! (${Date.now() - fullstart} ms)`);
+    last_max_iteration = maxx;
+    last_max_iteration_high_stats = getHighestStats(files[files.length - 1]);
 }
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
