@@ -63,9 +63,9 @@ function buildrandomseed() {
 }
 
 function make_permutation(parent_configuration, mutations_left) {
-    const mutations = mutations_left;
-    console.log("Making mutations...");
-    const timestart = Date.now();
+    //const mutations = mutations_left;
+    //console.log("Making mutations...");
+    //const timestart = Date.now();
     let configuration = parent_configuration;
     while (mutations_left > 0) {
         let pos = Math.round(Math.random() * (parent_configuration.length - 1));
@@ -73,7 +73,7 @@ function make_permutation(parent_configuration, mutations_left) {
         configuration = parent_configuration.replaceAt(pos, insert);
         mutations_left--;
     }
-    console.log(`   ${mutations} mutations made! (${(Date.now() - timestart)} ms)`);
+    //console.log(`   ${mutations} mutations made! (${(Date.now() - timestart)} ms)`);
     return configuration;
 }
 
@@ -81,7 +81,7 @@ const n = 5;
 async function get_stats(configuration) {
     let samples = [];
     for (let i = 0; i < n; i++) {
-        console.log("getting stats " + i);
+        //console.log("getting stats " + i);
         let thisdef = {};
         Object.assign(thisdef, set_parameters);
         thisdef["layout"] = configuration;
@@ -109,9 +109,9 @@ async function get_stats(configuration) {
         for (let sample of samples) {
             stdevsum = stdevsum + Math.pow((sample[key] - avg), 2);
         }
-        console.log("stdevsum:" + stdevsum);
+        //console.log("stdevsum:" + stdevsum);
         let stdev = Math.sqrt(stdevsum / n);
-        console.log("stdev:" + stdev);
+        //console.log("stdev:" + stdev);
         results[key]["min"] = min;
         results[key]["max"] = max;
         results[key]["avg"] = avg;
@@ -136,7 +136,7 @@ function get_weakest_and_strongest_form() {
             score = score + fitness_weights[key] * form["stats"][key]["avg"];
         }
         active_forms[configuration]["score"] = score;
-        console.log("score:" + score);
+        //console.log("score:" + score);
         if (score < lowest_score) {
             lowest_score = score;
             lowest_score_configuration = configuration;
