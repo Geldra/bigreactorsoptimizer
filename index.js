@@ -179,6 +179,7 @@ async function main() {
             }
         }
         const permutationmult = Math.random() * 5;
+        const secondpermutationmult = Date.now()%100000/10000;
         while (Object.keys(active_forms).length < max_forms) {
             //repopulate
             let mutation_ancestor;
@@ -188,7 +189,7 @@ async function main() {
                 mutation_ancestor = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
             }
 
-            let new_configuration = make_permutation(mutation_ancestor, Math.round(Math.random() * 5000 * permutationmult));
+            let new_configuration = make_permutation(mutation_ancestor, Math.round(Math.random() * 5000 * permutationmult*secondpermutationmult));
             active_forms[new_configuration] = { "age": 0 };
             active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
             active_forms[new_configuration]["ancestor"] = mutation_ancestor;
