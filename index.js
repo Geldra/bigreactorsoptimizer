@@ -62,15 +62,14 @@ function buildrandomseed() {
     return newseed;
 }
 
-function make_permutation(parent_configuration, mutations_left = 0) {
-    let pos = Math.round(Math.random() * (parent_configuration.length - 1));
-    let insert = Object.keys(components)[Math.round(Math.random() * (Object.keys(components).length - 1))];
-    let configuration = parent_configuration.replaceAt(pos, insert);
-    if (mutations_left === 0) {
-        return configuration;
-    } else {
-        return make_permutation(configuration, mutations_left - 1);
+function make_permutation(parent_configuration, mutations_left) {
+    let configuration = parent_configuration;
+    while (mutations_left > 0) {
+        let pos = Math.round(Math.random() * (parent_configuration.length - 1));
+        let insert = Object.keys(components)[Math.round(Math.random() * (Object.keys(components).length - 1))];
+        configuration = parent_configuration.replaceAt(pos, insert);
     }
+    return configuration;
 
 }
 
@@ -185,7 +184,7 @@ async function main() {
                 mutation_ancestor = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
             }
 
-            let new_configuration = make_permutation(mutation_ancestor, (Date.now() % 10000) * 2+1000);
+            let new_configuration = make_permutation(mutation_ancestor, (Date.now() % 10000) * 2 + 1000);
             active_forms[new_configuration] = { "age": 0 };
             active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
             active_forms[new_configuration]["ancestor"] = mutation_ancestor;
