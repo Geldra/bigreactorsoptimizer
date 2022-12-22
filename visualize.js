@@ -1,9 +1,70 @@
 const sharp = require("sharp");
 const fs = require("fs");
 const mh = require("metrohash").MetroHash128;
+const { Client, EmbedBuilder, GatewayIntentBits } = require("discord.js");
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages
+    ]
+});
 const image_width = 10000;
 const image_height = 2500;
 const point_radius = 3;
+const update_interval = 1000 * 60;
+let last_update = 0;
+const spamchanid = process.argv[3];
+let spamchan = null;
+let last_max_iteration = 0;
+let last_max_iteration_high_stats = {};
+
+client.once('ready', async () => {
+    console.log("Ready to make pictures!!!!");
+    spamchan = await client.channels.fetch(spamchanid);
+    updateloop();
+});
+const discord_token = process.argv[2];
+client.login(discord_token);
+
+async function updateloop() {
+    while (true) {
+        if (Date.now() - last_update > update_interval) {
+            last_update = Date.now();
+            let timestart = Date.now();
+            const stats = getHighestStats();
+            await buildgraph("output", 1000);
+            const theEmbed = new EmbedBuilder()
+                .setTitle("Your hourly reactor update!")
+                .setColor('#DFFF00')
+                .setDescription("I maeked dis:")
+                .setImage("attachment://output.png")
+                .addFields(
+                    { name: "Generation", value: `${Math.round(stats["output"]["avg"] * 100) / 100}±${Math.round(stats["output"]["stdev"] * 100) / 100} RF/t` },
+                    { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100}±${Math.round(stats["fuelConsumption"]["stdev"] * 100) / 100} mB/t` }
+                )
+                .setTimestamp()
+                .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
+
+            await spamchan.send({ content: (`${Math.floor((Date.now() - timestart) / 1000)} seconds`), embeds: [theEmbed], files: ["./visualizations/output.png"] });
+        }
+        await sleep(1000);
+    }
+}
+
+function getHighestStats(file = "current.json") {
+    let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file, { encoding: "utf-8" }));
+    let highestpower = 0;
+    let highestpowerstats = {};
+    for (let conf of Object.keys(data)) {
+        if (data[conf]["stats"]["output"]["avg"] > highestpower) {
+            highestpower = data[conf]["stats"]["output"]["avg"];
+            highestpowerstats = {};
+            Object.assign(highestpowerstats, data[conf]["stats"]);
+        }
+    }
+    return highestpowerstats;
+}
+
 
 async function buildgraph(stat = "output", last_iterations = 500) {
     const fullstart = Date.now();
@@ -13,7 +74,9 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json"].includes(thing)).sort((a, b) => { return parseInt(a.replace(".json", "")) - parseInt(b.replace(".json", "")) }).slice(-last_iterations);
     let maxx = parseInt(files[files.length - 1].replace(".json", ""));
     let minx = parseInt(files[0].replace(".json", ""));
-    let relations = {}; // hash:{"ancestor":hash, "color":color}
+    last_max_iteration = maxx;
+    last_max_iteration_high_stats = getHighestStats(files[files.length - 1]);
+    let relations = new Map(); // [hash,{"ancestor":hash, "color":color}]
     //sweep files once to get bounds
     let files_parsed = 0;
     const files_length = files.length;
@@ -31,9 +94,6 @@ async function buildgraph(stat = "output", last_iterations = 500) {
             const this_file_parse = files_parsed;
             let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file));
             let iteration = parseInt(file.replace(".json", ""));
-            /*if (iteration > maxx) {
-                maxx = iteration;
-            }*/
             let confbatch = [];
             const conflength = Object.keys(data).length;
             for (let conf of Object.keys(data)) {
@@ -47,10 +107,11 @@ async function buildgraph(stat = "output", last_iterations = 500) {
                 let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
                 let stats = {};
                 Object.assign(stats, data[conf]["stats"][stat]);
-                data[conf] = null;//maybe this keeps things more freed up
-                delete data[conf];//I'm not sure which will work best
-                if (!Object.keys(relations).includes(thisone)) {
-                    relations[thisone] = {
+                data[conf] = null;
+                delete data[conf];
+                const objkeystart = Date.now();
+                if (!relations.has(thisone)) {
+                    relations.set(thisone, {
                         "ancestor": ancestor,
                         "color": ("#" + Math.floor(Math.random() * 16777215).toString(16)),
                         "coords": [[
@@ -58,14 +119,15 @@ async function buildgraph(stat = "output", last_iterations = 500) {
                             stats["avg"] + 0,
                             file
                         ]]
-                    }
+                    });
                 } else {
-                    relations[thisone]["coords"].push([
+                    relations.get(thisone)["coords"].push([
                         iteration,
                         stats["avg"] + 0,
                         file
                     ])
                 }
+                console.log("   objkeydelta = " + (Date.now() - objkeystart) + " ms");
                 if (stats["avg"] < miny) {
                     miny = stats["avg"] + 0;
                 }
@@ -77,49 +139,62 @@ async function buildgraph(stat = "output", last_iterations = 500) {
             }
             data = null;
             console.log(`Completed parsing ${file} (${this_file_parse}/${files_length})`);
-        } catch {
-            console.log("EVIL EVIL EVIL EVIL EVIL: " + file);
+        } catch (err) {
+            console.log("EVIL EVIL EVIL EVIL EVIL: " + file + "\n   " + err.toString());
             fs.writeFileSync("./visualizations/bad_files/" + Date.now(), "EVIL EVIL EVIL EVIL EVIL: " + file, { encoding: "utf-8" });
         }
     }
     console.log(`-- Parsing complete, moving to building (${Date.now() - fullstart} ms)`);
     //sweep again to build the data
     let relations_built = 0;
-    const relations_length = Object.keys(relations).length;
-    for (let relation_ref of Object.keys(relations)) {
-        relations[relation_ref]["coords"].sort((a, b) => { return a[0] - b[0] });
-        for (let coord of relations[relation_ref]["coords"]) {
+    const relations_length = relations.size;
+    svgelms.push(`
+        <rect width="${image_width}" height="${image_height}" fill="black" fill-opacity="1" />
+    `);
+    svgelms.push(`
+        <line x1="${getx(minx)}" y1="${gety(last_max_iteration_high_stats[stat]["avg"])}" x2="${getx(maxx)}" y2="${gety(last_max_iteration_high_stats[stat]["avg"])}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" stroke_opacity="0.1" />
+        <line x1="${getx(last_max_iteration)}" y1="${gety(miny)}" x2="${getx(last_max_iteration)}" y2="${gety(maxy)}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" stroke_opacity="0.1" />
+        <circle cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"])}" r="${point_radius * 4}" fill="#FF0000" fill_opacity="0.1" />`
+    );
+    relations.forEach((relation, relation_ref, relations_map) => {
+        relation["coords"].sort((a, b) => { return a[0] - b[0] });
+        for (let coord of relation["coords"]) {
             svgelms.push(`
-                <circle cx="${getx(coord[0])}" cy="${gety(coord[1])}" r="${point_radius}" fill="${relations[relation_ref]["color"]}" />
+                <circle cx="${getx(coord[0])}" cy="${gety(coord[1])}" r="${point_radius}" fill="${relation["color"]}" />
             `)
         }
-        let start_coord = relations[relation_ref]["coords"][0];
-        let end_coord = relations[relation_ref]["coords"][relations[relation_ref]["coords"].length - 1];
+        let start_coord = relation["coords"][0];
+        let end_coord = relation["coords"][relation["coords"].length - 1];
         svgelms.push(`
-            <line x1="${getx(start_coord[0])}" y1="${gety(start_coord[1])}" x2="${getx(end_coord[0])}" y2="${gety(end_coord[1])}" stroke-width="${Math.ceil(point_radius / 1.2)}" stroke="${relations[relation_ref]["color"]}" />
+            <line x1="${getx(start_coord[0])}" y1="${gety(start_coord[1])}" x2="${getx(end_coord[0])}" y2="${gety(end_coord[1])}" stroke-width="${Math.ceil(point_radius / 1.2)}" stroke="${relation["color"]}" />
         `)
         if (start_coord[1] != end_coord[1]) {
             console.log(`What happened here:\nstart = (${getx(start_coord[0])}, ${gety(start_coord[1])})\nstart = (${getx(end_coord[0])}, ${gety(end_coord[1])})`);
         }
-        if (Object.keys(relations).includes(relations[relation_ref]["ancestor"])) {
-            let end_ancestor = relations[relations[relation_ref]["ancestor"]]["coords"][relations[relations[relation_ref]["ancestor"]]["coords"].length - 1];
+        if (relations.has(relation["ancestor"])) {
+            let end_ancestor = relations.get(relation["ancestor"])["coords"][relations.get(relation["ancestor"])["coords"].length - 1];
             svgelms.push(`
-                <line x1="${getx(start_coord[0])}" y1="${gety(end_ancestor[1])}" x2="${getx(start_coord[0])}" y2="${gety(start_coord[1])}" stroke-width="${Math.ceil(point_radius / 4)}" stroke="${relations[relation_ref]["color"]}" />
+                <line x1="${getx(start_coord[0])}" y1="${gety(end_ancestor[1])}" x2="${getx(start_coord[0])}" y2="${gety(start_coord[1])}" stroke-width="${Math.ceil(point_radius / 4)}" stroke="${relation["color"]}" />
             `)
         }
         relations_built++;
         console.log(`built ${relation_ref} (${relations_built}/${relations_length})`);
-    }
+    });
     console.log(`-- Building complete, moving to export (${Date.now() - fullstart} ms)`);
     let fullsvg = `<svg>${svgelms.join("")}</svg>`;
-    fs.writeFileSync("./visualizations/test.png", await sharp(Buffer.from(fullsvg), { unlimited: true }).png().toBuffer());
+    fs.writeFileSync("./visualizations/" + stat + ".png", await sharp(Buffer.from(fullsvg), { unlimited: true }).png().toBuffer());
     function getx(rawx) {
+        rawx = rawx < minx ? minx : rawx;
+        rawx = rawx > maxx ? maxx : rawx;
         return Math.round(((rawx - minx) / (maxx - minx)) * image_width);
     }
     function gety(rawy) {
+        rawy = rawy < miny ? miny : rawy;
+        rawy = rawy > maxy ? maxy : rawy;
         return image_height - Math.round(((rawy - miny) / (maxy - miny)) * image_height);
     }
     console.log(`Complete! (${Date.now() - fullstart} ms)`)
 }
-
-buildgraph();
+async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

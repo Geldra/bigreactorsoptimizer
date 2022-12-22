@@ -239,11 +239,6 @@ async function givemetheresultalready(data) {
     console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Complete.");
     return result;
 }
-
-async function sleep(ms) {
-    console.log("ZzZZz... (" + ms + "ms)");
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 startupArt();
 main();
 
