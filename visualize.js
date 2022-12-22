@@ -75,7 +75,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     let maxx = parseInt(files[files.length - 1].replace(".json", ""));
     let minx = parseInt(files[0].replace(".json", ""));
     if (last_max_iteration === 0) {
-        last_max_iteration = min;
+        last_max_iteration = minx;
         last_max_iteration_high_stats = getHighestStats(files[0]);
     }
     let relations = new Map(); // [hash,{"ancestor":hash, "color":color}]
