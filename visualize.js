@@ -11,7 +11,6 @@ const client = new Client({
 const image_width = 10000;
 const image_height = 2500;
 const point_radius = 3;
-const update_interval = 1000 * 60 * 30;
 let last_update = 0;
 const spamchanid = process.argv[3];
 let spamchan = null;
@@ -28,9 +27,8 @@ client.login(discord_token);
 
 async function updateloop() {
     while (true) {
-        if (Date.now() - last_update > update_interval) {
+        if ((new Date(Date.now())).getMinutes() % 30 == 0 && Date.now() - last_update > 1000 * 60 * 20) {
             last_update = Date.now();
-            let timestart = Date.now();
             const stats = getHighestStats();
             await buildgraph("output", 1000);
             const theEmbed = new EmbedBuilder()
@@ -45,7 +43,13 @@ async function updateloop() {
                 .setTimestamp()
                 .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
 
-            await spamchan.send({ content: (`${Math.floor((Date.now() - timestart) / 1000)} seconds`), embeds: [theEmbed], files: ["./visualizations/output.png"] });
+            await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds`), embeds: [theEmbed], files: ["./visualizations/output.png"] });
+            try { //https://stackoverflow.com/a/30654451
+                if (global.gc) { global.gc(); }
+            } catch (e) {
+                console.log("`node --expose-gc index.js`");
+                process.exit();
+            }
         }
         await sleep(1000);
     }
@@ -105,10 +109,10 @@ async function buildgraph(stat = "output", last_iterations = 500) {
             async function parseconf(conf) {
                 const startConfTime = Date.now();
                 const thisconfid = confbatch.length;
-                let thisone = conf;
-                let ancestor = data[conf]["ancestor"];
-                //let thisone = (new mh(666)).update(conf).digest();
-                //let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
+                /*let thisone = conf;
+                let ancestor = data[conf]["ancestor"];*/
+                let thisone = (new mh(666)).update(conf).digest();
+                let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
                 let stats = {};
                 Object.assign(stats, data[conf]["stats"][stat]);
                 data[conf] = null;
