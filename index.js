@@ -178,8 +178,8 @@ async function main() {
                 delete active_forms[weakest];
             }
         }
-        const permutationmult = Math.random() * 5;
-        const secondpermutationmult = Date.now() % 100000 / 10000;
+        const permutationmult = Math.random() * 7;
+        const secondpermutationmult = Date.now() % 100000 / 1000;
         while (Object.keys(active_forms).length < max_forms) {
             //repopulate
             let mutation_ancestor;
