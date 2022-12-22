@@ -200,6 +200,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     console.log(`Complete! (${Date.now() - fullstart} ms)`);
     last_max_iteration = maxx;
     last_max_iteration_high_stats = getHighestStats(files[files.length - 1]);
+    relations = null;
 }
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
