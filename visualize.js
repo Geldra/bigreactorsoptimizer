@@ -11,7 +11,7 @@ const client = new Client({
 const image_width = 10000;
 const image_height = 2500;
 const point_radius = 3;
-const update_interval = 1000 * 60;
+const update_interval = 1000 * 60 * 30;
 let last_update = 0;
 const spamchanid = process.argv[3];
 let spamchan = null;
@@ -34,7 +34,7 @@ async function updateloop() {
             const stats = getHighestStats();
             await buildgraph("output", 1000);
             const theEmbed = new EmbedBuilder()
-                .setTitle("Your hourly reactor update!")
+                .setTitle("Your bihourly reactor update!")
                 .setColor('#DFFF00')
                 .setDescription("I maeked dis:")
                 .setImage("attachment://output.png")
@@ -173,12 +173,12 @@ async function buildgraph(stat = "output", last_iterations = 500) {
         if (start_coord[1] != end_coord[1]) {
             console.log(`What happened here:\nstart = (${getx(start_coord[0])}, ${gety(start_coord[1])})\nstart = (${getx(end_coord[0])}, ${gety(end_coord[1])})`);
         }
-        if (relations.has(relation["ancestor"])) {
+        /*if (relations.has(relation["ancestor"])) {
             let end_ancestor = relations.get(relation["ancestor"])["coords"][relations.get(relation["ancestor"])["coords"].length - 1];
             svgelms.push(`
                 <line x1="${getx(start_coord[0])}" y1="${gety(end_ancestor[1])}" x2="${getx(start_coord[0])}" y2="${gety(start_coord[1])}" stroke-width="${Math.ceil(point_radius / 4)}" stroke="${relation["color"]}" />
             `)
-        }
+        }*/
         relations_built++;
         console.log(`built ${relation_ref} (${relations_built}/${relations_length})`);
     });
