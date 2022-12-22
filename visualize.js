@@ -12,6 +12,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     let maxy = 0;
     let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json"].includes(thing)).sort((a, b) => { return parseInt(a.replace(".json", "")) - parseInt(b.replace(".json", "")) }).slice(-last_iterations);
     let maxx = parseInt(files[files.length - 1].replace(".json", ""));
+    let minx = parseInt(files[0].replace(".json", ""));
     let relations = {}; // hash:{"ancestor":hash, "color":color}
     //sweep files once to get bounds
     let files_parsed = 0;
@@ -42,10 +43,6 @@ async function buildgraph(stat = "output", last_iterations = 500) {
             async function parseconf(conf) {
                 const startConfTime = Date.now();
                 const thisconfid = confbatch.length;
-                //let thisone = crypto.createHash("sha512").update(conf).digest("hex");
-                //let ancestor = crypto.createHash("sha512").update(data[conf]["ancestor"]).digest("hex");
-                //let thisone = xxh.hash64(Buffer.from(conf, "ascii"), 666, "hex");
-                //let ancestor = xxh.hash64(Buffer.from(data[conf]["ancestor"], "ascii"), 666, "hex");
                 let thisone = (new mh(666)).update(conf).digest();
                 let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
                 let stats = {};
@@ -117,7 +114,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     let fullsvg = `<svg>${svgelms.join("")}</svg>`;
     fs.writeFileSync("./visualizations/test.png", await sharp(Buffer.from(fullsvg), { unlimited: true }).png().toBuffer());
     function getx(rawx) {
-        return Math.round((rawx / maxx) * image_width);
+        return Math.round(((rawx - minx) / (maxx - minx)) * image_width);
     }
     function gety(rawy) {
         return image_height - Math.round(((rawy - miny) / (maxy - miny)) * image_height);

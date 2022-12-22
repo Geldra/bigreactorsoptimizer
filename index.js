@@ -143,8 +143,8 @@ function get_weakest_and_strongest_form() {
             highest_score_configuration = configuration;
         }
     }
-    console.log(JSON.stringify(highest_score_configuration));
-    console.log(JSON.stringify(lowest_score_configuration));
+    //console.log(JSON.stringify(highest_score_configuration));
+    //console.log(JSON.stringify(lowest_score_configuration));
     if (highest_score_configuration != "") {
         console.log("Topstats:");
         console.log("    Gen:" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["stdev"] * 100) / 100) + " RF/t");
