@@ -1,19 +1,17 @@
 const sharp = require("sharp");
 const fs = require("fs");
-//const crypto = require("crypto");
-//const xxh = require("xxhash");
 const mh = require("metrohash").MetroHash128;
 const image_width = 10000;
 const image_height = 2500;
 const point_radius = 3;
 
-async function buildgraph(stat = "output") {
+async function buildgraph(stat = "output", last_iterations = 500) {
     const fullstart = Date.now();
     let svgelms = [];
-    let maxx = 0;
     let miny = Infinity;
     let maxy = 0;
-    let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json"].includes(thing));
+    let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json"].includes(thing)).sort((a, b) => { return parseInt(a.replace(".json", "")) - parseInt(b.replace(".json", "")) }).slice(-last_iterations);
+    let maxx = parseInt(files[files.length - 1].replace(".json", ""));
     let relations = {}; // hash:{"ancestor":hash, "color":color}
     //sweep files once to get bounds
     let files_parsed = 0;
@@ -27,60 +25,65 @@ async function buildgraph(stat = "output") {
         filebatch.push(parsefile(file));
     }
     async function parsefile(file) {
-        files_parsed++;
-        const this_file_parse = files_parsed;
-        let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file));
-        let iteration = parseInt(file.replace(".json", ""));
-        if (iteration > maxx) {
-            maxx = iteration;
-        }
-        let confbatch = [];
-        const conflength = Object.keys(data).length;
-        for (let conf of Object.keys(data)) {
-            confbatch.push(parseconf(conf));
-        }
-        await Promise.all(confbatch);
-        async function parseconf(conf) {
-            const startConfTime = Date.now();
-            const thisconfid = confbatch.length;
-            //let thisone = crypto.createHash("sha512").update(conf).digest("hex");
-            //let ancestor = crypto.createHash("sha512").update(data[conf]["ancestor"]).digest("hex");
-            //let thisone = xxh.hash64(Buffer.from(conf, "ascii"), 666, "hex");
-            //let ancestor = xxh.hash64(Buffer.from(data[conf]["ancestor"], "ascii"), 666, "hex");
-            let thisone = (new mh(666)).update(conf).digest();
-            let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
-            let stats = {};
-            Object.assign(stats, data[conf]["stats"][stat]);
-            data[conf] = null;//maybe this keeps things more freed up
-            delete data[conf];//I'm not sure which will work best
-            if (!Object.keys(relations).includes(thisone)) {
-                relations[thisone] = {
-                    "ancestor": ancestor,
-                    "color": ("#" + Math.floor(Math.random() * 16777215).toString(16)),
-                    "coords": [[
+        try {
+            files_parsed++;
+            const this_file_parse = files_parsed;
+            let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file));
+            let iteration = parseInt(file.replace(".json", ""));
+            /*if (iteration > maxx) {
+                maxx = iteration;
+            }*/
+            let confbatch = [];
+            const conflength = Object.keys(data).length;
+            for (let conf of Object.keys(data)) {
+                confbatch.push(parseconf(conf));
+            }
+            await Promise.all(confbatch);
+            async function parseconf(conf) {
+                const startConfTime = Date.now();
+                const thisconfid = confbatch.length;
+                //let thisone = crypto.createHash("sha512").update(conf).digest("hex");
+                //let ancestor = crypto.createHash("sha512").update(data[conf]["ancestor"]).digest("hex");
+                //let thisone = xxh.hash64(Buffer.from(conf, "ascii"), 666, "hex");
+                //let ancestor = xxh.hash64(Buffer.from(data[conf]["ancestor"], "ascii"), 666, "hex");
+                let thisone = (new mh(666)).update(conf).digest();
+                let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
+                let stats = {};
+                Object.assign(stats, data[conf]["stats"][stat]);
+                data[conf] = null;//maybe this keeps things more freed up
+                delete data[conf];//I'm not sure which will work best
+                if (!Object.keys(relations).includes(thisone)) {
+                    relations[thisone] = {
+                        "ancestor": ancestor,
+                        "color": ("#" + Math.floor(Math.random() * 16777215).toString(16)),
+                        "coords": [[
+                            iteration,
+                            stats["avg"] + 0,
+                            file
+                        ]]
+                    }
+                } else {
+                    relations[thisone]["coords"].push([
                         iteration,
                         stats["avg"] + 0,
                         file
-                    ]]
+                    ])
                 }
-            } else {
-                relations[thisone]["coords"].push([
-                    iteration,
-                    stats["avg"] + 0,
-                    file
-                ])
+                if (stats["avg"] < miny) {
+                    miny = stats["avg"] + 0;
+                }
+                if (stats["avg"] > maxy) {
+                    maxy = stats["avg"] + 0;
+                }
+                stats = null;
+                console.log(`${thisone} (${this_file_parse}/${files_length}) (${Date.now() - startConfTime} ms) (${thisconfid}/${conflength})`);
             }
-            if (stats["avg"] < miny) {
-                miny = stats["avg"] + 0;
-            }
-            if (stats["avg"] > maxy) {
-                maxy = stats["avg"] + 0;
-            }
-            stats = null;
-            console.log(`${thisone} (${this_file_parse}/${files_length}) (${Date.now() - startConfTime} ms) (${thisconfid}/${conflength})`);
+            data = null;
+            console.log(`Completed parsing ${file} (${this_file_parse}/${files_length})`);
+        } catch {
+            console.log("EVIL EVIL EVIL EVIL EVIL: " + file);
+            fs.writeFileSync("./visualizations/bad_files/" + Date.now(), "EVIL EVIL EVIL EVIL EVIL: " + file, { encoding: "utf-8" });
         }
-        data = null;
-        console.log(`Completed parsing ${file} (${this_file_parse}/${files_length})`);
     }
     console.log(`-- Parsing complete, moving to building (${Date.now() - fullstart} ms)`);
     //sweep again to build the data
