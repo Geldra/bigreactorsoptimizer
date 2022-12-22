@@ -27,5 +27,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: sudo systemctl start bigreactorsoptimizer
+    - run: sudo systemctl start bigreactorsvisualizer
+    - run: sleep 3
     - run: npm rebuild
     - run: sudo systemctl start bigreactorsvisualizer
