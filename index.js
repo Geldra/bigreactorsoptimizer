@@ -184,7 +184,7 @@ async function main() {
             }
         }
         const permutationmult = (Math.random() + 1) * 2;
-        const secondpermutationmult = (Date.now() % 10000 + 1000) / 100;
+        const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"]) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / 100;
         while (Object.keys(active_forms).length < max_forms) {
             //repopulate
             let mutation_ancestor;
