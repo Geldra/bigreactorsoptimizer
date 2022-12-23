@@ -65,7 +65,7 @@ function buildrandomseed() {
 function make_permutation(parent_configuration, mutations_left) {
     //const mutations = mutations_left;
     //console.log("Making mutations...");
-    //const timestart = Date.now();
+    const timestart = Date.now();
     let configuration = parent_configuration;
     while (mutations_left > 0) {
         let pos = Math.round(Math.random() * (parent_configuration.length - 1));
@@ -73,7 +73,7 @@ function make_permutation(parent_configuration, mutations_left) {
         configuration = parent_configuration.replaceAt(pos, insert);
         mutations_left--;
     }
-    //console.log(`   ${mutations} mutations made! (${(Date.now() - timestart)} ms)`);
+    console.log(`   ${mutations} mutations made! (${(Date.now() - timestart)} ms)`);
     return configuration;
 }
 
@@ -181,7 +181,7 @@ async function main() {
                 delete active_forms[weakest];
             }
         }
-        const permutationmult = (Math.random() + 1) * 20;
+        const permutationmult = (Math.random() + 1) * 2;
         const secondpermutationmult = (Date.now() % 100000 + 1000) / 100;
         while (Object.keys(active_forms).length < max_forms) {
             //repopulate
