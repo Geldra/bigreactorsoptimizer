@@ -30,7 +30,7 @@ const set_parameters = {
 
 const fitness_weights = {
     "output": 1,
-    "fuelConsumption": -1000
+    "fuelConsumption": -50
 }
 
 const components = { "C": "Gelid Cryotheum", "E": "Liquid Ender", "D": "Diamond Block", "G": "Graphite Block", "R": "Destabilized Redstone", "X": "Control Rod", "L": "Block of Gold", "O": "Air" }
