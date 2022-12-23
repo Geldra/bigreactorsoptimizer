@@ -194,7 +194,7 @@ async function main() {
                 mutation_ancestor = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
             }
 
-            let new_configuration = make_permutation(mutation_ancestor, Math.round((Math.random() + 1) * 5000 * permutationmult * secondpermutationmult));
+            let new_configuration = make_permutation(mutation_ancestor, Math.round((Math.random() + 1) * 5 * permutationmult * secondpermutationmult));
             active_forms[new_configuration] = { "age": 0 };
             active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
             active_forms[new_configuration]["ancestor"] = mutation_ancestor;
