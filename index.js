@@ -79,7 +79,7 @@ function make_permutation(parent_configuration, mutations_left) {
     return configuration;
 }
 
-const n = 5;
+const n = 3;
 async function get_stats(configuration) {
     let samples = [];
     for (let i = 0; i < n; i++) {
