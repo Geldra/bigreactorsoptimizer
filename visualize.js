@@ -109,10 +109,10 @@ async function buildgraph(stat = "output", last_iterations = 500) {
             async function parseconf(conf) {
                 const startConfTime = Date.now();
                 const thisconfid = confbatch.length;
-                /*let thisone = conf;
-                let ancestor = data[conf]["ancestor"];*/
-                let thisone = (new mh(666)).update(conf).digest();
-                let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
+                let thisone = conf;
+                let ancestor = data[conf]["ancestor"];
+                //let thisone = (new mh(666)).update(conf).digest();
+                //let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
                 let stats = {};
                 Object.assign(stats, data[conf]["stats"][stat]);
                 data[conf] = null;
