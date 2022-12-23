@@ -67,11 +67,13 @@ function make_permutation(parent_configuration, mutations_left) {
     //console.log("Making mutations...");
     const timestart = Date.now();
     let configuration = parent_configuration;
+    let mutations = 0
     while (mutations_left > 0) {
         let pos = Math.round(Math.random() * (parent_configuration.length - 1));
         let insert = Object.keys(components)[Math.round(Math.random() * (Object.keys(components).length - 1))];
         configuration = parent_configuration.replaceAt(pos, insert);
         mutations_left--;
+        mutations++;
     }
     console.log(`   ${mutations} mutations made! (${(Date.now() - timestart)} ms)`);
     return configuration;
