@@ -169,16 +169,16 @@ async function main() {
         for (let j = 0; j < Math.round(Math.random() * 10 + 1); j++) {
             let weakest;
             let champs = get_weakest_and_strongest_form();
-            if (Math.random() > 0.2) {
-                //usually we will kill any non-strongest form
-                const weakest_arr = Object.keys(active_forms).filter(iform => iform != champs["highest"]).sort((a, b) => {
-                    return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
-                }).slice(0, Math.ceil(max_forms / 3));
-                weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
-            } else {
+            //if (Math.random() > 0.2) {
+            //usually we will kill any non-strongest form
+            const weakest_arr = Object.keys(active_forms).filter(iform => iform != champs["highest"]).sort((a, b) => {
+                return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
+            }).slice(0, Math.ceil(max_forms / 3));
+            weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
+            /*} else {
                 //rarely we will simply kill the lowest form
                 weakest = champs["lowest"];
-            }
+            }*/
             if (Object.keys(active_forms).length >= max_forms / 2) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 delete active_forms[weakest];
             }
