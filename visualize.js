@@ -8,11 +8,11 @@ const client = new Client({
         GatewayIntentBits.GuildMessages
     ]
 });
-const image_width = 10000;
-const image_height = 2500;
+const image_width = 7500;
+const image_height = 2000;
 const reactor_width = 100;
 const reactor_height = 100;
-const tile_size = 8; //pixels width
+const tile_size = 3; //pixels width
 const point_radius = 3;
 let last_update = 0;
 const spamchanid = process.argv[3];
@@ -20,6 +20,7 @@ let spamchan = null;
 let last_max_iteration = 0;
 let last_max_iteration_high_stats = {};
 let highestconf = "";
+const testing = process.argv[4] == "test" ? true : false;
 
 client.once('ready', async () => {
     console.log("Ready to make pictures!!!!");
@@ -47,7 +48,6 @@ async function drawReactor(conf, width = reactor_width, height = reactor_height)
     internals_composite.push({ input: tiles.get("casing-corner"), top: 0, left: (width - 1) * tile_size });
     for (let i = 0; i < conf.length; i++) {
         const topoffset = (Math.floor(i / (width - 2)) + 1) * tile_size;
-        console.log("topoff: " + topoffset);
         if (i % (width - 2) === 0) {
             internals_composite.push({ input: tiles.get("casing-ud"), top: topoffset, left: 0 });
             internals_composite.push({ input: tiles.get("casing-ud"), top: topoffset, left: (width - 1) * tile_size });
@@ -59,7 +59,6 @@ async function drawReactor(conf, width = reactor_width, height = reactor_height)
     }
     internals_composite.push({ input: tiles.get("casing-corner"), top: (height - 1) * tile_size, left: 0 });
     internals_composite.push({ input: tiles.get("casing-corner"), top: (height - 1) * tile_size, left: (width - 1) * tile_size });
-    console.log("ok cool");
     return await sharp("./garbage.png")
         .resize(width * tile_size, height * tile_size)
         .composite(internals_composite)
@@ -67,9 +66,14 @@ async function drawReactor(conf, width = reactor_width, height = reactor_height)
         .toBuffer();
 }
 
+let inittestrun = false;
 async function updateloop() {
     while (true) {
-        if ((new Date(Date.now())).getMinutes() % 30 == 0 && Date.now() - last_update > 1000 * 60 * 20) {
+        if (((new Date(Date.now())).getMinutes() % 30 == 0 && Date.now() - last_update > 1000 * 60 * 20) || (inittestrun == false && testing)) {
+            inittestrun = true;
+            if (testing) {
+                return;
+            }
             last_update = Date.now();
             const stats = getHighestStats();
             await buildgraph("output", 1000);
