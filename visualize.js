@@ -76,6 +76,7 @@ async function updateloop() {
             const stats = getHighestStats();
             await buildgraph("output", 1000);
             fs.writeFileSync("./visualizations/reactor.png", await drawReactor(highestconf));
+            fs.writeFileSync("./../../../reactorimagesaves/reactor_" + last_max_iteration + ".png", await drawReactor(highestconf));
             const theEmbed = new EmbedBuilder()
                 .setTitle("Your bihourly reactor update!")
                 .setColor('#DFFF00')
