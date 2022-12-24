@@ -26,7 +26,8 @@ client.once('ready', async () => {
     console.log("Ready to make pictures!!!!");
     spamchan = await client.channels.fetch(spamchanid);
     await compressTiles();
-    updateloop();
+    await updateloop();
+    client.destroy();
 });
 const discord_token = process.argv[2];
 client.login(discord_token);
@@ -71,9 +72,6 @@ async function updateloop() {
     while (true) {
         if (((new Date(Date.now())).getMinutes() % 30 == 0 && Date.now() - last_update > 1000 * 60 * 20) || (inittestrun == false && testing)) {
             inittestrun = true;
-            if (testing) {
-                return;
-            }
             last_update = Date.now();
             const stats = getHighestStats();
             await buildgraph("output", 1000);
@@ -97,6 +95,11 @@ async function updateloop() {
             } catch (e) {
                 console.log("`node --expose-gc index.js`");
                 process.exit();
+            }
+
+            if (testing) {
+                console.log("Test complete, exiting!");
+                return;
             }
         }
         await sleep(1000);
