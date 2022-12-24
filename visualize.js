@@ -10,20 +10,62 @@ const client = new Client({
 });
 const image_width = 10000;
 const image_height = 2500;
+const reactor_width = 100;
+const reactor_height = 100;
+const tile_size = 8; //pixels width
 const point_radius = 3;
 let last_update = 0;
 const spamchanid = process.argv[3];
 let spamchan = null;
 let last_max_iteration = 0;
 let last_max_iteration_high_stats = {};
+let highestconf = "";
 
 client.once('ready', async () => {
     console.log("Ready to make pictures!!!!");
     spamchan = await client.channels.fetch(spamchanid);
+    await compressTiles();
     updateloop();
 });
 const discord_token = process.argv[2];
 client.login(discord_token);
+
+const tiles = new Map();
+async function compressTiles() {
+    for (let tilename of fs.readdirSync("./assets/")) {
+        console.log("Compressing " + tilename);
+        tiles.set(tilename.replace(".gif", ""), await sharp("./assets/" + tilename).resize({ width: tile_size, height: tile_size }).toBuffer());
+    }
+}
+
+async function drawReactor(conf, width = reactor_width, height = reactor_height) {
+    let internals_composite = [];
+    internals_composite.push({ input: tiles.get("casing-corner"), top: 0, left: 0 });
+    for (let i = 0; i < width - 2; i++) {
+        internals_composite.push({ input: tiles.get("casing-lr"), top: 0, left: (i * tile_size) + tile_size });
+    }
+    internals_composite.push({ input: tiles.get("casing-corner"), top: 0, left: (width - 1) * tile_size });
+    for (let i = 0; i < conf.length; i++) {
+        const topoffset = (Math.floor(i / (width - 2)) + 1) * tile_size;
+        console.log("topoff: " + topoffset);
+        if (i % (width - 2) === 0) {
+            internals_composite.push({ input: tiles.get("casing-ud"), top: topoffset, left: 0 });
+            internals_composite.push({ input: tiles.get("casing-ud"), top: topoffset, left: (width - 1) * tile_size });
+        }
+        internals_composite.push({ input: tiles.get(conf.substring(i, i + 1)), top: topoffset, left: (i % (width - 2) + 1) * tile_size });
+    }
+    for (let i = 0; i < width - 2; i++) {
+        internals_composite.push({ input: tiles.get("casing-lr"), top: (height - 1) * tile_size, left: (i * tile_size) + tile_size });
+    }
+    internals_composite.push({ input: tiles.get("casing-corner"), top: (height - 1) * tile_size, left: 0 });
+    internals_composite.push({ input: tiles.get("casing-corner"), top: (height - 1) * tile_size, left: (width - 1) * tile_size });
+    console.log("ok cool");
+    return await sharp("./garbage.png")
+        .resize(width * tile_size, height * tile_size)
+        .composite(internals_composite)
+        .png()
+        .toBuffer();
+}
 
 async function updateloop() {
     while (true) {
@@ -31,19 +73,21 @@ async function updateloop() {
             last_update = Date.now();
             const stats = getHighestStats();
             await buildgraph("output", 1000);
+            fs.writeFileSync("./visualizations/reactor.png", await drawReactor(highestconf));
             const theEmbed = new EmbedBuilder()
                 .setTitle("Your bihourly reactor update!")
                 .setColor('#DFFF00')
                 .setDescription("I maeked dis:")
                 .setImage("attachment://output.png")
+                .setThumbnail("attachment://reactor.png")
                 .addFields(
-                    { name: "Generation", value: `${Math.round(stats["output"]["avg"]/10)/100}±${Math.round(stats["output"]["stdev"]/10)/100} kRF/t` },
+                    { name: "Generation", value: `${Math.round(stats["output"]["avg"] / 10) / 100}±${Math.round(stats["output"]["stdev"] / 10) / 100} kRF/t` },
                     { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100}±${Math.round(stats["fuelConsumption"]["stdev"] * 100) / 100} mB/t` }
                 )
                 .setTimestamp()
                 .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
 
-            await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds`), embeds: [theEmbed], files: ["./visualizations/output.png"] });
+            await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds`), embeds: [theEmbed], files: ["./visualizations/output.png", "./visualizations/reactor.png"] });
             try { //https://stackoverflow.com/a/30654451
                 if (global.gc) { global.gc(); }
             } catch (e) {
@@ -55,6 +99,7 @@ async function updateloop() {
     }
 }
 
+
 function getHighestStats(file = "current.json") {
     let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file, { encoding: "utf-8" }));
     let highestpower = 0;
@@ -62,10 +107,12 @@ function getHighestStats(file = "current.json") {
     for (let conf of Object.keys(data)) {
         if (data[conf]["stats"]["output"]["avg"] > highestpower) {
             highestpower = data[conf]["stats"]["output"]["avg"];
+            highestconf = conf;
             highestpowerstats = {};
             Object.assign(highestpowerstats, data[conf]["stats"]);
         }
     }
+
     return highestpowerstats;
 }
 
