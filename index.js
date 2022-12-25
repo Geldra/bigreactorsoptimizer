@@ -172,7 +172,7 @@ async function main() {
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
                 });
-                weakest_arr = weakest_arr.slice(0, Math.ceil(weakest_arr.length / 6));
+                weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
                 let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
                 delete active_forms[weakest];
             }
