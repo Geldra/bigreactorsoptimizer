@@ -178,7 +178,7 @@ async function main() {
             }
         }
         const permutationmult = (Math.random() + 1) * 2;
-        const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"]) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / 100;
+        const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 10000) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (100000);
         while (Object.keys(active_forms).length < max_forms) {
             //repopulate
             let mutation_ancestor;
@@ -225,7 +225,7 @@ async function givemetheresultalready(data) {
             let time_elapsed = (Date.now() - starttime) / 60000;
             let progress_made = ii * n + thiscall;
             let speed = progress_made / time_elapsed;
-            let remaining = Math.floor(((iterations - ii) * n + thiscall) / speed);
+            //let remaining = Math.floor(((iterations - ii) * n + thiscall) / speed);
             //console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Making a call... (ETA: " + remaining + " minutes) [" + Math.round(((ii * n + thiscall) / (iterations * n)) * 1000) / 100 + "% progress] {" + Math.round((errorcalls / allcalls) * 1000) / 100 + "% fail rate}");
             allcalls++;
             result = await post("api/simulate", data);
