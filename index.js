@@ -167,7 +167,7 @@ const starttime = Date.now();
 var loggedinit = false;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
-        for (let j = 0; j < Math.ceil(Math.random() * max_forms / 7); j++) {
+        for (let j = 0; j < Math.ceil(Math.random() * max_forms / 15); j++) {
             if (Object.keys(active_forms).length >= max_forms / 2) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
