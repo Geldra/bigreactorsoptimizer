@@ -89,23 +89,23 @@ async function updateloop() {
                 )
                 .setTimestamp()
                 .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
-try{
-    await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds`), embeds: [theEmbed], files: ["./visualizations/output.png", "./visualizations/reactor.png"] });
-}catch{
-    const theFallbackEmbed = new EmbedBuilder()
-    .setTitle("Your bihourly reactor update!")
-    .setColor('#DFFF00')
-    .setDescription("Thumbnail was too big or some other stupid excuse by discord:")
-    .setImage("attachment://output.png")
-    .addFields(
-        { name: "Generation", value: `${Math.round(stats["output"]["avg"] / 10) / 100}±${Math.round(stats["output"]["stdev"] / 10) / 100} kRF/t` },
-        { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100}±${Math.round(stats["fuelConsumption"]["stdev"] * 100) / 100} mB/t` }
-    )
-    .setTimestamp()
-    .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
-    await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds`), embeds: [theEmbed], files: ["./visualizations/output.png"] });
-}
-            
+            try {
+                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds`), embeds: [theEmbed], files: ["./visualizations/output.png", "./visualizations/reactor.png"] });
+            } catch {
+                const theFallbackEmbed = new EmbedBuilder()
+                    .setTitle("Your bihourly reactor update!")
+                    .setColor('#DFFF00')
+                    .setDescription("Thumbnail was too big or some other stupid excuse by discord:")
+                    .setImage("attachment://output.png")
+                    .addFields(
+                        { name: "Generation", value: `${Math.round(stats["output"]["avg"] / 10) / 100}±${Math.round(stats["output"]["stdev"] / 10) / 100} kRF/t` },
+                        { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100}±${Math.round(stats["fuelConsumption"]["stdev"] * 100) / 100} mB/t` }
+                    )
+                    .setTimestamp()
+                    .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
+                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds`), embeds: [theFallbackEmbed], files: ["./visualizations/output.png"] });
+            }
+
             try { //https://stackoverflow.com/a/30654451
                 if (global.gc) { global.gc(); }
             } catch (e) {

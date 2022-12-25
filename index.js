@@ -53,6 +53,7 @@ function buildrandomseed() {
         for (let key of Object.keys(import_forms)) {
             active_forms[key] = import_forms[key];
         }
+        console.log("Imported from file");
     }
     let newseed = "";
     let keys = Object.keys(components);
@@ -166,20 +167,13 @@ const starttime = Date.now();
 var loggedinit = false;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
-        for (let j = 0; j < Math.round(Math.random() * 10 + 1); j++) {
-            let weakest;
-            let champs = get_weakest_and_strongest_form();
-            //if (Math.random() > 0.2) {
-            //usually we will kill any non-strongest form
-            const weakest_arr = Object.keys(active_forms).filter(iform => iform != champs["highest"]).sort((a, b) => {
-                return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
-            }).slice(0, Math.ceil(max_forms / 3));
-            weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
-            /*} else {
-                //rarely we will simply kill the lowest form
-                weakest = champs["lowest"];
-            }*/
+        for (let j = 0; j < Math.ceil(Math.random() * max_forms / 7); j++) {
             if (Object.keys(active_forms).length >= max_forms / 2) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
+                let weakest_arr = Object.keys(active_forms).sort((a, b) => {
+                    return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
+                });
+                weakest_arr = weakest_arr.slice(0, Math.ceil(weakest_arr.length / 6));
+                let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
                 delete active_forms[weakest];
             }
         }
@@ -232,17 +226,17 @@ async function givemetheresultalready(data) {
             let progress_made = ii * n + thiscall;
             let speed = progress_made / time_elapsed;
             let remaining = Math.floor(((iterations - ii) * n + thiscall) / speed);
-            console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Making a call... (ETA: " + remaining + " minutes) [" + Math.round(((ii * n + thiscall) / (iterations * n)) * 1000) / 100 + "% progress] {" + Math.round((errorcalls / allcalls) * 1000) / 100 + "% fail rate}");
+            //console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Making a call... (ETA: " + remaining + " minutes) [" + Math.round(((ii * n + thiscall) / (iterations * n)) * 1000) / 100 + "% progress] {" + Math.round((errorcalls / allcalls) * 1000) / 100 + "% fail rate}");
             allcalls++;
             result = await post("api/simulate", data);
             complete = true;
         } catch (err) {
             errorcalls++;
-            console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Keep trying. <" + err.toString() + ">");
+            //console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Keep trying. <" + err.toString() + ">");
             complete = false;
         }
     }
-    console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Complete.");
+    //console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Complete.");
     return result;
 }
 startupArt();
