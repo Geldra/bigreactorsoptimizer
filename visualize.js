@@ -84,8 +84,8 @@ async function updateloop() {
                 .setImage("attachment://output.png")
                 .setThumbnail("attachment://reactor.png")
                 .addFields(
-                    { name: "Generation", value: `${Math.round(stats["output"]["avg"] / 10) / 100}±${Math.round(stats["output"]["stdev"] / 10) / 100} kRF/t` },
-                    { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100}±${Math.round(stats["fuelConsumption"]["stdev"] * 100) / 100} mB/t` }
+                    { name: "Generation", value: `${Math.round(stats["output"]["avg"] / 10) / 100} kRF/t` },
+                    { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100} mB/t` }
                 )
                 .setTimestamp()
                 .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
