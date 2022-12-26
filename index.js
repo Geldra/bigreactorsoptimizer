@@ -214,7 +214,6 @@ let errorcalls = 0;
 async function givemetheresultalready(data) {
     let complete = false;
     let result = {};
-    aggrocalls++;
     while (complete == false) {
         try {
             allcalls++;
