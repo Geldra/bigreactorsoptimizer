@@ -170,7 +170,7 @@ async function main() {
         const permutationmult = (Math.random() + 1) * 2;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000);
         const current_stdev = getStandardDeviation(last_highest);
-        const thirdpermutationmult = 0.1 / ((current_stdev != 0 ? current_stdev : 0.00001) / last_highest[0]);
+        const thirdpermutationmult = Math.log(0.1 / ((current_stdev != 0 ? current_stdev : 0.001) / last_highest[0]));
         let calltime = 0;
         while (Object.keys(active_forms).length < max_forms) {
             //repopulate
