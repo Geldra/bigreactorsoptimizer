@@ -141,9 +141,21 @@ String.prototype.replaceAt = function (index, replacement) {
 ii = 1;
 const starttime = Date.now();
 var loggedinit = false;
+var last_highest = [];
+const max_last_highest = 5;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         const startitertime = Date.now();
+        //Recording a set of samples for standard deviation calc
+        let highest = Object.keys(active_forms).sort((a, b) => {
+            return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
+        });
+        last_highest.push(active_forms[highest[highest.length - 1]]["stats"]["output"]["avg"]);
+        highest = null;
+        if (last_highest.length > max_last_highest) {
+            last_highest = last_highest.slice(1);
+        }
+        //Culling
         for (let j = 0; j < Math.ceil(Math.random() * max_forms); j++) {
             if (Object.keys(active_forms).length >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
@@ -154,8 +166,11 @@ async function main() {
                 delete active_forms[weakest];
             }
         }
+        //Mutating
         const permutationmult = (Math.random() + 1) * 2;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000);
+        const current_stdev = getStandardDeviation(last_highest);
+        const thirdpermutationmult = 0.1 / ((current_stdev != 0 ? current_stdev : 0.00001) / last_highest[0]);
         let calltime = 0;
         while (Object.keys(active_forms).length < max_forms) {
             //repopulate
@@ -166,7 +181,7 @@ async function main() {
                 mutation_ancestor = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
             }
 
-            let new_conf_returns = make_permutation(mutation_ancestor, Math.round((Math.random() + 1) * 5 * permutationmult * secondpermutationmult));
+            let new_conf_returns = make_permutation(mutation_ancestor, Math.round((Math.random() + 1) * 5 * permutationmult * secondpermutationmult * thirdpermutationmult));
             let new_configuration = new_conf_returns[0];
             active_forms[new_configuration] = { "age": 0 };
             let thiscallstarttime = Date.now();
@@ -225,6 +240,12 @@ async function givemetheresultalready(data) {
         }
     }
     return result;
+}
+
+function getStandardDeviation(array) { //https://stackoverflow.com/a/53577159
+    const n = array.length
+    const mean = array.reduce((a, b) => a + b) / n
+    return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
 }
 startupArt();
 main();
