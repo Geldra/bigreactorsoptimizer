@@ -244,7 +244,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
         let start_coord = relation["coords"][0];
         let end_coord = relation["coords"][relation["coords"].length - 1];
         svgelms.push(`
-            <line x1="${getx(start_coord[0])}" y1="${gety(start_coord[1])}" x2="${getx(end_coord[0])}" y2="${gety(end_coord[1])}" stroke-width="${Math.ceil(point_radius / 1.2)}" stroke="${relation["color"]}" />
+            <line x1="${getx(start_coord[0])}" y1="${gety(start_coord[1])}" x2="${getx(end_coord[0])}" y2="${gety(start_coord[1])}" stroke-width="${Math.ceil(point_radius / 1.2)}" stroke="${relation["color"]}" />
         `)
         if (start_coord[1] != end_coord[1]) {
             console.log(`What happened here:\nstart = (${getx(start_coord[0])}, ${gety(start_coord[1])})\nstart = (${getx(end_coord[0])}, ${gety(end_coord[1])})`);
