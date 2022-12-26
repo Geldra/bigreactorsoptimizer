@@ -1,24 +1,14 @@
 const fs = require("fs");
 const bent = require("bent");
 const post = bent("http://localhost:8081/", "POST", "json", 200);
-const apiurls = [post];
-let aggrocalls = 0;
 const active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
 const max_forms = 125;
 const iterations = 100000000;
 const log_interval = 100; //interval to save a snapshot of active_forms in ./log/
 fs.mkdirSync("../../../reactorsaves", { recursive: true });
-
-// curl -b u1 -c u1 -X POST -H "Content-Type: application/json" -d '{"xSize":7,"zSize":7,"height":7,"layout":"XXXXXXXXXXXXXXXXXXXXXXXXX","isActivelyCooled":false,"controlRodInsertion":0}' localhost:8081/api/simulate
-/*{
-    "xSize":7,
-    "zSize":7,
-    "height":7,
-    "layout":"XXXXXXXXXXXXXXXXXXXXXXXXX",
-    "isActivelyCooled":false,
-    "controlRodInsertion":0
-}*/
+fs.mkdirSync("../../../reactorimagesaves", { recursive: true });
+fs.mkdirSync("../../../reactorvars/compweights", { recursive: true });
 
 const set_parameters = {
     "xSize": 100,
@@ -28,14 +18,21 @@ const set_parameters = {
     "controlRodInsertion": 0
 }
 
-/*const fitness_weights = {
-    "output": 1,
-    "fuelConsumption": 0
-}*/
+const components = buildComponents();
+function buildComponents() {
+    const initcomps = { "C": "Gelid Cryotheum", "E": "Liquid Ender", "D": "Diamond Block", "G": "Graphite Block", "R": "Destabilized Redstone", "X": "Control Rod", "L": "Block of Gold", "O": "Air" }
+    for (let compkey of Object.keys(initcomps)) {
+        initcomps[compkey] = { "name": initcomps[compkey], "weight": 1 };
+    }
+    if (fs.existsSync("../../../reactorvars/compweights/current.json")) {
+        const oldcompweights = JSON.parse(fs.readFileSync("../../../reactorvars/compweights/current.json"));
+        for (let compkey of Object.keys(initcomps)) {
+            initcomps[compkey]["weight"] = oldcompweights[compkey]["weight"];
+        }
+    }
+    return initcomps;
+}
 
-const components = { "C": "Gelid Cryotheum", "E": "Liquid Ender", "D": "Diamond Block", "G": "Graphite Block", "R": "Destabilized Redstone", "X": "Control Rod", "L": "Block of Gold", "O": "Air" }
-
-//const seed = "X".repeat((set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2));
 let init_iteration = 1;
 const seed = buildrandomseed();
 
@@ -56,35 +53,51 @@ function buildrandomseed() {
         console.log("Imported from file");
     }
     let newseed = "";
-    let keys = Object.keys(components);
     for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
-        newseed = newseed + "X"//keys[Math.round(Math.random() * (keys.length - 1))]
+        newseed = newseed + "X";
     }
     return newseed;
 }
 
 function make_permutation(parent_configuration, mutations_left) {
-    //const mutations = mutations_left;
-    //console.log("Making mutations...");
-    const timestart = Date.now();
     let configuration = parent_configuration;
-    let mutations = 0
+    let changes = {};
+    let tiles = [];
+    let tile_weights = []; //cumulative weights
+    for (let tile of Object.keys(components)) {
+        tiles.push(tile);
+        tile_weights.push(tile_weights.reduce((a, b) => a + b, 1) + components[tile]["weight"]);
+    }
+    //normalize weights
+    for (let i = 0; i < tile_weights.length; i++) {
+        tile_weights[i] = tile_weights[i] / tile_weights[tile_weights.length - 1];
+    }
     while (mutations_left > 0) {
         let pos = Math.round(Math.random() * (parent_configuration.length - 1));
-        let insert = Object.keys(components)[Math.round(Math.random() * (Object.keys(components).length - 1))];
+        //let insert = Object.keys(components)[Math.round(Math.random() * (Object.keys(components).length - 1))];
+        let insert = tiles[tiles.length - 1];
+        let insertrand = Math.random();
+        for (let i = 0; i < tile_weights.length; i++) {
+            if (insertrand < tile_weights[i]) {
+                insert = tiles[i];
+                break;
+            }
+        }
         configuration = parent_configuration.replaceAt(pos, insert);
+        if (Object.keys(changes).includes(insert)) {
+            changes[insert] = changes[insert] + 1;
+        } else {
+            changes[insert] = 1;
+        }
         mutations_left--;
-        mutations++;
     }
-    //console.log(`   ${mutations} mutations made! (${(Date.now() - timestart)} ms)`);
-    return configuration;
+    return [configuration, changes];
 }
 
 const n = 1;
 async function get_stats(configuration) {
     let samples = [];
     for (let i = 0; i < n; i++) {
-        //console.log("getting stats " + i);
         let thisdef = {};
         Object.assign(thisdef, set_parameters);
         thisdef["layout"] = configuration;
@@ -112,9 +125,7 @@ async function get_stats(configuration) {
         for (let sample of samples) {
             stdevsum = stdevsum + Math.pow((sample[key] - avg), 2);
         }
-        //console.log("stdevsum:" + stdevsum);
         let stdev = Math.sqrt(stdevsum / n);
-        //console.log("stdev:" + stdev);
         results[key]["min"] = min;
         results[key]["max"] = max;
         results[key]["avg"] = avg;
@@ -127,53 +138,12 @@ String.prototype.replaceAt = function (index, replacement) {
     return this.substring(0, index) + replacement + this.substring(index + replacement.length);
 }
 
-/*function get_weakest_and_strongest_form() {
-    let lowest_score = Infinity;
-    let lowest_score_configuration = "";
-    let highest_score = -Infinity;
-    let highest_score_configuration = "";
-    for (let configuration of Object.keys(active_forms)) {
-        let form = active_forms[configuration];
-        let score = 0;
-        for (let key of Object.keys(fitness_weights)) {
-            score = score + fitness_weights[key] * form["stats"][key]["avg"];
-        }
-        active_forms[configuration]["score"] = score;
-        //console.log("score:" + score);
-        if (score < lowest_score) {
-            lowest_score = score;
-            lowest_score_configuration = configuration;
-        }
-        if (score > highest_score) {
-            highest_score = score;
-            highest_score_configuration = configuration;
-        }
-    }
-    //console.log(JSON.stringify(highest_score_configuration));
-    //console.log(JSON.stringify(lowest_score_configuration));
-    if (highest_score_configuration != "") {
-        console.log("Topstats:");
-        console.log("    Gen:" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["output"]["stdev"] * 100) / 100) + " RF/t");
-        console.log("    Eat:" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["avg"] * 100) / 100) + "+-" + (Math.round(active_forms[highest_score_configuration]["stats"]["fuelConsumption"]["stdev"] * 100) / 100) + " mB/t");
-    }
-    return {
-        "lowest": lowest_score_configuration,
-        "highest": highest_score_configuration
-    };
-}*/
-
 ii = 1;
 const starttime = Date.now();
 var loggedinit = false;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         const startitertime = Date.now();
-        let changesbefore = [];
-        Object.keys(active_forms).sort((a, b) => {
-            return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
-        }).forEach((value, index) => {
-            changesbefore.push(active_forms[value]["stats"]["output"]["avg"]);
-        });
         for (let j = 0; j < Math.ceil(Math.random() * max_forms); j++) {
             if (Object.keys(active_forms).length >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
@@ -184,27 +154,9 @@ async function main() {
                 delete active_forms[weakest];
             }
         }
-        let changesafter = [];
-        Object.keys(active_forms).sort((a, b) => {
-            return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
-        }).forEach((value, index) => {
-            changesafter.push(active_forms[value]["stats"]["output"]["avg"]);
-        });
-        console.log(Object.keys(active_forms).length + "/" + max_forms);
-        if (changesbefore[changesbefore.length - 1] != changesafter[changesafter.length - 1]) {
-            const readout = `Ok it did a funny thing look:
-    High:
-        Before: ${changesbefore[changesbefore.length - 1]}
-        After : ${changesafter[changesafter.length - 1]}
-    Low:
-        Before: ${changesbefore[0]}
-        After : ${changesafter[0]}
-            `;
-            console.log(readout);
-            fs.writeFileSync("./visualizations/badfiles/" + ii + ".txt", readout, { encoding: "utf-8" });
-        }
         const permutationmult = (Math.random() + 1) * 2;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000);
+        let calltime = 0;
         while (Object.keys(active_forms).length < max_forms) {
             //repopulate
             let mutation_ancestor;
@@ -214,24 +166,44 @@ async function main() {
                 mutation_ancestor = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
             }
 
-            let new_configuration = make_permutation(mutation_ancestor, Math.round((Math.random() + 1) * 5 * permutationmult * secondpermutationmult));
+            let new_conf_returns = make_permutation(mutation_ancestor, Math.round((Math.random() + 1) * 5 * permutationmult * secondpermutationmult));
+            let new_configuration = new_conf_returns[0];
             active_forms[new_configuration] = { "age": 0 };
+            let thiscallstarttime = Date.now();
             active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
+            calltime = calltime + Date.now() - thiscallstarttime;
             active_forms[new_configuration]["ancestor"] = mutation_ancestor;
+
+            //analyze the effects of these changes
+            if (Object.keys(active_forms).includes(mutation_ancestor)) {
+                let score_diff = active_forms[new_configuration]["stats"]["output"]["avg"] - active_forms[mutation_ancestor]["stats"]["output"]["avg"];
+                let score_diff_percent = score_diff / active_forms[mutation_ancestor]["stats"]["output"]["avg"];
+                for (let tile of Object.keys(new_conf_returns[1])) {
+                    components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
+                    if (components[tile]["weight"] <= 0) {
+                        //weight at or under 0 prevents items from appearing
+                        components[tile]["weight"] = 1;
+                    }
+                }
+            }
         }
 
         if (ii % log_interval == 0 || (loggedinit == false && Object.keys(active_forms).length >= max_forms)) {
             fs.writeFileSync("../../../reactorsaves/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
+            fs.writeFileSync("../../../reactorvars/compweights/" + ii + ".json", JSON.stringify(components, null, 4), { encoding: false });
             if (loggedinit === false) {
                 loggedinit = true;
             }
+            fs.writeFileSync("../../../reactorsaves/current.json", JSON.stringify(active_forms, null, 4), { encoding: false });
+            fs.writeFileSync("../../../reactorvars/compweights/current.json", JSON.stringify(components, null, 4), { encoding: false });
         }
-        fs.writeFileSync("../../../reactorsaves/current.json", JSON.stringify(active_forms, null, 4), { encoding: false });
+
 
         for (let configuration of Object.keys(active_forms)) {
             active_forms[configuration]["age"]++;
         }
-        console.log(`Iteration ${ii} complete. (${Date.now() - startitertime} ms)`);
+        const nowtime = Date.now()
+        console.log(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${nowtime - startitertime - calltime} ms calculating]`);
     }
     fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(active_forms, null, 4), { encoding: false });
 }
@@ -241,29 +213,18 @@ let allcalls = 0;
 let errorcalls = 0;
 async function givemetheresultalready(data) {
     let complete = false;
-    let tries = 0;
     let result = {};
-    //let thiscall = aggrocalls % n + 1;
     aggrocalls++;
     while (complete == false) {
-        //await sleep(Math.floor((50 + Math.random() * 50) / apiurls.length));
-        tries++;
         try {
-            //let time_elapsed = (Date.now() - starttime) / 60000;
-            //let progress_made = ii * n + thiscall;
-            //let speed = progress_made / time_elapsed;
-            //let remaining = Math.floor(((iterations - ii) * n + thiscall) / speed);
-            //console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Making a call... (ETA: " + remaining + " minutes) [" + Math.round(((ii * n + thiscall) / (iterations * n)) * 1000) / 100 + "% progress] {" + Math.round((errorcalls / allcalls) * 1000) / 100 + "% fail rate}");
             allcalls++;
             result = await post("api/simulate", data);
             complete = true;
         } catch (err) {
             errorcalls++;
-            //console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Keep trying. <" + err.toString() + ">");
             complete = false;
         }
     }
-    //console.log("{" + ii + "/" + iterations + "}[" + thiscall + "/" + n + "](x" + tries + ") Complete.");
     return result;
 }
 startupArt();
