@@ -5,7 +5,7 @@ const apiurls = [post];
 let aggrocalls = 0;
 const active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
-const max_forms = 100;
+const max_forms = 125;
 const iterations = 100000000;
 const log_interval = 100; //interval to save a snapshot of active_forms in ./log/
 fs.mkdirSync("../../../reactorsaves", { recursive: true });
@@ -174,8 +174,8 @@ async function main() {
         }).forEach((value, index) => {
             changesbefore.push(active_forms[value]["stats"]["output"]["avg"]);
         });
-        for (let j = 0; j < Math.ceil(Math.random() * max_forms / 5); j++) {
-            if (Object.keys(active_forms).length >= max_forms / 2) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
+        for (let j = 0; j < Math.ceil(Math.random() * max_forms); j++) {
+            if (Object.keys(active_forms).length >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
                 });
