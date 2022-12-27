@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "bent": "^7.3.12",
+    "discord.js": "^14.7.1",
+    "metrohash": "^2.8.0",
+    "sharp": "^0.31.2"
+  }
+}
