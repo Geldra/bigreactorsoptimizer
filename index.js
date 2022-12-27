@@ -5,7 +5,7 @@ const active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
 const max_forms = 125;
 const iterations = 100000000;
-const log_interval = (process.argv[]); //interval to save a snapshot of active_forms in ./log/
+const log_interval = 100; //interval to save a snapshot of active_forms in ./log/
 fs.mkdirSync("../../../reactorsaves", { recursive: true });
 fs.mkdirSync("../../../reactorimagesaves", { recursive: true });
 fs.mkdirSync("../../../reactorvars/compweights", { recursive: true });
@@ -226,6 +226,11 @@ Stdev = ${current_stdev} (${Math.round(current_stdev / last_highest[0])}%)
             }
             fs.writeFileSync("../../../reactorsaves/current.json", JSON.stringify(active_forms, null, 4), { encoding: false });
             fs.writeFileSync("../../../reactorvars/compweights/current.json", JSON.stringify(components, null, 4), { encoding: false });
+            if (ii % (log_interval * 10) == 0) {
+                for (let key of Object.keys(components)) {
+                    components[key]["weight"] = 1;
+                }
+            }
         }
 
 
