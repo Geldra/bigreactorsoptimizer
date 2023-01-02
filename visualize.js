@@ -205,7 +205,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
                         file
                     ])
                 }
-                console.log("   objkeydelta = " + (Date.now() - objkeystart) + " ms");
+                //console.log("   objkeydelta = " + (Date.now() - objkeystart) + " ms");
                 if (stats["avg"] < miny) {
                     miny = stats["avg"] + 0;
                 }
@@ -213,10 +213,10 @@ async function buildgraph(stat = "output", last_iterations = 500) {
                     maxy = stats["avg"] + 0;
                 }
                 stats = null;
-                console.log(`${thisone} (${this_file_parse}/${files_length}) (${Date.now() - startConfTime} ms) (${thisconfid}/${conflength})`);
+                //console.log(`${thisone} (${this_file_parse}/${files_length}) (${Date.now() - startConfTime} ms) (${thisconfid}/${conflength})`);
             }
             data = null;
-            console.log(`Completed parsing ${file} (${this_file_parse}/${files_length})`);
+            //console.log(`Completed parsing ${file} (${this_file_parse}/${files_length})`);
         } catch (err) {
             console.log("EVIL EVIL EVIL EVIL EVIL: " + file + "\n   " + err.toString());
             fs.writeFileSync("./visualizations/bad_files/" + Date.now(), "EVIL EVIL EVIL EVIL EVIL: " + file, { encoding: "utf-8" });
@@ -256,7 +256,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
             `)
         }*/
         relations_built++;
-        console.log(`built ${relation_ref} (${relations_built}/${relations_length})`);
+        //console.log(`built ${relation_ref} (${relations_built}/${relations_length})`);
     });
     console.log(`-- Building complete, moving to export (${Date.now() - fullstart} ms)`);
     let fullsvg = `<svg>${svgelms.join("")}</svg>`;
