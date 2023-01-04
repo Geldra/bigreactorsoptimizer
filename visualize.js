@@ -10,9 +10,15 @@ const client = new Client({
 });
 const image_width = 5000;
 const image_height = 1500;
+const image_margins = {
+    "left": 15,
+    "right": 15,
+    "top": 15,
+    "bottom": 45
+}
 const reactor_width = 16;
 const reactor_height = 16;
-const tile_size = 1; //pixels width
+const tile_size = 3; //pixels width
 const point_radius = 3;
 let last_update = 0;
 const spamchanid = process.argv[3];
@@ -155,7 +161,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     let relations = new Map(); // [hash,{"ancestor":hash, "color":color}]
     //sweep files once to get bounds
     let files_parsed = 0;
-    const files_length = files.length;
+    //const files_length = files.length;
     let filebatch = [];
     for (let file of files) {
         if (filebatch.length >= 500) {
@@ -167,18 +173,18 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     async function parsefile(file) {
         try {
             files_parsed++;
-            const this_file_parse = files_parsed;
+            //const this_file_parse = files_parsed;
             let data = JSON.parse(fs.readFileSync("../../../reactorsaves/" + file));
             let iteration = parseInt(file.replace(".json", ""));
             let confbatch = [];
-            const conflength = Object.keys(data).length;
+            //const conflength = Object.keys(data).length;
             for (let conf of Object.keys(data)) {
                 confbatch.push(parseconf(conf));
             }
             await Promise.all(confbatch);
             async function parseconf(conf) {
-                const startConfTime = Date.now();
-                const thisconfid = confbatch.length;
+                //const startConfTime = Date.now();
+                //const thisconfid = confbatch.length;
                 //let thisone = conf;
                 //let ancestor = data[conf]["ancestor"];
                 let thisone = (new mh(666)).update(conf).digest();
@@ -227,7 +233,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     let relations_built = 0;
     const relations_length = relations.size;
     svgelms.push(`
-        <rect width="${image_width}" height="${image_height}" fill="black" fill-opacity="1" />
+        <rect width="${image_width+image_margins["left"]+image_margins["right"]}" height="${image_height+image_margins["top"]+image_margins["bottom"]}" fill="black" fill-opacity="1" />
     `);
     svgelms.push(`
         <line x1="${getx(minx)}" y1="${gety(last_max_iteration_high_stats[stat]["avg"])}" x2="${getx(maxx)}" y2="${gety(last_max_iteration_high_stats[stat]["avg"])}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" stroke_opacity="0.1" />
@@ -264,12 +270,12 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     function getx(rawx) {
         rawx = rawx < minx ? minx : rawx;
         rawx = rawx > maxx ? maxx : rawx;
-        return Math.round(((rawx - minx) / (maxx - minx)) * image_width);
+        return Math.round(((rawx - minx) / (maxx - minx)) * image_width + image_margins["left"]);
     }
     function gety(rawy) {
         rawy = rawy < miny ? miny : rawy;
         rawy = rawy > maxy ? maxy : rawy;
-        return image_height - Math.round(((rawy - miny) / (maxy - miny)) * image_height);
+        return image_height + image_margins["top"] - Math.round(((rawy - miny) / (maxy - miny)) * image_height);
     }
     console.log(`Complete! (${Date.now() - fullstart} ms)`);
     last_max_iteration = maxx;

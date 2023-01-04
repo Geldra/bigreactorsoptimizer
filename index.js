@@ -3,12 +3,13 @@ const bent = require("bent");
 const post = bent("http://localhost:8081/", "POST", "json", 200);
 const active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
-const max_forms = 125;
+const max_forms = 150;
 const iterations = 100000000;
-const log_interval = 100; //interval to save a snapshot of active_forms in ./log/
+const log_interval = 1; //interval to save a snapshot of active_forms in ./log/
 fs.mkdirSync("../../../reactorsaves", { recursive: true });
 fs.mkdirSync("../../../reactorimagesaves", { recursive: true });
 fs.mkdirSync("../../../reactorvars/compweights", { recursive: true });
+const readout_level = process.argv[2];
 
 const set_parameters = {
     "xSize": 16,
@@ -20,6 +21,7 @@ const set_parameters = {
 
 const components = buildComponents();
 function buildComponents() {
+    const funcStart = Date.now();
     const initcomps = { "C": "Gelid Cryotheum", "E": "Liquid Ender", "D": "Diamond Block", "G": "Graphite Block", "R": "Destabilized Redstone", "X": "Control Rod", "L": "Block of Gold", "O": "Air" }
     for (let compkey of Object.keys(initcomps)) {
         initcomps[compkey] = { "name": initcomps[compkey], "weight": 1 };
@@ -30,6 +32,7 @@ function buildComponents() {
             initcomps[compkey]["weight"] = oldcompweights[compkey]["weight"];
         }
     }
+    say(`buildComponents() [${Date.now() - funcStart} ms]`);
     return initcomps;
 }
 
@@ -37,6 +40,7 @@ let init_iteration = 1;
 const seed = buildrandomseed();
 
 function buildrandomseed() {
+    const funcStart = Date.now();
     if (fs.existsSync("../../../reactorsaves/current.json")) {
         let highest_iteration = 1;
         for (let file of fs.readdirSync("../../../reactorsaves").filter(ifile => ![".", "..", "current.json"].includes(ifile))) {
@@ -50,16 +54,18 @@ function buildrandomseed() {
         for (let key of Object.keys(import_forms)) {
             active_forms[key] = import_forms[key];
         }
-        console.log("Imported from file");
+        say("Imported from file", "normal");
     }
     let newseed = "";
     for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
         newseed = newseed + "X";
     }
+    say(`buildrandomseed() [${Date.now() - funcStart} ms]`);
     return newseed;
 }
 
 function make_permutation(parent_configuration, mutations_left) {
+    const funcStart = Date.now();
     let configuration = parent_configuration;
     let changes = {};
     let tiles = [];
@@ -91,11 +97,13 @@ function make_permutation(parent_configuration, mutations_left) {
         }
         mutations_left--;
     }
+    say(`make_permutation() [${Date.now() - funcStart} ms]`);
     return [configuration, changes];
 }
 
 const n = 1;
 async function get_stats(configuration) {
+    const funcStart = Date.now();
     let samples = [];
     for (let i = 0; i < n; i++) {
         let thisdef = {};
@@ -131,6 +139,7 @@ async function get_stats(configuration) {
         results[key]["avg"] = avg;
         results[key]["stdev"] = stdev;
     }
+    say(`get_stats() [${Date.now() - funcStart} ms]`);
     return results;
 }
 
@@ -163,8 +172,13 @@ async function main() {
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
                 });
+                let highest = weakest_arr[weakest_arr.length - 1];
                 weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
                 let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
+                say(`Culling checkstack:`, "debug");
+                say(`   1: ${active_forms[weakest_arr[0]]["stats"]["output"]["avg"] <= active_forms[weakest]["stats"]["output"]["avg"]} (${active_forms[weakest_arr[0]]["stats"]["output"]["avg"]} <= ${active_forms[weakest]["stats"]["output"]["avg"]})`, "debug");
+                say(`   2: ${active_forms[weakest]["stats"]["output"]["avg"] <= active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]} (${active_forms[weakest]["stats"]["output"]["avg"]} <= ${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]})`, "debug");
+                say(`   3: ${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"] < active_forms[highest]["stats"]["output"]["avg"]} (${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]} < ${active_forms[highest]["stats"]["output"]["avg"]})`, "debug");
                 delete active_forms[weakest];
             }
         }
@@ -174,10 +188,10 @@ async function main() {
         const current_stdev = getStandardDeviation(last_highest);
         let numerator = (current_stdev == 0 ? 0.0001 : current_stdev);
         let denominator = (last_highest.length == 0 ? 0.00001 : last_highest[0]);
-        const thirdpermutationmult = Math.log(1 / (numerator / denominator));
+        const thirdpermutationmult = Math.log(1 / (numerator / denominator) + 1);
 
         const productmult = Math.round(permutationmult * secondpermutationmult * thirdpermutationmult);
-        console.log(`Mutation multipliers:
+        say(`Mutation multipliers:
 num:${numerator}
 den:${denominator}
 1= ${permutationmult}
@@ -185,7 +199,7 @@ den:${denominator}
 3= ${thirdpermutationmult}
 Product= ${productmult}
 Stdev = ${current_stdev} (${Math.round(current_stdev / last_highest[0])}%)
-        `)
+        `, "verbose");
         let calltime = 0;
         while (Object.keys(active_forms).length < max_forms) {
             //repopulate
@@ -196,7 +210,7 @@ Stdev = ${current_stdev} (${Math.round(current_stdev / last_highest[0])}%)
                 mutation_ancestor = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
             }
 
-            let new_conf_returns = make_permutation(mutation_ancestor, Math.round(permutationmult * secondpermutationmult * thirdpermutationmult));
+            let new_conf_returns = make_permutation(mutation_ancestor, productmult);
             let new_configuration = new_conf_returns[0];
             active_forms[new_configuration] = { "age": 0 };
             let thiscallstarttime = Date.now();
@@ -238,7 +252,7 @@ Stdev = ${current_stdev} (${Math.round(current_stdev / last_highest[0])}%)
             active_forms[configuration]["age"]++;
         }
         const nowtime = Date.now()
-        console.log(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${nowtime - startitertime - calltime} ms calculating]`);
+        say(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${nowtime - startitertime - calltime} ms calculating]`, "normal");
     }
     fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(active_forms, null, 4), { encoding: false });
 }
@@ -247,6 +261,7 @@ Stdev = ${current_stdev} (${Math.round(current_stdev / last_highest[0])}%)
 let allcalls = 0;
 let errorcalls = 0;
 async function givemetheresultalready(data) {
+    const funcStart = Date.now();
     let complete = false;
     let result = {};
     while (complete == false) {
@@ -259,6 +274,7 @@ async function givemetheresultalready(data) {
             complete = false;
         }
     }
+    say(`givemetheresultalready() [${Date.now() - funcStart} ms]`);
     return result;
 }
 
@@ -333,4 +349,41 @@ function startupArt() {
         + "                    -++-       :++-                                                       \n"
         + "                     .--        .--                                                       \n"
         + "                                                                                          ");
+}
+
+function say(message, level = "functions") {
+    // functions
+    // debug
+    // verbose
+    // normal
+    // sparse
+    //There is probably a cuter way to do this
+    let shouldlog = false;
+    switch (readout_level) {
+        case "functions":
+            shouldlog = true;
+            break;
+        case "debug":
+            if (level == "sparse" || level == "normal" || level == "verbose" || level == "debug") {
+                shouldlog = true;
+            }
+        case "verbose":
+            if (level == "sparse" || level == "normal" || level == "verbose") {
+                shouldlog = true;
+            }
+            break;
+        case "normal":
+            if (level == "sparse" || level == "normal") {
+                shouldlog = true;
+            }
+            break;
+        case "sparse":
+            if (level == "sparse") {
+                shouldlog = true;
+            }
+            break;
+    }
+    if (shouldlog) {
+        console.log(`[${level}] ${message}`);
+    }
 }
