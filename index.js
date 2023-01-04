@@ -5,11 +5,11 @@ const active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
 const max_forms = 150;
 const iterations = 100000000;
-const log_interval = 100; //interval to save a snapshot of active_forms in ./log/
+const log_interval = parseInt(process.argv[2]); //interval to save a snapshot of active_forms in ./log/
 fs.mkdirSync("../../../reactorsaves", { recursive: true });
 fs.mkdirSync("../../../reactorimagesaves", { recursive: true });
 fs.mkdirSync("../../../reactorvars/compweights", { recursive: true });
-const readout_level = process.argv[2];
+const readout_level = process.argv[3];
 
 const set_parameters = {
     "xSize": 16,
