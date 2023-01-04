@@ -3,7 +3,7 @@ const bent = require("bent");
 const post = bent("http://localhost:8081/", "POST", "json", 200);
 const active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
-const max_forms = 150;
+const max_forms = 200;
 const iterations = 100000000;
 const log_interval = parseInt(process.argv[2]); //interval to save a snapshot of active_forms in ./log/
 fs.mkdirSync("../../../reactorsaves", { recursive: true });
@@ -184,7 +184,7 @@ async function main() {
             }
         }
         //Mutating
-        const permutationmult = (Math.random() + 1) * 10;
+        const permutationmult = (Math.random() + 1) * 15;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000);
         const current_stdev = getStandardDeviation(last_highest);
         let numerator = (current_stdev == 0 ? 0.0001 : current_stdev);
