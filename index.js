@@ -11,8 +11,8 @@ fs.mkdirSync("../../../reactorimagesaves", { recursive: true });
 fs.mkdirSync("../../../reactorvars/compweights", { recursive: true });
 
 const set_parameters = {
-    "xSize": 100,
-    "zSize": 100,
+    "xSize": 16,
+    "zSize": 16,
     "height": 5,
     "isActivelyCooled": false,
     "controlRodInsertion": 0

@@ -10,8 +10,8 @@ const client = new Client({
 });
 const image_width = 5000;
 const image_height = 1500;
-const reactor_width = 100;
-const reactor_height = 100;
+const reactor_width = 16;
+const reactor_height = 16;
 const tile_size = 1; //pixels width
 const point_radius = 3;
 let last_update = 0;
