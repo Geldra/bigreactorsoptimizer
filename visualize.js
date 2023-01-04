@@ -2,6 +2,7 @@ const sharp = require("sharp");
 const fs = require("fs");
 const mh = require("metrohash").MetroHash128;
 const { Client, EmbedBuilder, GatewayIntentBits } = require("discord.js");
+fs.mkdirSync("./visualizations", { recursive: true });
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
