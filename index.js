@@ -167,18 +167,19 @@ async function main() {
             }
         }
         //Culling
+        let highest_conf = "";
         for (let j = 0; j < Math.ceil(Math.random() * max_forms); j++) {
             if (Object.keys(active_forms).length >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
                 });
-                let highest = weakest_arr[weakest_arr.length - 1];
+                highest_conf = weakest_arr[weakest_arr.length - 1];
                 weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
                 let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
                 say(`Culling checkstack:`, "debug");
                 say(`   1: ${active_forms[weakest_arr[0]]["stats"]["output"]["avg"] <= active_forms[weakest]["stats"]["output"]["avg"]} (${active_forms[weakest_arr[0]]["stats"]["output"]["avg"]} <= ${active_forms[weakest]["stats"]["output"]["avg"]})`, "debug");
                 say(`   2: ${active_forms[weakest]["stats"]["output"]["avg"] <= active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]} (${active_forms[weakest]["stats"]["output"]["avg"]} <= ${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]})`, "debug");
-                say(`   3: ${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"] < active_forms[highest]["stats"]["output"]["avg"]} (${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]} < ${active_forms[highest]["stats"]["output"]["avg"]})`, "debug");
+                say(`   3: ${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"] < active_forms[highest_conf]["stats"]["output"]["avg"]} (${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]} < ${active_forms[highest_conf]["stats"]["output"]["avg"]})`, "debug");
                 delete active_forms[weakest];
             }
         }
@@ -192,13 +193,13 @@ async function main() {
 
         const productmult = Math.round(permutationmult * secondpermutationmult * thirdpermutationmult);
         say(`Mutation multipliers:
-num:${numerator}
-den:${denominator}
-1= ${permutationmult}
-2= ${secondpermutationmult}
-3= ${thirdpermutationmult}
-Product= ${productmult}
-Stdev = ${current_stdev} (${Math.round(current_stdev / last_highest[0])}%)
+   num:${numerator}
+   den:${denominator}
+   1= ${permutationmult}
+   2= ${secondpermutationmult}
+   3= ${thirdpermutationmult}
+   Product= ${productmult}
+   Stdev = ${current_stdev} (${Math.round(current_stdev / last_highest[0])}%)
         `, "verbose");
         let calltime = 0;
         while (Object.keys(active_forms).length < max_forms) {
@@ -251,8 +252,9 @@ Stdev = ${current_stdev} (${Math.round(current_stdev / last_highest[0])}%)
         for (let configuration of Object.keys(active_forms)) {
             active_forms[configuration]["age"]++;
         }
-        const nowtime = Date.now()
-        say(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${nowtime - startitertime - calltime} ms calculating]`, "normal");
+        const nowtime = Date.now();
+        say(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${nowtime - startitertime - calltime} ms calculating]`, "sparse");
+        say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms[highest_conf]["stats"]["output"]["avg"] * 100) / 100} RF/t\n   Eating = ${Math.round(active_forms[highest_conf]["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
     }
     fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(active_forms, null, 4), { encoding: false });
 }
