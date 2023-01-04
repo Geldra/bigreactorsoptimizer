@@ -152,7 +152,7 @@ function getHighestStats(file = "current.json") {
 }
 
 
-async function buildgraph(stat = "output", last_iterations = 500) {
+async function buildgraph(stat = "output", last_iterations = 400) {
     const fullstart = Date.now();
     let svgelms = [];
     let miny = Infinity;
