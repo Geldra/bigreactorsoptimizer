@@ -17,8 +17,13 @@ const image_margins = {
     "top": 15,
     "bottom": 45
 }
+const sidohorg_reactor_bounds = {
+    "width": 30,
+    "height": 46
+}
 const reactor_width = 16;
-const reactor_height = 16;
+const reactor_length = 16;
+const reactor_height = 5;
 const tile_size = 3; //pixels width
 const point_radius = 3;
 let last_update = 0;
@@ -47,7 +52,7 @@ async function compressTiles() {
     }
 }
 
-async function drawReactor(conf, width = reactor_width, height = reactor_height) {
+async function drawReactor(conf, width = reactor_width, height = reactor_length) {
     let internals_composite = [];
     internals_composite.push({ input: tiles.get("casing-corner"), top: 0, left: 0 });
     for (let i = 0; i < width - 2; i++) {
@@ -87,12 +92,12 @@ async function updateloop() {
             const theEmbed = new EmbedBuilder()
                 .setTitle("Your bihourly reactor update!")
                 .setColor('#DFFF00')
-                .setDescription("I maeked dis:")
+                .setDescription("I maeked dis:" + ((reactor_width <= sidohorg_reactor_bounds["width"] && reactor_length <= sidohorg_reactor_bounds["width"] && reactor_length <= sidohorg_reactor_bounds["height"]) ? `\n[View on br.sidoh.org](https://br.sidoh.org/#reactor-design?length=${reactor_length - 2}&width=${reactor_width - 2}&height=${reactor_height - 2}&activelyCooled=false&controlRodInsertion=0&layout=${compressConf(highestconf)})` : ""))
                 .setImage("attachment://output.png")
                 .setThumbnail("attachment://reactor.png")
                 .addFields(
-                    { name: "Generation", value: `${Math.round(stats["output"]["avg"] / 10) / 100} kRF/t` },
-                    { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100} mB/t` }
+                    { name: "Generation", value: `${Math.round(stats["output"]["avg"] / 10) / 100} kRF/t`, inline: true },
+                    { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100} mB/t`, inline: true }
                 )
                 .setTimestamp()
                 .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
@@ -105,8 +110,8 @@ async function updateloop() {
                     .setDescription("Thumbnail was too big or some other stupid excuse by discord:")
                     .setImage("attachment://output.png")
                     .addFields(
-                        { name: "Generation", value: `${Math.round(stats["output"]["avg"] / 10) / 100}±${Math.round(stats["output"]["stdev"] / 10) / 100} kRF/t` },
-                        { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100}±${Math.round(stats["fuelConsumption"]["stdev"] * 100) / 100} mB/t` }
+                        { name: "Generation:", value: `${Math.round(stats["output"]["avg"] / 10) / 100} kRF/t`, inline: true },
+                        { name: "Consumption:", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100} mB/t`, inline: true }
                     )
                     .setTimestamp()
                     .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
@@ -234,7 +239,7 @@ async function buildgraph(stat = "output", last_iterations = 500) {
     let relations_built = 0;
     const relations_length = relations.size;
     svgelms.push(`
-        <rect width="${image_width+image_margins["left"]+image_margins["right"]}" height="${image_height+image_margins["top"]+image_margins["bottom"]}" fill="black" fill-opacity="1" />
+        <rect width="${image_width + image_margins["left"] + image_margins["right"]}" height="${image_height + image_margins["top"] + image_margins["bottom"]}" fill="black" fill-opacity="1" />
     `);
     svgelms.push(`
         <line x1="${getx(minx)}" y1="${gety(last_max_iteration_high_stats[stat]["avg"])}" x2="${getx(maxx)}" y2="${gety(last_max_iteration_high_stats[stat]["avg"])}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" stroke_opacity="0.1" />
@@ -285,4 +290,17 @@ async function buildgraph(stat = "output", last_iterations = 500) {
 }
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+function compressConf(input) { //Thanks ChatGPT :)
+    let output = "";
+    let count = 1;
+    for (let i = 0; i < input.length; i++) {
+        if (input[i] === input[i + 1]) {
+            count++;
+        } else {
+            output += count > 1 ? count + input[i] : input[i];
+            count = 1;
+        }
+    }
+    return output;
 }

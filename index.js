@@ -101,7 +101,7 @@ function make_permutation(parent_configuration, mutations_left) {
     return [configuration, changes];
 }
 
-const n = 1;
+const n = 3;
 async function get_stats(configuration) {
     const funcStart = Date.now();
     let samples = [];
