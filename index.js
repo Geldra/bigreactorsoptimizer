@@ -151,7 +151,7 @@ ii = 1;
 const starttime = Date.now();
 var loggedinit = false;
 var last_highest = [];
-const max_last_highest = 5;
+const max_last_highest = 50;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         const startitertime = Date.now();
@@ -189,7 +189,7 @@ async function main() {
         const current_stdev = getStandardDeviation(last_highest);
         const current_mean = getAverage(last_highest);
         let thirdpermutationmultinterm = (current_stdev / current_mean < 0.02 && last_highest.length >= max_last_highest ? 100 * (0.02 / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
-        const thirdpermutationmult = (thirdpermutationmultinterm > 100000 ? 1000 : thirdpermutationmultinterm);
+        const thirdpermutationmult = (thirdpermutationmultinterm > 100000 ? 10000 : thirdpermutationmultinterm);
         const productmult = Math.round(permutationmult * secondpermutationmult * thirdpermutationmult);
         say(`Mutation multipliers:
    avg:${current_mean}
