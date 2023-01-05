@@ -152,7 +152,7 @@ const starttime = Date.now();
 var loggedinit = false;
 var last_highest = [];
 var highest_conf = "";
-const max_last_highest = 5; //higher numbers here make it less sensitive to changes
+const max_last_highest = 10; //higher numbers here make it less sensitive to changes
 const convergence_percent_error_threshold = 0.0002;
 var convergence_detection_count = 0;
 const convergence_detection_count_threshold = 50; //number of times to try escaping the local optimum
@@ -203,12 +203,12 @@ async function main() {
         const current_stdev = getStandardDeviation(last_highest);
         const current_mean = getAverage(last_highest);
         let thirdpermutationmultinterm = (current_stdev / current_mean < convergence_percent_error_threshold && last_highest.length >= max_last_highest ? 100 * (convergence_percent_error_threshold / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
-        const thirdpermutationmult = (thirdpermutationmultinterm > 100000 ? 10000 : thirdpermutationmultinterm);
+        const thirdpermutationmult = (thirdpermutationmultinterm > 100000 ? set_parameters["zSize"] * set_parameters["xSize"] * 100 : thirdpermutationmultinterm);
         //TODO: Allow time to explore new region before calling convergence
         // Currently just using "convergence_detection_count_threshold" as a buffer time to poke around randomly.
         // This is only useful if I find regions that are substantially better than the local optimum, 
         // to the point where a given random configuration in it is better.
-        if (thirdpermutationmult >= 10000) {
+        if (current_stdev == 0) {
             for (let key of Object.keys(components)) {
                 components[key]["weight"] = 1;
             }
