@@ -185,7 +185,7 @@ async function main() {
         }
         //Mutating
         const permutationmult = (Math.random() + 1) * 15;
-        const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000);
+        const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
         const current_stdev = getStandardDeviation(last_highest);
         const current_mean = getAverage(last_highest);
         let thirdpermutationmultinterm = (current_stdev / current_mean < 0.02 && last_highest.length >= max_last_highest ? 100 * (0.02 / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
@@ -198,7 +198,6 @@ async function main() {
    2= ${secondpermutationmult}
    3= ${thirdpermutationmult}
    Product= ${productmult}
-   Stdev = ${current_stdev} (${Math.round(current_stdev / last_highest[0])}%)
         `, "verbose");
         let calltime = 0;
         while (Object.keys(active_forms).length < max_forms) {
