@@ -33,6 +33,7 @@ let last_max_iteration = 0;
 let last_max_iteration_high_stats = {};
 let highestconf = "";
 const testing = process.argv[4] == "test" ? true : false;
+let last_highest_file_iteration = 0;
 
 client.once('ready', async () => {
     console.log("Ready to make pictures!!!!");
@@ -86,7 +87,9 @@ async function updateloop() {
             inittestrun = true;
             last_update = Date.now();
             const stats = getHighestStats();
-            await buildgraph("output", 1000);
+            if (!await buildgraph("output", 1000)) {
+                continue;
+            }
             fs.writeFileSync("./visualizations/reactor.png", await drawReactor(highestconf));
             fs.writeFileSync("./../../../reactorimagesaves/reactor_" + last_max_iteration + ".png", await drawReactor(highestconf));
             const theEmbed = new EmbedBuilder()
@@ -159,6 +162,11 @@ async function buildgraph(stat = "output", last_iterations = 400) {
     let maxy = 0;
     let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json"].includes(thing)).sort((a, b) => { return parseInt(a.replace(".json", "")) - parseInt(b.replace(".json", "")) }).slice(-last_iterations);
     let maxx = parseInt(files[files.length - 1].replace(".json", ""));
+    if (maxx == last_highest_file_iteration) {
+        console.log("No additional data found. Skipping this update.");
+        return false;
+    }
+    last_highest_file_iteration = maxx;
     let minx = parseInt(files[0].replace(".json", ""));
     if (last_max_iteration === 0) {
         last_max_iteration = minx;
