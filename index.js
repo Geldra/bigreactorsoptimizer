@@ -156,18 +156,36 @@ const max_last_highest = 10; //higher numbers here make it less sensitive to cha
 const convergence_percent_error_threshold = 0.0002;
 var convergence_detection_count = 0;
 const convergence_detection_count_threshold = 500; //number of times to try escaping the local optimum
+const max_breakouts = 10; //blank resets to reconverge
+let breakouts = 0;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         const old_highest_conf = highest_conf;
         //Check if convergence has been reached
         if (convergence_detection_count > convergence_detection_count_threshold) {
-            console.log("Lasting convergence detected!");
+            say("Convergence detected.", "sparse");
             const highest_stats = active_forms[highest_conf]["stats"];
-            console.log("Results:");
-            for (let key of Object.keys(highest_stats)) {
-                console.log("   " + key + "= " + highest_stats[key]["avg"] + " +- " + highest_stats[key]["stdev"]);
+            if (breakouts < max_breakouts) {
+                //Breakout
+                say(`Attempting convergence breakout... (${breakouts}/${max_breakouts})`, "sparse");
+                let newseed = "";
+                for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
+                    newseed = newseed + "X";
+                }
+                active_forms = {};
+                active_forms[newseed] = { "age": 0 };
+                active_forms[newseed]["stats"] = await get_stats(newseed);
+                active_forms[newseed]["ancestor"] = mutation_ancestor;
+
+                breakouts = breakouts + 1;
+            } else {
+                //End on max breakouts
+                say("Convergence results:", "sparse");
+                for (let key of Object.keys(highest_stats)) {
+                    say("   " + key + "= " + highest_stats[key]["avg"] + " +- " + highest_stats[key]["stdev"], "sparse");
+                }
+                break;
             }
-            break;
         }
         const startitertime = Date.now();
         //Recording a set of samples for standard deviation calc
