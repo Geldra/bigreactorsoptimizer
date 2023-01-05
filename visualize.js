@@ -88,10 +88,16 @@ async function updateloop() {
             last_update = Date.now();
             const stats = getHighestStats();
             if (!await buildgraph("output", 1000)) {
+                console.log("False from buildgraph so no changes in files!");
                 continue;
             }
+            console.log("Drawing reactor images...");
+            const timestart_reactor_draw = Date.now();
             fs.writeFileSync("./visualizations/reactor.png", await drawReactor(highestconf));
             fs.writeFileSync("./../../../reactorimagesaves/reactor_" + last_max_iteration + ".png", await drawReactor(highestconf));
+            console.log(`   Reactor draw complete! ${Date.now() - timestart_reactor_draw}`);
+            console.log("Assembling embed and sending...");
+            const timestart_embed_send = Date.now();
             const theEmbed = new EmbedBuilder()
                 .setTitle("Your bihourly reactor update!")
                 .setColor('#DFFF00')
@@ -127,7 +133,7 @@ async function updateloop() {
                 console.log("`node --expose-gc index.js`");
                 process.exit();
             }
-
+            console.log(`   Embed send complete! ${Date.now() - timestart_embed_send}`);
             if (testing) {
                 console.log("Test complete, exiting!");
                 return;
@@ -291,10 +297,11 @@ async function buildgraph(stat = "output", last_iterations = 400) {
         rawy = rawy > maxy ? maxy : rawy;
         return image_height + image_margins["top"] - Math.round(((rawy - miny) / (maxy - miny)) * image_height);
     }
-    console.log(`Complete! (${Date.now() - fullstart} ms)`);
+    console.log(`   Export complete! (${Date.now() - fullstart} ms)`);
     last_max_iteration = maxx;
     last_max_iteration_high_stats = getHighestStats(files[files.length - 1]);
     relations = null;
+    return true;
 }
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
