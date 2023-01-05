@@ -21,6 +21,10 @@ const sidohorg_reactor_bounds = {
     "width": 30,
     "height": 46
 }
+const users_to_notify_upon_completion = [
+    "317799838362370070",
+    "283435626844389376"
+]
 const reactor_width = 8;
 const reactor_length = 8;
 const reactor_height = 5;
@@ -89,6 +93,7 @@ async function updateloop() {
             const stats = getHighestStats();
             if (!await buildgraph("output", 1000)) {
                 console.log("False from buildgraph so no changes in files!");
+                await spamchan.send("No changes since last update. Convergence is likely!\nView the last update to see the latest.\n<@" + users_to_notify_upon_completion.join("><@") + ">");
                 continue;
             }
             console.log("Drawing reactor images...");
