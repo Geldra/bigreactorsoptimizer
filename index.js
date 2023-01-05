@@ -421,6 +421,6 @@ function say(message, level = "functions") {
             break;
     }
     if (shouldlog) {
-        console.log(`[${level}] ${message}`);
+        console.log(`[${level.substring(0, 1)}] ${message}`);
     }
 }
