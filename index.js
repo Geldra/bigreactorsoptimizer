@@ -213,8 +213,10 @@ async function main() {
                 components[key]["weight"] = 1;
             }
             convergence_detection_count = convergence_detection_count + 1;
-        } else {
+            say("Increasing convergence to " + convergence_detection_count + " / " + convergence_detection_count_threshold, "normal");
+        } else if (convergence_detection_count > 0) {
             convergence_detection_count = 0;
+            say("Resetting convergence to " + convergence_detection_count, "normal");
         }
         const productmult = Math.round(permutationmult * secondpermutationmult * thirdpermutationmult);
         say(`Mutation multipliers:
