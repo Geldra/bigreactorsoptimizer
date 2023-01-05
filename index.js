@@ -158,6 +158,7 @@ var convergence_detection_count = 0;
 const convergence_detection_count_threshold = 500; //number of times to try escaping the local optimum
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
+        const old_highest_conf = highest_conf;
         //Check if convergence has been reached
         if (convergence_detection_count > convergence_detection_count_threshold) {
             console.log("Lasting convergence detected!");
@@ -175,7 +176,6 @@ async function main() {
                 return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
             });
             last_highest.push(active_forms[highest[highest.length - 1]]["stats"]["output"]["avg"]);
-            highest_conf = highest[highest.length - 1];
             highest = null;
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
@@ -188,6 +188,12 @@ async function main() {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
                 });
                 highest_conf = weakest_arr[weakest_arr.length - 1];
+                if (active_forms[highest_conf]["stats"]["output"]["avg"] < active_forms[old_highest_conf]["stats"]["output"]["avg"]) {
+                    //nonsense situation where highest is not the highest.
+                    fs.writeFileSync("../../../whywhywhywhy" + Date.now() + ".txt", JSON.stringify(
+                        [[highest_conf, active_forms[highest_conf]["stats"]["output"]["avg"]], [old_highest_conf, active_forms[old_highest_conf]["stats"]["output"]["avg"]]]
+                        , null, 4), { encoding: "utf-8" });
+                }
                 weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
                 let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
                 say(`Culling checkstack:`, "debug");
