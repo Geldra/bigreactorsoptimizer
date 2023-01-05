@@ -162,7 +162,7 @@ async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         let stacktrace_iter = [];
         const old_highest_conf = highest_conf;
-        stacktrace_iter.push(["old_highest_conf165", old_highest_conf]);
+        stacktrace_iter.push(["old_highest_conf165", old_highest_conf.forEach((cnf) => { })]);
         const old_highest_score = Object.keys(active_forms).includes(old_highest_conf) ? active_forms[old_highest_conf]["stats"]["output"]["avg"] : 0;
         stacktrace_iter.push(["old_highest_score167", old_highest_score]);
         //Check if convergence has been reached
@@ -210,7 +210,7 @@ async function main() {
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
                 });
-                stacktrace_iter.push(["weakest_arr213-" + j, weakest_arr.slice()]);
+                stacktrace_iter.push(["weakest_arr213-" + j, arrmapstack(weakest_arr)]);
                 highest_conf = weakest_arr[weakest_arr.length - 1];
                 stacktrace_iter.push(["highest_conf215-" + j, highest_conf + ""]);
                 if (old_highest_conf.length > 0) {
@@ -222,7 +222,7 @@ async function main() {
                     }
                 }
                 weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
-                stacktrace_iter.push(["weakest_arr225-" + j, weakest_arr.slice()]);
+                stacktrace_iter.push(["weakest_arr225-" + j, arrmapstack(weakest_arr)]);
                 let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
                 stacktrace_iter.push(["weakest227-" + j, weakest + ""]);
                 say(`Culling checkstack:`, "debug");
@@ -463,4 +463,10 @@ function say(message, level = "functions") {
     if (shouldlog) {
         console.log(`[${level.substring(0, 1)}] ${message}`);
     }
+}
+
+function arrmapstack(conf_arr) {
+    return conf_arr.map(cnf => {
+        return cnf + "-" + active_forms[cnf]["stats"]["output"]["avg"];
+    })
 }
