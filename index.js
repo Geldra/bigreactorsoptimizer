@@ -207,7 +207,7 @@ async function main() {
         // Currently just using "convergence_detection_count_threshold" as a buffer time to poke around randomly.
         // This is only useful if I find regions that are substantially better than the local optimum, 
         // to the point where a given random configuration in it is better.
-        if (thirdpermutationmult > 10000) {
+        if (thirdpermutationmult >= 10000) {
             for (let key of Object.keys(components)) {
                 components[key]["weight"] = 1;
             }
