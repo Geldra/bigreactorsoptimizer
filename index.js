@@ -182,7 +182,6 @@ async function main() {
             }
         }
         //Culling
-        let highest_conf = "";
         for (let j = 0; j < Math.ceil(Math.random() * max_forms); j++) {
             if (Object.keys(active_forms).length >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
