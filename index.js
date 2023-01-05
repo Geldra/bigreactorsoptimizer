@@ -164,7 +164,6 @@ async function main() {
         //Check if convergence has been reached
         if (convergence_detection_count > convergence_detection_count_threshold) {
             say("Convergence detected.", "sparse");
-            const highest_stats = active_forms[highest_conf]["stats"];
             if (breakouts < max_breakouts) {
                 //Breakout
                 say(`Attempting convergence breakout... (${breakouts}/${max_breakouts})`, "sparse");
@@ -180,7 +179,8 @@ async function main() {
                 breakouts = breakouts + 1;
             } else {
                 //End on max breakouts
-                say("Convergence results:", "sparse");
+                say("No more breakouts. Convergence results:", "sparse");
+                const highest_stats = active_forms[highest_conf]["stats"];
                 for (let key of Object.keys(highest_stats)) {
                     say("   " + key + "= " + highest_stats[key]["avg"] + " +- " + highest_stats[key]["stdev"], "sparse");
                 }
