@@ -190,6 +190,11 @@ async function main() {
         const current_mean = getAverage(last_highest);
         let thirdpermutationmultinterm = (current_stdev / current_mean < 0.02 && last_highest.length >= max_last_highest ? 100 * (0.02 / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
         const thirdpermutationmult = (thirdpermutationmultinterm > 100000 ? 10000 : thirdpermutationmultinterm);
+        if (thirdpermutationmult > 10000) {
+            for (let key of Object.keys(components)) {
+                components[key]["weight"] = 1;
+            }
+        }
         const productmult = Math.round(permutationmult * secondpermutationmult * thirdpermutationmult);
         say(`Mutation multipliers:
    avg:${current_mean}
