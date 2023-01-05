@@ -162,7 +162,7 @@ async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         let stacktrace_iter = [];
         const old_highest_conf = highest_conf;
-        stacktrace_iter.push(["old_highest_conf165", old_highest_conf.forEach((cnf) => { })]);
+        stacktrace_iter.push(["old_highest_conf165", arrmapstack(old_highest_conf)]);
         const old_highest_score = Object.keys(active_forms).includes(old_highest_conf) ? active_forms[old_highest_conf]["stats"]["output"]["avg"] : 0;
         stacktrace_iter.push(["old_highest_score167", old_highest_score]);
         //Check if convergence has been reached
