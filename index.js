@@ -161,6 +161,7 @@ let breakouts = 0;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         const old_highest_conf = highest_conf;
+        const old_highest_score = Object.keys(active_forms).includes(old_highest_conf) ? active_forms[old_highest_conf] : 0;
         //Check if convergence has been reached
         if (convergence_detection_count > convergence_detection_count_threshold) {
             say("Convergence detected.", "sparse");
@@ -307,7 +308,10 @@ async function main() {
         const nowtime = Date.now();
         say(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${nowtime - startitertime - calltime} ms calculating]`, "sparse");
         if (Object.keys(active_forms).includes(highest_conf)) {
-            say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms[highest_conf]["stats"]["output"]["avg"] * 100) / 100} RF/t\n   Eating = ${Math.round(active_forms[highest_conf]["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
+            say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms[highest_conf]["stats"]["output"]["avg"] * 100) / 100} RF/t (old ${old_highest_score})\n   Eating = ${Math.round(active_forms[highest_conf]["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
+            if (active_forms[highest_conf]["stats"]["output"]["avg"] < old_highest_score) {
+                fs.writeFileSync("../../../whydoyoudothis" + Date.now() + ".txt", `It did it:\n  ${active_forms[highest_conf]["stats"]["output"]["avg"]}\n  ${old_highest_score}`, { encoding: "utf-8" });
+            }
         }
     }
     fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(active_forms, null, 4), { encoding: false });
