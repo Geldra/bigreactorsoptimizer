@@ -187,14 +187,13 @@ async function main() {
         const permutationmult = (Math.random() + 1) * 15;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000);
         const current_stdev = getStandardDeviation(last_highest);
-        let numerator = (current_stdev == 0 ? 0.0001 : current_stdev);
-        let denominator = (last_highest.length == 0 ? 0.00001 : last_highest[0]);
-        const thirdpermutationmult = Math.log(1 / (numerator / denominator) + 1);
+        const current_mean = getAverage(last_highest);
+        const thirdpermutationmult = (current_stdev / current_mean < 0.02 ? 100 * (0.02 / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
 
         const productmult = Math.round(permutationmult * secondpermutationmult * thirdpermutationmult);
         say(`Mutation multipliers:
-   num:${numerator}
-   den:${denominator}
+   avg:${current_mean}
+   stdev:${current_stdev}
    1= ${permutationmult}
    2= ${secondpermutationmult}
    3= ${thirdpermutationmult}
@@ -285,8 +284,15 @@ function getStandardDeviation(array) { //https://stackoverflow.com/a/53577159
         return 0;
     }
     const n = array.length
-    const mean = array.reduce((a, b) => a + b) / n
+    const mean = getAverage(array);
     return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
+}
+function getAverage(array) {
+    if (array.length == 0) {
+        return 0;
+    }
+    const n = array.length
+    return array.reduce((a, b) => a + b) / n
 }
 startupArt();
 main();
