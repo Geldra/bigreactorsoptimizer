@@ -188,11 +188,13 @@ async function main() {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
                 });
                 highest_conf = weakest_arr[weakest_arr.length - 1];
-                if (active_forms[highest_conf]["stats"]["output"]["avg"] < active_forms[old_highest_conf]["stats"]["output"]["avg"]) {
-                    //nonsense situation where highest is not the highest.
-                    fs.writeFileSync("../../../whywhywhywhy" + Date.now() + ".txt", JSON.stringify(
-                        [[highest_conf, active_forms[highest_conf]["stats"]["output"]["avg"]], [old_highest_conf, active_forms[old_highest_conf]["stats"]["output"]["avg"]]]
-                        , null, 4), { encoding: "utf-8" });
+                if (old_highest_conf.length > 0) {
+                    if (active_forms[highest_conf]["stats"]["output"]["avg"] < active_forms[old_highest_conf]["stats"]["output"]["avg"]) {
+                        //nonsense situation where highest is not the highest.
+                        fs.writeFileSync("../../../whywhywhywhy" + Date.now() + ".txt", JSON.stringify(
+                            [[highest_conf, active_forms[highest_conf]["stats"]["output"]["avg"]], [old_highest_conf, active_forms[old_highest_conf]["stats"]["output"]["avg"]]]
+                            , null, 4), { encoding: "utf-8" });
+                    }
                 }
                 weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
                 let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
