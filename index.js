@@ -206,7 +206,7 @@ async function main() {
             }
         }
         //Mutating
-        const permutationmult = (Math.random() + 1) * 15;
+        const permutationmult = (Math.random() + 1) * 5;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
         const current_stdev = getStandardDeviation(last_highest);
         const current_mean = getAverage(last_highest);
