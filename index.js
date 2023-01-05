@@ -188,7 +188,7 @@ async function main() {
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000);
         const current_stdev = getStandardDeviation(last_highest);
         const current_mean = getAverage(last_highest);
-        const thirdpermutationmult = (current_stdev / current_mean < 0.02 ? 100 * (0.02 / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
+        const thirdpermutationmult = (current_stdev / current_mean < 0.02 && last_highest.length >= max_last_highest ? 100 * (0.02 / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
 
         const productmult = Math.round(permutationmult * secondpermutationmult * thirdpermutationmult);
         say(`Mutation multipliers:
