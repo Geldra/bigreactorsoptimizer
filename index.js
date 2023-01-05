@@ -151,9 +151,22 @@ ii = 1;
 const starttime = Date.now();
 var loggedinit = false;
 var last_highest = [];
-const max_last_highest = 50;
+const max_last_highest = 5; //higher numbers here make it less sensitive to changes
+const convergence_percent_error_threshold = 0.0002;
+var convergence_detection_count = 0;
+const convergence_detection_count_threshold = 50; //number of times to try escaping the local optimum
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
+        //Check if convergence has been reached
+        if (convergence_detection_count > convergence_detection_count_threshold) {
+            console.log("Lasting convergence detected!");
+            const highest_stats = active_forms[last_highest[last_highest.length - 1]]["stats"];
+            console.log("Results:");
+            for (let key of Object.keys(highest_stats)) {
+                console.log("   " + key + "= " + highest_stats[key]["avg"] + " +- " + highest_stats[key]["stdev"]);
+            }
+            break;
+        }
         const startitertime = Date.now();
         //Recording a set of samples for standard deviation calc
         if (Object.keys(active_forms).length > 0) {
@@ -188,12 +201,19 @@ async function main() {
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
         const current_stdev = getStandardDeviation(last_highest);
         const current_mean = getAverage(last_highest);
-        let thirdpermutationmultinterm = (current_stdev / current_mean < 0.02 && last_highest.length >= max_last_highest ? 100 * (0.02 / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
+        let thirdpermutationmultinterm = (current_stdev / current_mean < convergence_percent_error_threshold && last_highest.length >= max_last_highest ? 100 * (convergence_percent_error_threshold / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
         const thirdpermutationmult = (thirdpermutationmultinterm > 100000 ? 10000 : thirdpermutationmultinterm);
+        //TODO: Allow time to explore new region before calling convergence
+        // Currently just using "convergence_detection_count_threshold" as a buffer time to poke around randomly.
+        // This is only useful if I find regions that are substantially better than the local optimum, 
+        // to the point where a given random configuration in it is better.
         if (thirdpermutationmult > 10000) {
             for (let key of Object.keys(components)) {
                 components[key]["weight"] = 1;
             }
+            convergence_detection_count = convergence_detection_count + 1;
+        } else {
+            convergence_detection_count = 0;
         }
         const productmult = Math.round(permutationmult * secondpermutationmult * thirdpermutationmult);
         say(`Mutation multipliers:
