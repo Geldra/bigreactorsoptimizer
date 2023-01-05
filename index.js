@@ -210,9 +210,9 @@ async function main() {
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
                 });
-                stacktrace_iter.push(["weakest_arr213-" + i, weakest_arr.slice()]);
+                stacktrace_iter.push(["weakest_arr213-" + j, weakest_arr.slice()]);
                 highest_conf = weakest_arr[weakest_arr.length - 1];
-                stacktrace_iter.push(["highest_conf215-" + i, highest_conf + ""]);
+                stacktrace_iter.push(["highest_conf215-" + j, highest_conf + ""]);
                 if (old_highest_conf.length > 0) {
                     if (active_forms[highest_conf]["stats"]["output"]["avg"] < active_forms[old_highest_conf]["stats"]["output"]["avg"]) {
                         //nonsense situation where highest is not the highest.
@@ -222,9 +222,9 @@ async function main() {
                     }
                 }
                 weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
-                stacktrace_iter.push(["weakest_arr225-" + i, weakest_arr.slice()]);
+                stacktrace_iter.push(["weakest_arr225-" + j, weakest_arr.slice()]);
                 let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
-                stacktrace_iter.push(["weakest227-" + i, weakest + ""]);
+                stacktrace_iter.push(["weakest227-" + j, weakest + ""]);
                 say(`Culling checkstack:`, "debug");
                 say(`   1: ${active_forms[weakest_arr[0]]["stats"]["output"]["avg"] <= active_forms[weakest]["stats"]["output"]["avg"]} (${active_forms[weakest_arr[0]]["stats"]["output"]["avg"]} <= ${active_forms[weakest]["stats"]["output"]["avg"]})`, "debug");
                 say(`   2: ${active_forms[weakest]["stats"]["output"]["avg"] <= active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]} (${active_forms[weakest]["stats"]["output"]["avg"]} <= ${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]})`, "debug");
