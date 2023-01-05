@@ -197,7 +197,7 @@ async function main() {
             let highest = Object.keys(active_forms).sort((a, b) => {
                 return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
             });
-            stacktrace_iter.push(["highest", highest]);
+            stacktrace_iter.push(["highest", arrmapstack(highest)]);
             last_highest.push(active_forms[highest[highest.length - 1]]["stats"]["output"]["avg"]);
             highest = null;
             if (last_highest.length > max_last_highest) {
