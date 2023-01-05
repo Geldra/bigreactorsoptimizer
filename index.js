@@ -262,7 +262,8 @@ async function main() {
    Product= ${productmult}
         `, "verbose");
         let calltime = 0;
-        while (Object.keys(active_forms).length < max_forms) {
+        let duplicate_permutation_tries = 0;//failure is duplicate
+        while (Object.keys(active_forms).length < max_forms && duplicate_permutation_tries < 20) {
             //repopulate
             let mutation_ancestor;
             if (Object.keys(active_forms).length == 0) {
@@ -272,6 +273,11 @@ async function main() {
             }
 
             let new_conf_returns = make_permutation(mutation_ancestor, productmult);
+            if (Object.keys(active_forms).includes(new_conf_returns)) {
+                //do NOT recalculate duplicate confs.
+                duplicate_permutation_tries++;
+                continue;
+            }
             let new_configuration = new_conf_returns[0];
             active_forms[new_configuration] = { "age": 0 };
             let thiscallstarttime = Date.now();
