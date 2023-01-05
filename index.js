@@ -279,7 +279,9 @@ async function main() {
         }
         const nowtime = Date.now();
         say(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${nowtime - startitertime - calltime} ms calculating]`, "sparse");
-        say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms[highest_conf]["stats"]["output"]["avg"] * 100) / 100} RF/t\n   Eating = ${Math.round(active_forms[highest_conf]["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
+        if (Object.keys(active_forms).includes(highest_conf)) {
+            say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms[highest_conf]["stats"]["output"]["avg"] * 100) / 100} RF/t\n   Eating = ${Math.round(active_forms[highest_conf]["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
+        }
     }
     fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(active_forms, null, 4), { encoding: false });
 }
