@@ -160,8 +160,11 @@ const max_breakouts = 10; //blank resets to reconverge
 let breakouts = 0;
 async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
+        let stacktrace_iter = [];
         const old_highest_conf = highest_conf;
+        stacktrace_iter.push(["old_highest_conf165", old_highest_conf]);
         const old_highest_score = Object.keys(active_forms).includes(old_highest_conf) ? active_forms[old_highest_conf]["stats"]["output"]["avg"] : 0;
+        stacktrace_iter.push(["old_highest_score167", old_highest_score]);
         //Check if convergence has been reached
         if (convergence_detection_count > convergence_detection_count_threshold) {
             say("Convergence detected.", "sparse");
@@ -194,6 +197,7 @@ async function main() {
             let highest = Object.keys(active_forms).sort((a, b) => {
                 return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
             });
+            stacktrace_iter.push(["highest", highest]);
             last_highest.push(active_forms[highest[highest.length - 1]]["stats"]["output"]["avg"]);
             highest = null;
             if (last_highest.length > max_last_highest) {
@@ -206,7 +210,9 @@ async function main() {
                 let weakest_arr = Object.keys(active_forms).sort((a, b) => {
                     return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
                 });
+                stacktrace_iter.push(["weakest_arr213-" + i, weakest_arr.slice()]);
                 highest_conf = weakest_arr[weakest_arr.length - 1];
+                stacktrace_iter.push(["highest_conf215-" + i, highest_conf + ""]);
                 if (old_highest_conf.length > 0) {
                     if (active_forms[highest_conf]["stats"]["output"]["avg"] < active_forms[old_highest_conf]["stats"]["output"]["avg"]) {
                         //nonsense situation where highest is not the highest.
@@ -216,7 +222,9 @@ async function main() {
                     }
                 }
                 weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
+                stacktrace_iter.push(["weakest_arr225-" + i, weakest_arr.slice()]);
                 let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
+                stacktrace_iter.push(["weakest227-" + i, weakest + ""]);
                 say(`Culling checkstack:`, "debug");
                 say(`   1: ${active_forms[weakest_arr[0]]["stats"]["output"]["avg"] <= active_forms[weakest]["stats"]["output"]["avg"]} (${active_forms[weakest_arr[0]]["stats"]["output"]["avg"]} <= ${active_forms[weakest]["stats"]["output"]["avg"]})`, "debug");
                 say(`   2: ${active_forms[weakest]["stats"]["output"]["avg"] <= active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]} (${active_forms[weakest]["stats"]["output"]["avg"]} <= ${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]})`, "debug");
@@ -310,7 +318,9 @@ async function main() {
         if (Object.keys(active_forms).includes(highest_conf)) {
             say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms[highest_conf]["stats"]["output"]["avg"] * 100) / 100} RF/t (old ${old_highest_score})\n   Eating = ${Math.round(active_forms[highest_conf]["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
             if (active_forms[highest_conf]["stats"]["output"]["avg"] < old_highest_score) {
-                fs.writeFileSync("../../../whydoyoudothis" + Date.now() + ".txt", `It did it:\n  ${active_forms[highest_conf]["stats"]["output"]["avg"]}\n  ${old_highest_score}`, { encoding: "utf-8" });
+                stacktrace_iter.push(active_forms[highest_conf]["stats"]["output"]["avg"]);
+                stacktrace_iter.push(old_highest_score);
+                fs.writeFileSync("../../../whydoyoudothis" + Date.now() + ".json", JSON.stringify(stacktrace_iter, null, 4), { encoding: "utf-8" });
             }
         }
     }
