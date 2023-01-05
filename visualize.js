@@ -21,8 +21,8 @@ const sidohorg_reactor_bounds = {
     "width": 30,
     "height": 46
 }
-const reactor_width = 16;
-const reactor_length = 16;
+const reactor_width = 8;
+const reactor_length = 8;
 const reactor_height = 5;
 const tile_size = 3; //pixels width
 const point_radius = 3;

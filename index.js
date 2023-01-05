@@ -12,8 +12,8 @@ fs.mkdirSync("../../../reactorvars/compweights", { recursive: true });
 const readout_level = process.argv[3];
 
 const set_parameters = {
-    "xSize": 16,
-    "zSize": 16,
+    "xSize": 8,
+    "zSize": 8,
     "height": 5,
     "isActivelyCooled": false,
     "controlRodInsertion": 0
@@ -151,6 +151,7 @@ ii = 1;
 const starttime = Date.now();
 var loggedinit = false;
 var last_highest = [];
+var highest_conf = "";
 const max_last_highest = 5; //higher numbers here make it less sensitive to changes
 const convergence_percent_error_threshold = 0.0002;
 var convergence_detection_count = 0;
@@ -160,7 +161,7 @@ async function main() {
         //Check if convergence has been reached
         if (convergence_detection_count > convergence_detection_count_threshold) {
             console.log("Lasting convergence detected!");
-            const highest_stats = active_forms[last_highest[last_highest.length - 1]]["stats"];
+            const highest_stats = active_forms[highest_conf]["stats"];
             console.log("Results:");
             for (let key of Object.keys(highest_stats)) {
                 console.log("   " + key + "= " + highest_stats[key]["avg"] + " +- " + highest_stats[key]["stdev"]);
@@ -174,6 +175,7 @@ async function main() {
                 return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
             });
             last_highest.push(active_forms[highest[highest.length - 1]]["stats"]["output"]["avg"]);
+            highest_conf = highest[highest.length - 1];
             highest = null;
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
