@@ -267,10 +267,8 @@ async function main() {
         let duplicate_permutation_tries = 0;//failure is duplicate
         while (Object.keys(active_forms).length < max_forms && duplicate_permutation_tries < 20) {
             //repopulate
-            let mutation_ancestor;
-            if (Object.keys(active_forms).length == 0) {
-                mutation_ancestor = seed;
-            } else {
+            let mutation_ancestor = seed;
+            if (Object.keys(active_forms).length != 0) {
                 mutation_ancestor = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
             }
 
