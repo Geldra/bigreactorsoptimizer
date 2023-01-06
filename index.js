@@ -234,12 +234,12 @@ async function main() {
             }
         }
         //Mutating
-        const permutationmult = (Math.random() + 1) * 5;
+        const permutationmult = (Math.random() + 1) * 10;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
         const current_stdev = getStandardDeviation(last_highest);
         const current_mean = getAverage(last_highest);
         let thirdpermutationmultinterm = 1;//(current_stdev / current_mean < convergence_percent_error_threshold && last_highest.length >= max_last_highest ? 100 * (convergence_percent_error_threshold / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
-        const thirdpermutationmult = (current_stdev == 0 ? set_parameters["zSize"] * set_parameters["xSize"] * 10 : thirdpermutationmultinterm);
+        const thirdpermutationmult = (current_stdev == 0 ? set_parameters["zSize"] * set_parameters["xSize"] : thirdpermutationmultinterm);
         //TODO: Allow time to explore new region before calling convergence
         // Currently just using "convergence_detection_count_threshold" as a buffer time to poke around randomly.
         // This is only useful if I find regions that are substantially better than the local optimum, 
@@ -278,24 +278,25 @@ async function main() {
             if (Object.keys(active_forms).includes(new_conf_returns)) {
                 //do NOT recalculate duplicate confs.
                 duplicate_permutation_tries++;
-                continue;
-            }
-            let new_configuration = new_conf_returns[0];
-            active_forms[new_configuration] = { "age": 0 };
-            let thiscallstarttime = Date.now();
-            active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
-            calltime = calltime + Date.now() - thiscallstarttime;
-            active_forms[new_configuration]["ancestor"] = mutation_ancestor;
+                stacktrace_iter.push(["duplicategen281", new_conf_returns]);
+            } else {
+                let new_configuration = new_conf_returns[0];
+                active_forms[new_configuration] = { "age": 0 };
+                let thiscallstarttime = Date.now();
+                active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
+                calltime = calltime + Date.now() - thiscallstarttime;
+                active_forms[new_configuration]["ancestor"] = mutation_ancestor;
 
-            //analyze the effects of these changes
-            if (Object.keys(active_forms).includes(mutation_ancestor)) {
-                let score_diff = active_forms[new_configuration]["stats"]["output"]["avg"] - active_forms[mutation_ancestor]["stats"]["output"]["avg"];
-                let score_diff_percent = score_diff / active_forms[mutation_ancestor]["stats"]["output"]["avg"];
-                for (let tile of Object.keys(new_conf_returns[1])) {
-                    components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
-                    if (components[tile]["weight"] <= 0) {
-                        //weight at or under 0 prevents items from appearing
-                        components[tile]["weight"] = 1;
+                //analyze the effects of these changes
+                if (Object.keys(active_forms).includes(mutation_ancestor)) {
+                    let score_diff = active_forms[new_configuration]["stats"]["output"]["avg"] - active_forms[mutation_ancestor]["stats"]["output"]["avg"];
+                    let score_diff_percent = score_diff / active_forms[mutation_ancestor]["stats"]["output"]["avg"];
+                    for (let tile of Object.keys(new_conf_returns[1])) {
+                        components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
+                        if (components[tile]["weight"] <= 0) {
+                            //weight at or under 0 prevents items from appearing
+                            components[tile]["weight"] = 1;
+                        }
                     }
                 }
             }
