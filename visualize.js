@@ -38,6 +38,7 @@ let last_max_iteration_high_stats = {};
 let highestconf = "";
 const testing = process.argv[4] == "test" ? true : false;
 let last_highest_file_iteration = 0;
+let sent_convergence_message = false;
 
 client.once('ready', async () => {
     console.log("Ready to make pictures!!!!");
@@ -91,10 +92,14 @@ async function updateloop() {
             inittestrun = true;
             last_update = Date.now();
             const stats = getHighestStats();
-            if (!await buildgraph("output", 1000)) {
+            let buildgraphoutput = await buildgraph("output", 1000);
+            if (!buildgraphoutput && (!sent_convergence_message)) {
                 console.log("False from buildgraph so no changes in files!");
                 await spamchan.send("No changes since last update. Convergence is likely!\nView the last update to see the latest.\n<@" + users_to_notify_upon_completion.join("><@") + ">");
+                sent_convergence_message = true;
                 continue;
+            } else if (buildgraphoutput && sent_convergence_message) {
+                sent_convergence_message = false;
             }
             console.log("Drawing reactor images...");
             const timestart_reactor_draw = Date.now();
