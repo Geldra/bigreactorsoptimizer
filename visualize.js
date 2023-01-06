@@ -18,15 +18,15 @@ const image_margins = {
     "bottom": 45
 }
 const sidohorg_reactor_bounds = {
-    "width": 30,
-    "height": 46
+    "width": 32,
+    "height": 32
 }
 const users_to_notify_upon_completion = [
     "317799838362370070",
     "283435626844389376"
 ]
-const reactor_width = 8;
-const reactor_length = 8;
+const reactor_width = 32;
+const reactor_length = 32;
 const reactor_height = 5;
 const tile_size = 8; //pixels width
 const point_radius = 3;

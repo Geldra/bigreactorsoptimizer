@@ -12,8 +12,8 @@ fs.mkdirSync("../../../reactorvars/compweights", { recursive: true });
 const readout_level = process.argv[3];
 
 const set_parameters = {
-    "xSize": 8,
-    "zSize": 8,
+    "xSize": 32,
+    "zSize": 32,
     "height": 5,
     "isActivelyCooled": false,
     "controlRodInsertion": 0
