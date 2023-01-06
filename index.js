@@ -213,19 +213,13 @@ async function main() {
                 highest_conf = weakest_arr[weakest_arr.length - 1];
                 stacktrace_iter.push(["highest_conf215-" + j, highest_conf + "-" + active_forms[highest_conf]["stats"]["output"]["avg"]]);
                 if (old_highest_conf.length > 0) {
-                    if (Object.keys(active_forms).includes(highest_conf) && Object.keys(active_forms).includes(old_highest_conf)) {
+                    if (Object.keys(active_forms).includes(old_highest_conf)) {
                         if (active_forms[highest_conf]["stats"]["output"]["avg"] < active_forms[old_highest_conf]["stats"]["output"]["avg"]) {
                             //nonsense situation where highest is not the highest.
                             fs.writeFileSync("../../../whywhywhywhy" + Date.now() + ".txt", JSON.stringify(
                                 [[highest_conf, active_forms[highest_conf]["stats"]["output"]["avg"]], [old_highest_conf, active_forms[old_highest_conf]["stats"]["output"]["avg"]]]
                                 , null, 4), { encoding: "utf-8" });
                         }
-
-                    } else {
-                        //more goofy nonsense
-                        fs.writeFileSync("../../../whywheredidyouputit" + Date.now() + ".txt", JSON.stringify(
-                            stacktrace_iter
-                            , null, 4), { encoding: "utf-8" });
                     }
                 }
                 weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
