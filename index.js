@@ -310,7 +310,7 @@ async function main() {
             }
             fs.writeFileSync("../../../reactorsaves/current.json", JSON.stringify(active_forms, null, 4), { encoding: false });
             fs.writeFileSync("../../../reactorvars/compweights/current.json", JSON.stringify(components, null, 4), { encoding: false });
-            if (ii % (log_interval * 10) == 0) {
+            if (ii % (log_interval) == 0) {
                 for (let key of Object.keys(components)) {
                     components[key]["weight"] = 1;
                 }
