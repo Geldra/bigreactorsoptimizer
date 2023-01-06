@@ -275,7 +275,7 @@ async function main() {
             }
 
             let new_conf_returns = make_permutation(mutation_ancestor, productmult);
-            if (Object.keys(active_forms).includes(new_conf_returns)) {
+            if (Object.keys(active_forms).includes(new_conf_returns[0])) {
                 //do NOT recalculate duplicate confs.
                 duplicate_permutation_tries++;
                 stacktrace_iter.push(["duplicategen281", new_conf_returns]);
