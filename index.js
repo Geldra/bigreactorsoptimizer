@@ -177,7 +177,7 @@ async function main() {
                 active_forms = {};
                 active_forms[newseed] = { "age": 0 };
                 active_forms[newseed]["stats"] = await get_stats(newseed);
-                active_forms[newseed]["ancestor"] = mutation_ancestor;
+                active_forms[newseed]["ancestor"] = "";
 
                 breakouts = breakouts + 1;
             } else {
