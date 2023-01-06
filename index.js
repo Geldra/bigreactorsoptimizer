@@ -1,7 +1,7 @@
 const fs = require("fs");
 const bent = require("bent");
 const post = bent("http://localhost:8081/", "POST", "json", 200);
-const active_forms = {};
+var active_forms = {};
 // "configuration string":{"stats":{}, "age":0}
 const max_forms = 200;
 const iterations = 100000000;
