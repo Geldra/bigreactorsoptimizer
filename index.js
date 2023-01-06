@@ -155,7 +155,7 @@ var highest_conf = "";
 const max_last_highest = 10; //higher numbers here make it less sensitive to changes
 const convergence_percent_error_threshold = 0.0002;
 var convergence_detection_count = 0;
-const convergence_detection_count_threshold = 500; //number of times to try escaping the local optimum
+const convergence_detection_count_threshold = 1500; //number of times to try escaping the local optimum
 const max_breakouts = 10; //blank resets to reconverge
 let breakouts = 0;
 async function main() {
