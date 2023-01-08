@@ -22,7 +22,16 @@ const set_parameters = {
 const components = buildComponents();
 function buildComponents() {
     const funcStart = Date.now();
-    const initcomps = { "C": "Gelid Cryotheum", "E": "Liquid Ender", "D": "Diamond Block", "G": "Graphite Block", "R": "Destabilized Redstone", "X": "Control Rod", "L": "Block of Gold", "O": "Air" }
+    const initcomps = {
+        //"C": "Gelid Cryotheum",
+        //"E": "Liquid Ender",
+        "D": "Diamond Block",
+        "G": "Graphite Block",
+        //"R": "Destabilized Redstone",
+        "X": "Control Rod",
+        "L": "Block of Gold",
+        "O": "Air"
+    }
     for (let compkey of Object.keys(initcomps)) {
         initcomps[compkey] = { "name": initcomps[compkey], "weight": 1 };
     }
