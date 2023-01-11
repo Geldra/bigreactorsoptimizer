@@ -18,6 +18,7 @@ const set_parameters = {
     "isActivelyCooled": false,
     "controlRodInsertion": 0
 }
+const reactorsize = (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2);
 
 const components = buildComponents();
 function buildComponents() {
@@ -76,7 +77,7 @@ function buildrandomseed() {
 function make_permutation(parent_configuration, mutations_left) {
     const funcStart = Date.now();
     let configuration = parent_configuration;
-    let changes = {};
+    let changes = new Map();
     let tiles = [];
     let tile_weights = []; //cumulative weights
     for (let tile of Object.keys(components)) {
@@ -87,9 +88,12 @@ function make_permutation(parent_configuration, mutations_left) {
     for (let i = 0; i < tile_weights.length; i++) {
         tile_weights[i] = tile_weights[i] / tile_weights[tile_weights.length - 1];
     }
-    while (mutations_left > 0) {
-        let pos = Math.round(Math.random() * (parent_configuration.length - 1));
-        //let insert = Object.keys(components)[Math.round(Math.random() * (Object.keys(components).length - 1))];
+    //mutate
+    var available_pos = [...Array(reactorsize).keys()];
+    while (mutations_left > 0 && available_pos.length > 0) {
+        //let pos = Math.round(Math.random() * (parent_configuration.length - 1));
+        let pos = available_pos[Math.floor(Math.random() * available_pos.length)];
+        available_pos.splice(available_pos.indexOf(pos), 1);
         let insert = tiles[tiles.length - 1];
         let insertrand = Math.random();
         for (let i = 0; i < tile_weights.length; i++) {
@@ -99,15 +103,15 @@ function make_permutation(parent_configuration, mutations_left) {
             }
         }
         configuration = parent_configuration.replaceAt(pos, insert);
-        if (Object.keys(changes).includes(insert)) {
-            changes[insert] = changes[insert] + 1;
+        if (changes.has(insert)) {
+            changes.set(insert, changes.get(insert) + 1);
         } else {
-            changes[insert] = 1;
+            changes.set(insert, 1);
         }
         mutations_left--;
     }
     say(`make_permutation() [${Date.now() - funcStart} ms]`);
-    return [configuration, changes];
+    return [configuration, Object.fromEntries([...changes.entries()])];
 }
 
 const n = 10;
