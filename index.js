@@ -1,7 +1,7 @@
 const fs = require("fs");
 const bent = require("bent");
 const post = bent("http://localhost:8081/", "POST", "json", 200);
-var active_forms = {};
+const active_forms = new Map();
 // "configuration string":{"stats":{}, "age":0}
 const max_forms = 200;
 const iterations = 100000000;
@@ -61,7 +61,7 @@ function buildrandomseed() {
         init_iteration = highest_iteration;
         let import_forms = JSON.parse(fs.readFileSync("../../../reactorsaves/current.json"));
         for (let key of Object.keys(import_forms)) {
-            active_forms[key] = import_forms[key];
+            active_forms.set(key, import_forms[key]);
         }
         say("Imported from file", "normal");
     }
@@ -110,7 +110,7 @@ function make_permutation(parent_configuration, mutations_left) {
     return [configuration, changes];
 }
 
-const n = 3;
+const n = 10;
 async function get_stats(configuration) {
     const funcStart = Date.now();
     let samples = [];
@@ -171,7 +171,7 @@ async function main() {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         let stacktrace_iter = [];
         const old_highest_conf = highest_conf;
-        const old_highest_score = Object.keys(active_forms).includes(old_highest_conf) ? active_forms[old_highest_conf]["stats"]["output"]["avg"] : 0;
+        const old_highest_score = active_forms.has(old_highest_conf) ? active_forms.get(old_highest_conf)["stats"]["output"]["avg"] : 0;
         stacktrace_iter.push(["old_highest_conf165", old_highest_conf + "-" + old_highest_score]);
         //Check if convergence has been reached
         if (convergence_detection_count > convergence_detection_count_threshold) {
@@ -183,16 +183,16 @@ async function main() {
                 for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
                     newseed = newseed + "X";
                 }
-                active_forms = {};
-                active_forms[newseed] = { "age": 0 };
-                active_forms[newseed]["stats"] = await get_stats(newseed);
-                active_forms[newseed]["ancestor"] = "";
+                active_forms.clear();
+                active_forms.set(newseed, { "age": 0 });
+                active_forms.get(newseed)["stats"] = await get_stats(newseed);
+                active_forms.get(newseed)["ancestor"] = "";
 
                 breakouts = breakouts + 1;
             } else {
                 //End on max breakouts
                 say("No more breakouts. Convergence results:", "sparse");
-                const highest_stats = active_forms[highest_conf]["stats"];
+                const highest_stats = active_forms.get(highest_conf)["stats"];
                 for (let key of Object.keys(highest_stats)) {
                     say("   " + key + "= " + highest_stats[key]["avg"] + " +- " + highest_stats[key]["stdev"], "sparse");
                 }
@@ -201,12 +201,12 @@ async function main() {
         }
         const startitertime = Date.now();
         //Recording a set of samples for standard deviation calc
-        if (Object.keys(active_forms).length > 0) {
-            let highest = Object.keys(active_forms).sort((a, b) => {
-                return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
+        if (active_forms.size > 0) {
+            let highest = [...active_forms.keys()].sort((a, b) => {
+                return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
             });
             stacktrace_iter.push(["highest", arrmapstack(highest)]);
-            last_highest.push(active_forms[highest[highest.length - 1]]["stats"]["output"]["avg"]);
+            last_highest.push(active_forms.get(highest[highest.length - 1])["stats"]["output"]["avg"]);
             highest = null;
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
@@ -214,19 +214,19 @@ async function main() {
         }
         //Culling
         for (let j = 0; j < Math.ceil(Math.random() * max_forms); j++) {
-            if (Object.keys(active_forms).length >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
-                let weakest_arr = Object.keys(active_forms).sort((a, b) => {
-                    return active_forms[a]["stats"]["output"]["avg"] - active_forms[b]["stats"]["output"]["avg"];
+            if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
+                let weakest_arr = [...active_forms.keys()].sort((a, b) => {
+                    return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
                 });
                 stacktrace_iter.push(["weakest_arr213-" + j, arrmapstack(weakest_arr)]);
                 highest_conf = weakest_arr[weakest_arr.length - 1];
-                stacktrace_iter.push(["highest_conf215-" + j, highest_conf + "-" + active_forms[highest_conf]["stats"]["output"]["avg"]]);
+                stacktrace_iter.push(["highest_conf215-" + j, highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
                 if (old_highest_conf.length > 0) {
-                    if (Object.keys(active_forms).includes(old_highest_conf)) {
-                        if (active_forms[highest_conf]["stats"]["output"]["avg"] < active_forms[old_highest_conf]["stats"]["output"]["avg"]) {
+                    if (active_forms.has(old_highest_conf)) {
+                        if (active_forms.get(highest_conf)["stats"]["output"]["avg"] < active_forms.get(old_highest_conf)["stats"]["output"]["avg"]) {
                             //nonsense situation where highest is not the highest.
                             fs.writeFileSync("../../../whywhywhywhy" + Date.now() + ".json", JSON.stringify(
-                                [[highest_conf, active_forms[highest_conf]["stats"]["output"]["avg"]], [old_highest_conf, active_forms[old_highest_conf]["stats"]["output"]["avg"]]]
+                                [[highest_conf, active_forms.get(highest_conf)["stats"]["output"]["avg"]], [old_highest_conf, active_forms.get(old_highest_conf)["stats"]["output"]["avg"]]]
                                 , null, 4), { encoding: "utf-8" });
                         }
                     }
@@ -234,12 +234,12 @@ async function main() {
                 weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
                 stacktrace_iter.push(["weakest_arr225-" + j, arrmapstack(weakest_arr)]);
                 let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
-                stacktrace_iter.push(["weakest227-" + j, weakest + "-" + active_forms[weakest]["stats"]["output"]["avg"]]);
+                stacktrace_iter.push(["weakest227-" + j, weakest + "-" + active_forms.get(weakest)["stats"]["output"]["avg"]]);
                 say(`Culling checkstack:`, "debug");
-                say(`   1: ${active_forms[weakest_arr[0]]["stats"]["output"]["avg"] <= active_forms[weakest]["stats"]["output"]["avg"]} (${active_forms[weakest_arr[0]]["stats"]["output"]["avg"]} <= ${active_forms[weakest]["stats"]["output"]["avg"]})`, "debug");
-                say(`   2: ${active_forms[weakest]["stats"]["output"]["avg"] <= active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]} (${active_forms[weakest]["stats"]["output"]["avg"]} <= ${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]})`, "debug");
-                say(`   3: ${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"] < active_forms[highest_conf]["stats"]["output"]["avg"]} (${active_forms[weakest_arr[weakest_arr.length - 1]]["stats"]["output"]["avg"]} < ${active_forms[highest_conf]["stats"]["output"]["avg"]})`, "debug");
-                delete active_forms[weakest];
+                say(`   1: ${active_forms.get(weakest_arr[0])["stats"]["output"]["avg"] <= active_forms.get(weakest)["stats"]["output"]["avg"]} (${active_forms.get(weakest_arr[0])["stats"]["output"]["avg"]} <= ${active_forms.get(weakest)["stats"]["output"]["avg"]})`, "debug");
+                say(`   2: ${active_forms.get(weakest)["stats"]["output"]["avg"] <= active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]} (${active_forms.get(weakest)["stats"]["output"]["avg"]} <= ${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]})`, "debug");
+                say(`   3: ${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"] < active_forms.get(highest_conf)["stats"]["output"]["avg"]} (${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]} < ${active_forms.get(highest_conf)["stats"]["output"]["avg"]})`, "debug");
+                active_forms.delete(weakest);
             }
         }
         //Mutating
@@ -274,30 +274,30 @@ async function main() {
         `, "verbose");
         let calltime = 0;
         let duplicate_permutation_tries = 0;//failure is duplicate
-        while (Object.keys(active_forms).length < max_forms && duplicate_permutation_tries < 20) {
+        while (active_forms.size < max_forms && duplicate_permutation_tries < 20) {
             //repopulate
             let mutation_ancestor = seed;
-            if (Object.keys(active_forms).length != 0) {
-                mutation_ancestor = Object.keys(active_forms)[Math.ceil(Math.random() * (Object.keys(active_forms).length - 1))];
+            if (active_forms.size != 0) {
+                mutation_ancestor = [...active_forms.keys()][Math.floor(Math.random() * (active_forms.size))];
             }
 
             let new_conf_returns = make_permutation(mutation_ancestor, productmult);
-            if (Object.keys(active_forms).includes(new_conf_returns[0])) {
+            if (active_forms.has(new_conf_returns[0])) {
                 //do NOT recalculate duplicate confs.
                 duplicate_permutation_tries++;
                 stacktrace_iter.push(["duplicategen281", new_conf_returns]);
             } else {
                 let new_configuration = new_conf_returns[0];
-                active_forms[new_configuration] = { "age": 0 };
+                active_forms.set(new_configuration, { "age": 0 });
                 let thiscallstarttime = Date.now();
-                active_forms[new_configuration]["stats"] = await get_stats(new_configuration);
+                active_forms.get(new_configuration)["stats"] = await get_stats(new_configuration);
                 calltime = calltime + Date.now() - thiscallstarttime;
-                active_forms[new_configuration]["ancestor"] = mutation_ancestor;
+                active_forms.get(new_configuration)["ancestor"] = mutation_ancestor;
 
                 //analyze the effects of these changes
-                if (Object.keys(active_forms).includes(mutation_ancestor)) {
-                    let score_diff = active_forms[new_configuration]["stats"]["output"]["avg"] - active_forms[mutation_ancestor]["stats"]["output"]["avg"];
-                    let score_diff_percent = score_diff / active_forms[mutation_ancestor]["stats"]["output"]["avg"];
+                if (active_forms.has(mutation_ancestor)) {
+                    let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
+                    let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
                     for (let tile of Object.keys(new_conf_returns[1])) {
                         components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
                         if (components[tile]["weight"] <= 0) {
@@ -309,13 +309,13 @@ async function main() {
             }
         }
 
-        if (ii % log_interval == 0 || (loggedinit == false && Object.keys(active_forms).length >= max_forms)) {
-            fs.writeFileSync("../../../reactorsaves/" + ii + ".json", JSON.stringify(active_forms, null, 4), { encoding: false });
+        if (ii % log_interval == 0 || (loggedinit == false && active_forms.size >= max_forms)) {
+            fs.writeFileSync("../../../reactorsaves/" + ii + ".json", JSON.stringify(Object.fromEntries([...active_forms.entries()]), null, 4), { encoding: false });
             fs.writeFileSync("../../../reactorvars/compweights/" + ii + ".json", JSON.stringify(components, null, 4), { encoding: false });
             if (loggedinit === false) {
                 loggedinit = true;
             }
-            fs.writeFileSync("../../../reactorsaves/current.json", JSON.stringify(active_forms, null, 4), { encoding: false });
+            fs.writeFileSync("../../../reactorsaves/current.json", JSON.stringify(Object.fromEntries([...active_forms.entries()]), null, 4), { encoding: false });
             fs.writeFileSync("../../../reactorvars/compweights/current.json", JSON.stringify(components, null, 4), { encoding: false });
             if (ii % (log_interval) == 0) {
                 for (let key of Object.keys(components)) {
@@ -325,21 +325,21 @@ async function main() {
         }
 
 
-        for (let configuration of Object.keys(active_forms)) {
-            active_forms[configuration]["age"]++;
+        for (let configuration of [...active_forms.keys()]) {
+            active_forms.get(configuration)["age"]++;
         }
         const nowtime = Date.now();
         say(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${nowtime - startitertime - calltime} ms calculating]`, "sparse");
-        if (Object.keys(active_forms).includes(highest_conf)) {
-            say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms[highest_conf]["stats"]["output"]["avg"] * 100) / 100} RF/t (old ${old_highest_score})\n   Eating = ${Math.round(active_forms[highest_conf]["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
-            if (active_forms[highest_conf]["stats"]["output"]["avg"] < old_highest_score) {
-                stacktrace_iter.push(["new_highest_conf320", highest_conf + "-" + active_forms[highest_conf]["stats"]["output"]["avg"]]);
+        if (active_forms.has(highest_conf)) {
+            say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms.get(highest_conf)["stats"]["output"]["avg"] * 100) / 100} RF/t (old ${old_highest_score})\n   Eating = ${Math.round(active_forms.get(highest_conf)["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
+            if (active_forms.get(highest_conf)["stats"]["output"]["avg"] < old_highest_score) {
+                stacktrace_iter.push(["new_highest_conf320", highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
                 stacktrace_iter.push(["old_highest_conf321", old_highest_conf + "-" + old_highest_score]);
                 fs.writeFileSync("../../../whydoyoudothis" + Date.now() + ".json", JSON.stringify(stacktrace_iter, null, 4), { encoding: "utf-8" });
             }
         }
     }
-    fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(active_forms, null, 4), { encoding: false });
+    fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(Object.fromEntries([...active_forms.entries()]), null, 4), { encoding: false });
 }
 
 
@@ -482,6 +482,6 @@ function say(message, level = "functions") {
 
 function arrmapstack(conf_arr) {
     return conf_arr.map(cnf => {
-        return cnf + "-" + active_forms[cnf]["stats"]["output"]["avg"];
+        return cnf + "-" + active_forms.get(cnf)["stats"]["output"]["avg"];
     })
 }
