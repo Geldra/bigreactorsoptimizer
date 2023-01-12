@@ -3,7 +3,6 @@ const fs = index.fs;
 const say = index.say;
 const active_forms = index.active_forms;
 const set_parameters = index.set_parameters;
-var init_iteration = index.init_iteration;
 
 module.exports = function () {
     const funcStart = Date.now();
@@ -15,7 +14,7 @@ module.exports = function () {
                 highest_iteration = new_num;
             }
         }
-        init_iteration = highest_iteration;
+        index.init_iteration = highest_iteration;
         let import_forms = JSON.parse(fs.readFileSync("../../../reactorsaves/current.json"));
         for (let key of Object.keys(import_forms)) {
             active_forms.set(key, import_forms[key]);
