@@ -3,6 +3,7 @@ const fs = index.fs;
 const say = index.say;
 const active_forms = index.active_forms;
 const set_parameters = index.set_parameters;
+var init_iteration = index.init_iteration;
 
 module.exports = function () {
     const funcStart = Date.now();
