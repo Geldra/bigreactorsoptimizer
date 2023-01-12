@@ -123,7 +123,7 @@ async function updateloop() {
                 .setTimestamp()
                 .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
             try {
-                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds`), embeds: [theEmbed], files: ["./visualizations/output.png", "./visualizations/reactor.png"] });
+                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds ${reactor_width}x${reactor_length}`), embeds: [theEmbed], files: ["./visualizations/output.png", "./visualizations/reactor.png"] });
             } catch {
                 const theFallbackEmbed = new EmbedBuilder()
                     .setTitle("Your bihourly reactor update!")
@@ -137,7 +137,7 @@ async function updateloop() {
                     )
                     .setTimestamp()
                     .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
-                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds`), embeds: [theFallbackEmbed], files: ["./visualizations/output.png"] });
+                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds ${reactor_width}x${reactor_length}`), embeds: [theFallbackEmbed], files: ["./visualizations/output.png"] });
             }
 
             try { //https://stackoverflow.com/a/30654451
