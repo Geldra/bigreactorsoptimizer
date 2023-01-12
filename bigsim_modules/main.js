@@ -29,6 +29,7 @@ const say = index.say;
 const utils = index.utils;
 const getStandardDeviation = utils.getStandardDeviation;
 const getAverage = utils.getAverage;
+const floatRound = utils.floatRound;
 
 var optimize_escape_split = 0.5; //if Math.round() is greater, escape. Otherwise, optimize. (high / low mutation count)
 
@@ -110,10 +111,11 @@ module.exports = async function () {
         //Mutating
         const permutationmult = (Math.random() + 1) * 10;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
-        const current_stdev = Math.round(getStandardDeviation(last_highest) * 10000) / 10000;
+        const current_stdev = floatRound(getStandardDeviation(last_highest), 5);
         const current_mean = getAverage(last_highest);
         let thirdpermutationmultinterm = 1;//(current_stdev / current_mean < convergence_percent_error_threshold && last_highest.length >= max_last_highest ? 100 * (convergence_percent_error_threshold / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
-        const thirdpermutationmult = (optimize_escape_split > Math.round()?(current_stdev == 0 ? set_parameters["zSize"] * set_parameters["xSize"] : thirdpermutationmultinterm):1);
+        const split_rand = Math.random();
+        const thirdpermutationmult = (optimize_escape_split > split_rand ? (current_stdev == 0 ? set_parameters["zSize"] * set_parameters["xSize"] : thirdpermutationmultinterm) : 1);
         //TODO: Allow time to explore new region before calling convergence
         // Currently just using "convergence_detection_count_threshold" as a buffer time to poke around randomly.
         // This is only useful if I find regions that are substantially better than the local optimum, 
@@ -135,7 +137,7 @@ module.exports = async function () {
    stdev:${current_stdev}
    1= ${permutationmult}
    2= ${secondpermutationmult}
-   3= ${thirdpermutationmult}
+   3= ${thirdpermutationmult} (${floatRound(split_rand,5)})
    Product= ${productmult}
         `, "verbose");
         let calltime = 0;

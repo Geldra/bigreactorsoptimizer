@@ -16,3 +16,8 @@ function getAverage(array) {
     return array.reduce((a, b) => a + b) / n
 }
 module.exports.getAverage = getAverage;
+
+function floatRound(number, digits) {
+    return number.toFixed(digits);
+}
+module.exports.floatRound = floatRound;
