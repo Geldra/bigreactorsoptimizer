@@ -39,6 +39,7 @@ let highestconf = "";
 const testing = process.argv[4] == "test" ? true : false;
 let last_highest_file_iteration = 0;
 let sent_convergence_message = false;
+let maxx = 0;
 
 client.once('ready', async () => {
     console.log("Ready to make pictures!!!!");
@@ -115,8 +116,9 @@ async function updateloop() {
                 .setImage("attachment://output.png")
                 .setThumbnail("attachment://reactor.png")
                 .addFields(
-                    { name: "Generation", value: `${Math.round(stats["output"]["avg"] / 10) / 100} kRF/t`, inline: true },
-                    { name: "Consumption", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100} mB/t`, inline: true }
+                    { name: "Generation", value: `${floatRound(stats["output"]["avg"] / 1000, 2)} ±${floatRound(stats["output"]["stdev"] / 1000, 2)} kRF/t`, inline: true },
+                    { name: "Consumption", value: `${floatRound(stats["fuelConsumption"]["avg"], 2)} ±${floatRound(stats["fuelConsumption"]["stdev"], 2)} mB/t`, inline: true },
+                    { name: "Iteration", value: `${maxx} ±${100}`, inline: true }
                 )
                 .setTimestamp()
                 .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
@@ -129,8 +131,9 @@ async function updateloop() {
                     .setDescription("Thumbnail was too big or some other stupid excuse by discord:")
                     .setImage("attachment://output.png")
                     .addFields(
-                        { name: "Generation:", value: `${Math.round(stats["output"]["avg"] / 10) / 100} kRF/t`, inline: true },
-                        { name: "Consumption:", value: `${Math.round(stats["fuelConsumption"]["avg"] * 100) / 100} mB/t`, inline: true }
+                        { name: "Generation", value: `${floatRound(stats["output"]["avg"] / 1000, 3)} ±${floatRound(stats["output"]["stdev"] / 1000, 3)} kRF/t`, inline: true },
+                        { name: "Consumption", value: `${floatRound(stats["fuelConsumption"]["avg"], 3)} ±${floatRound(stats["fuelConsumption"]["stdev"], 3)} mB/t`, inline: true },
+                        { name: "Iteration", value: `${maxx} ±${100}`, inline: true }
                     )
                     .setTimestamp()
                     .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
@@ -166,7 +169,7 @@ function getHighestStats(file = "current.json") {
             Object.assign(highestpowerstats, data[conf]["stats"]);
         }
     }
-
+    console.log(JSON.stringify(highestpowerstats, null, 2));
     return highestpowerstats;
 }
 
@@ -176,8 +179,8 @@ async function buildgraph(stat = "output", last_iterations = 400) {
     let svgelms = [];
     let miny = Infinity;
     let maxy = 0;
-    let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json"].includes(thing)).sort((a, b) => { return parseInt(a.replace(".json", "")) - parseInt(b.replace(".json", "")) }).slice(-last_iterations);
-    let maxx = parseInt(files[files.length - 1].replace(".json", ""));
+    let files = fs.readdirSync("../../../reactorsaves").filter(thing => !["current.json", "final.json"].includes(thing)).sort((a, b) => { return parseInt(a.replace(".json", "")) - parseInt(b.replace(".json", "")) }).slice(-last_iterations);
+    maxx = parseInt(files[files.length - 1].replace(".json", ""));
     if (maxx == last_highest_file_iteration) {
         console.log("No additional data found. Skipping this update.");
         return false;
@@ -280,7 +283,7 @@ async function buildgraph(stat = "output", last_iterations = 400) {
         let start_coord = relation["coords"][0];
         let end_coord = relation["coords"][relation["coords"].length - 1];
         svgelms.push(`
-            <line x1="${getx(start_coord[0])}" y1="${gety(start_coord[1])}" x2="${getx(end_coord[0])}" y2="${gety(start_coord[1])}" stroke-width="${Math.ceil(point_radius / 1.2)}" stroke="${relation["color"]}" />
+            <line x1="${getx(start_coord[0])}" y1="${gety(start_coord[1])}" x2="${getx(end_coord[0])}" y2="${gety(end_coord[1])}" stroke-width="${Math.ceil(point_radius / 1.2)}" stroke="${relation["color"]}" />
         `)
         if (start_coord[1] != end_coord[1]) {
             console.log(`What happened here:\nstart = (${getx(start_coord[0])}, ${gety(start_coord[1])})\nstart = (${getx(end_coord[0])}, ${gety(end_coord[1])})`);
@@ -328,4 +331,7 @@ function compressConf(input) { //Thanks ChatGPT :)
         }
     }
     return output;
+}
+function floatRound(number, digits) { //https://chat.openai.com/chat
+    return number.toFixed(digits).toString();
 }
