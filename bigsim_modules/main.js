@@ -30,6 +30,8 @@ const utils = index.utils;
 const getStandardDeviation = utils.getStandardDeviation;
 const getAverage = utils.getAverage;
 
+var optimize_escape_split = 0.5; //if Math.round() is greater, escape. Otherwise, optimize. (high / low mutation count)
+
 module.exports = async function () {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         let stacktrace_iter = [];
@@ -111,7 +113,7 @@ module.exports = async function () {
         const current_stdev = Math.round(getStandardDeviation(last_highest) * 10000) / 10000;
         const current_mean = getAverage(last_highest);
         let thirdpermutationmultinterm = 1;//(current_stdev / current_mean < convergence_percent_error_threshold && last_highest.length >= max_last_highest ? 100 * (convergence_percent_error_threshold / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
-        const thirdpermutationmult = (current_stdev == 0 ? set_parameters["zSize"] * set_parameters["xSize"] : thirdpermutationmultinterm);
+        const thirdpermutationmult = (optimize_escape_split > Math.round()?(current_stdev == 0 ? set_parameters["zSize"] * set_parameters["xSize"] : thirdpermutationmultinterm):1);
         //TODO: Allow time to explore new region before calling convergence
         // Currently just using "convergence_detection_count_threshold" as a buffer time to poke around randomly.
         // This is only useful if I find regions that are substantially better than the local optimum, 
