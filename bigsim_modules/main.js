@@ -153,10 +153,10 @@ module.exports = async function () {
             }
 
             let new_conf_returns = make_permutation(mutation_ancestor, productmult);
-            let start_set_search_time = Date.now();
+            const start_set_search_time = Date.now();
             if (oldconfs.has(new_conf_returns[0])) {
                 //do NOT recalculate duplicate confs.
-                if (active_forms.has(new_conf_returns[0])){
+                if (active_forms.has(new_conf_returns[0])) {
                     duplicate_permutation_tries++;
                 }
                 conf_collisions_avoided++;
@@ -164,7 +164,10 @@ module.exports = async function () {
             } else {
                 let new_configuration = new_conf_returns[0];
                 oldconfs.add(new_configuration);
-                say(`conf collisions report:\n  Tracking = ${oldconfs.size}\n  Avoided = ${conf_collisions_avoided}\n  Search time = ${Date.now() - start_set_search_time}ms`, "verbose");
+                const calc_set_search_time = Date.now() - start_set_search_time;
+                if (calc_set_search_time > 10) {
+                    say(`conf collisions report:\n  Tracking = ${oldconfs.size}\n  Avoided = ${conf_collisions_avoided}\n  Search time = ${Date.now() - start_set_search_time}ms`, "verbose");
+                }
                 active_forms.set(new_configuration, { "age": 0 });
                 let thiscallstarttime = Date.now();
                 active_forms.get(new_configuration)["stats"] = await get_stats(new_configuration);
