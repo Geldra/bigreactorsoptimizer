@@ -1,7 +1,7 @@
 var ii = 1;
 let breakouts = 0;
 const max_breakouts = 3; //blank resets to reconverge
-const convergence_detection_count_threshold = 50000; //number of times to try escaping the local optimum
+const convergence_detection_count_threshold = 75000; //number of times to try escaping the local optimum
 var convergence_detection_count = 0;
 const max_last_highest = 10; //higher numbers here make it less sensitive to changes
 var highest_conf = "";
@@ -32,6 +32,9 @@ const getAverage = utils.getAverage;
 const floatRound = utils.floatRound;
 
 var optimize_escape_split = 0.5; //if Math.round() is greater, escape. Otherwise, optimize. (high / low mutation count)
+
+const oldconfs = new Set();
+var conf_collisions_avoided = 0;
 
 module.exports = async function () {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
@@ -137,7 +140,7 @@ module.exports = async function () {
    stdev:${current_stdev}
    1= ${permutationmult}
    2= ${secondpermutationmult}
-   3= ${thirdpermutationmult} (${floatRound(split_rand,5)})
+   3= ${thirdpermutationmult} (${floatRound(split_rand, 5)})
    Product= ${productmult}
         `, "verbose");
         let calltime = 0;
@@ -150,12 +153,16 @@ module.exports = async function () {
             }
 
             let new_conf_returns = make_permutation(mutation_ancestor, productmult);
-            if (active_forms.has(new_conf_returns[0])) {
+            let start_set_search_time = Date.now();
+            if (oldconfs.has(new_conf_returns[0])) {
                 //do NOT recalculate duplicate confs.
                 duplicate_permutation_tries++;
+                conf_collisions_avoided++;
                 stacktrace_iter.push(["duplicategen281", new_conf_returns]);
             } else {
                 let new_configuration = new_conf_returns[0];
+                oldconfs.add(new_configuration);
+                say(`conf collisions report:\n  Tracking = ${oldconfs.size}\n  Avoided = ${conf_collisions_avoided}\n  Search time = ${Date.now() - start_set_search_time}ms`, "verbose");
                 active_forms.set(new_configuration, { "age": 0 });
                 let thiscallstarttime = Date.now();
                 active_forms.get(new_configuration)["stats"] = await get_stats(new_configuration);
