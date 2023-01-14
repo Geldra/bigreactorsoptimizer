@@ -156,7 +156,9 @@ module.exports = async function () {
             let start_set_search_time = Date.now();
             if (oldconfs.has(new_conf_returns[0])) {
                 //do NOT recalculate duplicate confs.
-                duplicate_permutation_tries++;
+                if (active_forms.has(new_conf_returns[0])){
+                    duplicate_permutation_tries++;
+                }
                 conf_collisions_avoided++;
                 stacktrace_iter.push(["duplicategen281", new_conf_returns]);
             } else {
