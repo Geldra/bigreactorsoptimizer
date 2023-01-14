@@ -4,7 +4,7 @@ const say = index.say;
 
 const givemetheresultalready = require("./giveResults");
 
-const n = 10;
+const n = 5;
 module.exports = async function (configuration) {
     const funcStart = Date.now();
     let samples = [];
