@@ -60,11 +60,7 @@ module.exports = async function () {
                 breakouts = breakouts + 1;
             } else {
                 //End on max breakouts
-                say("No more breakouts. Convergence results:", "sparse");
-                const highest_stats = active_forms.get(highest_conf)["stats"];
-                for (let key of Object.keys(highest_stats)) {
-                    say("   " + key + "= " + highest_stats[key]["avg"] + " +- " + highest_stats[key]["stdev"], "sparse");
-                }
+                report_results("convergence");
                 break;
             }
         }
@@ -145,7 +141,8 @@ module.exports = async function () {
         `, "verbose");
         let calltime = 0;
         let duplicate_permutation_tries = 0;//failure is duplicate
-        while (active_forms.size < max_forms && duplicate_permutation_tries < 20) {
+        let attempts_to_be_unique = 0;
+        while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
             //repopulate
             let mutation_ancestor = seed;
             if (active_forms.size != 0) {
@@ -161,6 +158,7 @@ module.exports = async function () {
                 }
                 conf_collisions_avoided++;
                 stacktrace_iter.push(["duplicategen281", new_conf_returns]);
+                attempts_to_be_unique++;
             } else {
                 let new_configuration = new_conf_returns[0];
                 oldconfs.add(new_configuration);
@@ -187,6 +185,14 @@ module.exports = async function () {
                     }
                 }
             }
+        }
+        if (duplicate_permutation_tries > convergence_detection_count_threshold){
+            report_results("explored");
+            break;
+        }
+        if (attempts_to_be_unique > convergence_detection_count_threshold){
+            report_results("unoriginal");
+            break;
         }
 
         if (ii % log_interval == 0 || (loggedinit == false && active_forms.size >= max_forms)) {
@@ -225,4 +231,22 @@ module.exports = async function () {
         })
     }
     fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(Object.fromEntries([...active_forms.entries()]), null, 4), { encoding: false });
+}
+
+function report_results(condition) {
+    switch(condition){
+        case "convergence":
+            say("No more breakouts. Results:", "sparse");
+            break;
+        case "unoriginal":
+            say("Originality too expensive. Results:", "sparse");
+            break;
+        case "explored":
+            say("Solution space explored. Results:", "sparse");
+            break;
+    }
+    const highest_stats = active_forms.get(highest_conf)["stats"];
+    for (let key of Object.keys(highest_stats)) {
+        say("   " + key + "= " + highest_stats[key]["avg"] + " +- " + highest_stats[key]["stdev"], "sparse");
+    }
 }
