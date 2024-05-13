@@ -78,7 +78,7 @@ module.exports = async function () {
             }
         }
         //Culling
-        for (let j = 0; j < Math.ceil(Math.random() * max_forms); j++) {
+        for (let j = 0; j < Math.ceil(Math.random() * 0.9 * max_forms); j++) {
             if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 let weakest_arr = [...active_forms.keys()].sort((a, b) => {
                     return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
@@ -108,7 +108,7 @@ module.exports = async function () {
             }
         }
         //Mutating
-        const permutationmult = (Math.random() + 1) * 50+20;
+        const permutationmult = (Math.random() + 1) * 5+20;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
         const current_stdev = floatRound(getStandardDeviation(last_highest), 5);
         const current_mean = getAverage(last_highest);
