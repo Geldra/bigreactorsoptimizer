@@ -22,7 +22,7 @@ module.exports.readout_level = readout_level;
 const set_parameters = {
     "xSize": 30,
     "zSize": 30,
-    "height": 5,
+    "height": 10,
     "isActivelyCooled": false,
     "controlRodInsertion": 0
 }

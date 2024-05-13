@@ -25,10 +25,10 @@ const users_to_notify_upon_completion = [
     "317799838362370070",
     "283435626844389376"
 ]
-const reactor_width = 32;
-const reactor_length = 32;
-const reactor_height = 5;
-const tile_size = 3; //pixels width
+const reactor_width = 30;
+const reactor_length = 30;
+const reactor_height = 10;
+const tile_size = 7; //pixels width
 const point_radius = 3;
 let last_update = 0;
 const spamchanid = process.argv[3];
@@ -72,7 +72,11 @@ async function drawReactor(conf, width = reactor_width, height = reactor_length)
             internals_composite.push({ input: tiles.get("casing-ud"), top: topoffset, left: 0 });
             internals_composite.push({ input: tiles.get("casing-ud"), top: topoffset, left: (width - 1) * tile_size });
         }
-        internals_composite.push({ input: tiles.get(conf.substring(i, i + 1)), top: topoffset, left: (i % (width - 2) + 1) * tile_size });
+        if (tiles.has(conf.substring(i, i + 1))){
+            internals_composite.push({ input: tiles.get(conf.substring(i, i + 1)), top: topoffset, left: (i % (width - 2) + 1) * tile_size });
+        }else{
+            internals_composite.push({ input: tiles.get("unknown"), top: topoffset, left: (i % (width - 2) + 1) * tile_size });
+        }
     }
     for (let i = 0; i < width - 2; i++) {
         internals_composite.push({ input: tiles.get("casing-lr"), top: (height - 1) * tile_size, left: (i * tile_size) + tile_size });
