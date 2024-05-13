@@ -33,3 +33,10 @@ jobs:
     - run: npm install sharp
     - run: sudo systemctl start bigreactorsoptimizer
     - run: sudo systemctl start bigreactorsvisualizer
+    - run: npm install
+    - run: npm rebuild
+    - run: npm remove sharp
+    - run: npm install sharp
+    - continue-on-error: true
+      run: sudo systemctl is-active bigreactorsvisualizer && sudo systemctl stop bigreactorsvisualizer
+    - run: sudo systemctl start bigreactorsvisualizer
