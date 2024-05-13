@@ -7,10 +7,10 @@ fs.mkdirSync("../../../reactorvars/compweights", { recursive: true });
 const active_forms = new Map();
 module.exports.active_forms = active_forms;
 
-const max_forms = 200;
+const max_forms = 800;
 module.exports.max_forms = max_forms;
 
-const iterations = 100000000;
+const iterations = 1000000000;
 module.exports.iterations = iterations;
 
 const log_interval = parseInt(process.argv[2]); //interval to save a snapshot of active_forms in ./log/
@@ -20,8 +20,8 @@ const readout_level = process.argv[3];
 module.exports.readout_level = readout_level;
 
 const set_parameters = {
-    "xSize": 32,
-    "zSize": 32,
+    "xSize": 30,
+    "zSize": 30,
     "height": 5,
     "isActivelyCooled": false,
     "controlRodInsertion": 0
