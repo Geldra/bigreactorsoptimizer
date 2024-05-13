@@ -38,5 +38,5 @@ jobs:
     - run: npm install
     - run: npm rebuild
     - run: npm remove sharp
-    - run: npm install sharp
+    - run: npm install --os=linux --cpu=x64 sharp
     - run: sudo systemctl start bigreactorsvisualizer
