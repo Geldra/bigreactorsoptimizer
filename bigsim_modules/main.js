@@ -186,14 +186,14 @@ module.exports = async function () {
         let timestartmutating = Date.now();
         let repoploops = 0;
         let repopstacknum = 0;
-        say(`Starting repopulation loop`,"debug");
+        say(`Starting repopulation loop`,"verbose");
         repopstack = [];
         while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
-            if (repopstack.length > 400){
+            if (repopstack.length > 1000){
                 repopstacknum++;
-                say(`Completing repopulation stack #${repopstacknum}`,"debug");
+                say(`Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
-                say(`Completed repopulation stack #${repopstacknum}`,"debug");
+                say(`Completed repopulation stack #${repopstacknum}`,"verbose");
                 repopstack = [];
             }
             repopstack.push(repopulate(repoploops+0));
