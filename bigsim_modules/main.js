@@ -276,7 +276,13 @@ module.exports = async function () {
     }
     function arrmapstack(conf_arr) {
         return conf_arr.map(cnf => {
-            return cnf + "-" + active_forms.get(cnf)["stats"]["output"]["avg"];
+            let this_is_dumb = cnf + "-0";
+            try{
+                this_is_dumb = cnf + "-" + active_forms.get(cnf)["stats"]["output"]["avg"];
+            }catch{
+
+            }
+            return ;
         })
     }
     fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(Object.fromEntries([...active_forms.entries()]), null, 4), { encoding: false });
