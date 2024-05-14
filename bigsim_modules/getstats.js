@@ -26,6 +26,10 @@ module.exports = async function (configuration) {
             let max = -Infinity;
             let sum = 0;
             for (let sample of samples) {
+                if (Object.keys(sample).includes("error")){
+                    sum = sum;
+                    continue;
+                }
                 sum = sum + sample[key];
                 if (sample[key] < min) {
                     min = sample[key];

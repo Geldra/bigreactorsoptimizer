@@ -6,14 +6,19 @@ module.exports = async function (data) {
     const funcStart = Date.now();
     let complete = false;
     let result = {};
-    while (complete == false) {
+    let failures = 0;
+    while (complete == false && failures < 1000) {
         try {
             result = await post("api/simulate", data);
             complete = true;
         } catch (err) {
+            failures++;
             //say(`Calling error: ${err}`,"debug")
             complete = false;
         }
+    }
+    if (complete == false){
+        result = {"error":"Max retries reached"}
     }
     say(`givemetheresultalready() [${Date.now() - funcStart} ms]`,"debug");
     return result;
