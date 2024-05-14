@@ -195,6 +195,9 @@ module.exports = async function () {
                 await Promise.all(repopstack);
                 say(`Completed repopulation stack #${repopstacknum} (${repoploops} total repops)`,"verbose");
                 repopstack = [];
+                if (active_forms.size > max_forms - 2){
+                    break;
+                }
             }
             repopstack.push(repopulate(repoploops+0));
             repoploops++;
