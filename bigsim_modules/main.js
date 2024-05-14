@@ -189,7 +189,7 @@ module.exports = async function () {
         say(`Starting repopulation loop`,"debug");
         repopstack = [];
         while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
-            if (repopstack.length > 50){
+            if (repopstack.length > 400){
                 repopstacknum++;
                 say(`Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
