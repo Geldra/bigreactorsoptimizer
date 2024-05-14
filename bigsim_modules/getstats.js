@@ -53,7 +53,7 @@ module.exports = async function (configuration) {
             results[key]["avg"] = avg;
             results[key]["stdev"] = stdev;
         }
-        say(`get_stats() [${Date.now() - funcStart} ms] [${successes} points]`);
+        say(`get_stats() [${Date.now() - funcStart} ms] [${successes} points]`, "debug");
         if (successes == 0){
             let results = {};
             let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
