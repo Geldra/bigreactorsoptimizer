@@ -70,7 +70,20 @@ module.exports = async function () {
         //Getting the stats on the leader configuration in active_forms
         if (active_forms.size > 0) {
             let highest = [...active_forms.keys()].sort((a, b) => {
-                return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
+                let first = 0;
+                let second = 0;
+                try {
+                    first = active_forms.get(a)["stats"]["output"]["avg"]
+                }catch{
+                    first = 0;
+                }
+                try {
+                    second = active_forms.get(b)["stats"]["output"]["avg"]
+                }catch{
+                    second = 0;
+                }
+                
+                return first - second;
             });
             stacktrace_iter.push(["highest", arrmapstack(highest)]);
             last_highest.push(active_forms.get(highest[highest.length - 1])["stats"]["output"]["avg"]);
