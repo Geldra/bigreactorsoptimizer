@@ -202,13 +202,17 @@ module.exports = async function () {
                     //analyze the effects of these changes
                     if (active_forms.has(mutation_ancestor)) {
                         say(`6.5 mutation ancestor found, comparing stats`,"debug");
-                        let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
-                        let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
-                        for (let tile of Object.keys(new_conf_returns[1])) {
-                            components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
-                            if (components[tile]["weight"] <= 0) {
-                                //weight at or under 0 prevents items from appearing
-                                components[tile]["weight"] = 1;
+                        if (!Object.keys(active_forms.get(mutation_ancestor)).includes("output")){
+                            say(`Anomalous blank ancestor. Cool.`,"debug");
+                        }else{
+                            let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
+                            let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
+                            for (let tile of Object.keys(new_conf_returns[1])) {
+                                components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
+                                if (components[tile]["weight"] <= 0) {
+                                    //weight at or under 0 prevents items from appearing
+                                    components[tile]["weight"] = 1;
+                                }
                             }
                         }
                     }
