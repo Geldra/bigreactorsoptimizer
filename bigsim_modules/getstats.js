@@ -52,9 +52,10 @@ module.exports = async function (configuration) {
         say(`get_stats() [${Date.now() - funcStart} ms]`);
         return results;
     }else{
-        results[key] = {};
+        results = {};
         let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
         for (let key of keys_to_stat) {
+            results[key] = {};
             results[key]["min"] = 0;
             results[key]["max"] = 0;
             results[key]["avg"] = 0;
