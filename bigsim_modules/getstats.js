@@ -27,6 +27,7 @@ module.exports = async function (configuration) {
             let sum = 0;
             for (let sample of samples) {
                 if (Object.keys(sample).includes("error")){
+                    say(`Error detected from sample`,"debug")
                     sum = sum;
                     continue;
                 }
@@ -52,7 +53,7 @@ module.exports = async function (configuration) {
         say(`get_stats() [${Date.now() - funcStart} ms]`);
         return results;
     }else{
-        results = {};
+        let results = {};
         let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
         for (let key of keys_to_stat) {
             results[key] = {};
