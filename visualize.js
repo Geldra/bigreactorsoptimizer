@@ -272,12 +272,17 @@ async function buildgraph(stat = "output", last_iterations = 400) {
     svgelms.push(`
         <rect width="${image_width + image_margins["left"] + image_margins["right"]}" height="${image_height + image_margins["top"] + image_margins["bottom"]}" fill="black" fill-opacity="1" />
     `);
-    svgelms.push(`
-        <ellipse cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"])}" rx="${point_radius * 10}" ry="${Math.round(((last_max_iteration_high_stats[stat]["stdev"]) / (maxy - miny)) * image_height)}" fill="#520000" />
-        <line x1="${getx(minx)}" y1="${gety(last_max_iteration_high_stats[stat]["avg"])}" x2="${getx(maxx)}" y2="${gety(last_max_iteration_high_stats[stat]["avg"])}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
-        <line x1="${getx(last_max_iteration)}" y1="${gety(miny)}" x2="${getx(last_max_iteration)}" y2="${gety(maxy)}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
-        <circle cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"])}" r="${point_radius * 4}" fill="#FF0000" />`
-    );
+    try{
+        svgelms.push(`
+            <ellipse cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"])}" rx="${point_radius * 10}" ry="${Math.round(((last_max_iteration_high_stats[stat]["stdev"]) / (maxy - miny)) * image_height)}" fill="#520000" />
+            <line x1="${getx(minx)}" y1="${gety(last_max_iteration_high_stats[stat]["avg"])}" x2="${getx(maxx)}" y2="${gety(last_max_iteration_high_stats[stat]["avg"])}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
+            <line x1="${getx(last_max_iteration)}" y1="${gety(miny)}" x2="${getx(last_max_iteration)}" y2="${gety(maxy)}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
+            <circle cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"])}" r="${point_radius * 4}" fill="#FF0000" />`
+        );
+    }catch{
+        console.log("No data available? Skipping this embed.")
+        return;
+    }
     relations.forEach((relation, relation_ref, relations_map) => {
         relation["coords"].sort((a, b) => { return a[0] - b[0] });
         for (let coord of relation["coords"]) {

@@ -236,7 +236,7 @@ module.exports = async function () {
                     }
                     say(`3 populating mutation information`,"debug");
                     let thiscallstarttime = Date.now();
-                    let og_af_size = active_forms.size();
+                    let og_af_size = active_forms.size;
                     active_forms.set(new_configuration, { "age": 0, "stats": (await get_stats(new_configuration)), "ancestor": mutation_ancestor });
                     if (active_forms.size() > og_af_size){
                         repops++;
