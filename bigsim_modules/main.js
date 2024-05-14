@@ -223,20 +223,16 @@ module.exports = async function () {
                         say(`conf collisions report:\n  Tracking = ${oldconfs.size}\n  Avoided = ${conf_collisions_avoided}\n  Search time = ${Date.now() - start_set_search_time}ms`, "verbose");
                     }
                     say(`3 populating mutation information`,"debug");
-                    active_forms.set(new_configuration, { "age": 0 });
-                    say(`4 mutation age set`,"debug");
                     let thiscallstarttime = Date.now();
-                    active_forms.get(new_configuration)["stats"] = await get_stats(new_configuration);
-                    say(`5 mutation stats set`,"debug");
+                    active_forms.set(new_configuration, { "age": 0, "stats": (await get_stats(new_configuration)), "ancestor": mutation_ancestor });
                     calltime = calltime + Date.now() - thiscallstarttime;
-                    active_forms.get(new_configuration)["ancestor"] = mutation_ancestor;
-                    say(`6 mutation ancestor set`,"debug");
+                    say(`4 mutation data set`,"debug");
 
                     //analyze the effects of these changes
                     if (active_forms.has(mutation_ancestor)) {
-                        say(`6.5 mutation ancestor found, comparing stats`,"debug");
+                        say(`4.5 mutation ancestor found, comparing stats`,"debug");
                         if (!Object.keys(active_forms.get(mutation_ancestor)).includes("output")){
-                            say(`Anomalous blank ancestor. Cool.`,"debug");
+                            say(`4.9 Anomalous blank ancestor. Cool.`,"debug");
                             active_forms.delete(mutation_ancestor);
                         }else{
                             let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
@@ -250,7 +246,7 @@ module.exports = async function () {
                             }
                         }
                     }
-                    say(`7 exit repopulation #${repopnum}`,"debug");
+                    say(`5 exit repopulation #${repopnum}`,"debug");
                 }
             }
         }
