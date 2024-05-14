@@ -22,16 +22,24 @@ module.exports = function (parent_configuration, mutations_left) {
     }
     //mutate
     var available_pos = [...Array(reactorsize).keys()];
+    const do_bias = Math.random() > 0.5;
+    const tile_bias = tiles[Math.round((tiles.length - 1)*Math.random())];
     while (mutations_left > 0 && available_pos.length > 0) {
         //let pos = Math.round(Math.random() * (parent_configuration.length - 1));
         let pos = available_pos[Math.floor(Math.random() * available_pos.length)];
         available_pos.splice(available_pos.indexOf(pos), 1);
-        let insert = tiles[tiles.length - 1];
-        let insertrand = Math.random();
-        for (let i = 0; i < tile_weights.length; i++) {
-            if (insertrand < tile_weights[i]) {
-                insert = tiles[i];
-                break;
+        let insert = tiles[tiles.length - 1]; //default tile
+        if (do_bias && Math.random() > 0.5){
+            // Bias behavior, tile_bias tile
+            insert = tile_bias;
+        }else{
+            // Default behavior, weighted random tile
+            let insertrand = Math.random();
+            for (let i = 0; i < tile_weights.length; i++) {
+                if (insertrand < tile_weights[i]) {
+                    insert = tiles[i];
+                    break;
+                }
             }
         }
         configuration = parent_configuration.replaceAt(pos, insert);
