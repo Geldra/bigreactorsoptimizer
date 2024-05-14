@@ -238,7 +238,7 @@ module.exports = async function () {
                     let thiscallstarttime = Date.now();
                     let og_af_size = active_forms.size;
                     active_forms.set(new_configuration, { "age": 0, "stats": (await get_stats(new_configuration)), "ancestor": mutation_ancestor });
-                    if (active_forms.size() > og_af_size){
+                    if (active_forms.size > og_af_size){
                         repops++;
                     }
                     calltime = calltime + Date.now() - thiscallstarttime;
