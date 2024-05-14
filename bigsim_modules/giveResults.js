@@ -2,18 +2,19 @@ const index = require("../index");
 const say = index.say;
 const bent = require("bent");
 const post = bent("http://localhost:8081/", "POST", "json", 200);
+const max_failures = 5;
 module.exports = async function (data) {
     const funcStart = Date.now();
     let complete = false;
     let result = {};
     let failures = 0;
-    while (complete == false && failures < 1000) {
+    while (complete == false && failures < max_failures) {
         try {
             result = await post("api/simulate", data);
             complete = true;
         } catch (err) {
             failures++;
-            say(`Calling error: ${err}`,"debug")
+            say(`Calling error (${failures}/${max_failures}): ${err}`,"debug")
             complete = false;
         }
     }
