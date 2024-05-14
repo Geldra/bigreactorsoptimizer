@@ -75,11 +75,31 @@ module.exports = async function () {
                 try {
                     first = active_forms.get(a)["stats"]["output"]["avg"]
                 }catch{
+                    let results = {};
+                    let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
+                    for (let key of keys_to_stat) {
+                        results[key] = {};
+                        results[key]["min"] = 0;
+                        results[key]["max"] = 0;
+                        results[key]["avg"] = 0;
+                        results[key]["stdev"] = 0;
+                    }
+                    active_forms.get(a)["stats"]=results;
                     first = 0;
                 }
                 try {
                     second = active_forms.get(b)["stats"]["output"]["avg"]
                 }catch{
+                    let results = {};
+                    let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
+                    for (let key of keys_to_stat) {
+                        results[key] = {};
+                        results[key]["min"] = 0;
+                        results[key]["max"] = 0;
+                        results[key]["avg"] = 0;
+                        results[key]["stdev"] = 0;
+                    }
+                    active_forms.get(b)["stats"]=results;
                     second = 0;
                 }
                 
