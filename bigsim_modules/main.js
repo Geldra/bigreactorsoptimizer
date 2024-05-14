@@ -38,6 +38,7 @@ var conf_collisions_avoided = 0;
 
 module.exports = async function () {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
+        say(`Starting iteration ${ii} of ${iterations}...`,"verbose");
         let stacktrace_iter = [];
         const old_highest_conf = highest_conf;
         const old_highest_score = active_forms.has(old_highest_conf) ? active_forms.get(old_highest_conf)["stats"]["output"]["avg"] : 0;
@@ -64,8 +65,9 @@ module.exports = async function () {
                 break;
             }
         }
+        say(`Convergence check concluded`,"debug");
         const startitertime = Date.now();
-        //Recording a set of samples for standard deviation calc
+        //Getting the stats on the leader configuration in active_forms
         if (active_forms.size > 0) {
             let highest = [...active_forms.keys()].sort((a, b) => {
                 return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
@@ -77,8 +79,11 @@ module.exports = async function () {
                 last_highest = last_highest.slice(1);
             }
         }
+        say(`Highest stat check concluded`,"debug");
         //Culling
-        for (let j = 0; j < Math.ceil(Math.random() * 0.9 * max_forms); j++) {
+        let cullmax = Math.ceil(Math.random() * 0.9 * max_forms);
+        for (let j = 0; j < cullmax; j++) {
+            say(`Cull #${j} of ${cullmax}`,"debug");
             if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 let weakest_arr = [...active_forms.keys()].sort((a, b) => {
                     return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
@@ -107,6 +112,7 @@ module.exports = async function () {
                 active_forms.delete(weakest);
             }
         }
+        say(`Weak culling concluded`,"debug");
         //Mutating
         const permutationmult = (Math.random() + 1) * 5+20;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
@@ -143,7 +149,11 @@ module.exports = async function () {
         let duplicate_permutation_tries = 0;//failure is duplicate
         let attempts_to_be_unique = 0;
         let timestartmutating = Date.now();
+        let repoploops = 0;
+        say(`Starting repopulation loop`,"debug");
         while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
+            repoploops++;
+            say(`0 Repopulation loop #${repoploops}`,"debug");
             //repopulate
             let mutation_ancestor = seed;
             if (active_forms.size != 0) {
@@ -151,8 +161,10 @@ module.exports = async function () {
             }
 
             let new_conf_returns = make_permutation(mutation_ancestor, productmult);
+            say(`1 mutation created`,"debug");
             const start_set_search_time = Date.now();
             if (oldconfs.has(new_conf_returns[0])) {
+                say(`2 duplicate detected`,"debug");
                 //do NOT recalculate duplicate confs.
                 if (active_forms.has(new_conf_returns[0])) {
                     duplicate_permutation_tries++;
@@ -161,6 +173,7 @@ module.exports = async function () {
                 stacktrace_iter.push(["duplicategen281", new_conf_returns]);
                 attempts_to_be_unique++;
             } else {
+                say(`2 mutation is unique`,"debug");
                 let new_configuration = new_conf_returns[0];
                 oldconfs.add(new_configuration);
                 const calc_set_search_time = Date.now() - start_set_search_time;

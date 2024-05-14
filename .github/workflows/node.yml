@@ -27,14 +27,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 #    - run: npm ci
     - run: node -v
-    - run: npm remove sharp
-    - run: npm install sharp
-    - run: npm rebuild
-    - run: npm install
+    - run: pwd
+    - run: bash dirty_fix.sh
     - run: sudo systemctl start bigreactorsoptimizer
-    - run: sudo systemctl start bigreactorsvisualizer
-    - run: npm remove sharp
-    - run: npm install sharp
-    - run: npm rebuild
-    - run: npm install
     - run: sudo systemctl start bigreactorsvisualizer

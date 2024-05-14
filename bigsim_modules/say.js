@@ -1,5 +1,6 @@
 const index = require("../index");
 const readout_level = index.readout_level;
+let lastsay = 0;
 module.exports = function (message, level = "functions") {
     // functions
     // debug
@@ -16,6 +17,7 @@ module.exports = function (message, level = "functions") {
             if (level == "sparse" || level == "normal" || level == "verbose" || level == "debug") {
                 shouldlog = true;
             }
+            break;
         case "verbose":
             if (level == "sparse" || level == "normal" || level == "verbose") {
                 shouldlog = true;
@@ -33,6 +35,11 @@ module.exports = function (message, level = "functions") {
             break;
     }
     if (shouldlog) {
-        console.log(`[${level.substring(0, 1)}] ${message}`);
+        let timedelta = "";
+        if (lastsay != 0){
+            timedelta = ` [${Date.now() - lastsay}ms]`;
+        }
+        lastsay = Date.now();
+        console.log(`[${level.substring(0, 1)}]${timedelta} ${message}`);
     }
 }
