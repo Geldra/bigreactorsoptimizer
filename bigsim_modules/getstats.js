@@ -4,7 +4,7 @@ const say = index.say;
 
 const givemetheresultalready = require("./giveResults");
 
-const n = 7; //number of samples to take
+const n = 3; //number of samples to take
 module.exports = async function (configuration) {
     say(`Attempting to get stats`,"debug");
     if (configuration.replaceAll("O","").length > 0){
