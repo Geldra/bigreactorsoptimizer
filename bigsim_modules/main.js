@@ -193,7 +193,7 @@ module.exports = async function () {
                 repopstacknum++;
                 say(`Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
-                say(`Completed repopulation stack #${repopstacknum} (${repoploops} total repops)`,"verbose");
+                say(`Completed repopulation stack #${repopstacknum} (${repoploops} total repops) (${active_forms.size} active forms)`,"verbose");
                 repopstack = [];
                 if (active_forms.size > max_forms - 2){
                     break;
