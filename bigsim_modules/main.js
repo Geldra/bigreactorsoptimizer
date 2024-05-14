@@ -193,7 +193,7 @@ module.exports = async function () {
                 repopstacknum++;
                 say(`Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
-                say(`Completed repopulation stack #${repopstacknum}`,"verbose");
+                say(`Completed repopulation stack #${repopstacknum} (${repoploops} total repops)`,"verbose");
                 repopstack = [];
             }
             repopstack.push(repopulate(repoploops+0));
