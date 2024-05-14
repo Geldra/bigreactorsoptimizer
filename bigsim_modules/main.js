@@ -285,7 +285,7 @@ module.exports = async function () {
         repopstacknum++;
         say(`Completing repopulation stack #${repopstacknum}`,"verbose");
         await Promise.all(repopstack);
-        say(`Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms)`,"verbose");
+        say(`Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms) (${errorpops} errors)`,"verbose");
         repopstack = [];
         say(`Time spent mutating: ${Date.now() - timestartmutating}ms`,"verbose");
         if (duplicate_permutation_tries > convergence_detection_count_threshold){
