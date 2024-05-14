@@ -73,41 +73,8 @@ module.exports = async function () {
         const startitertime = Date.now();
         //Getting the stats on the leader configuration in active_forms
         if (active_forms.size > 0) {
-            let highest = [...active_forms.keys()].sort((a, b) => {
-                let first = 0;
-                let second = 0;
-                try {
-                    first = active_forms.get(a)["stats"]["output"]["avg"]
-                }catch{
-                    let results = {};
-                    let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
-                    for (let key of keys_to_stat) {
-                        results[key] = {};
-                        results[key]["min"] = 0;
-                        results[key]["max"] = 0;
-                        results[key]["avg"] = 0;
-                        results[key]["stdev"] = 0;
-                    }
-                    active_forms.get(a)["stats"]=results;
-                    first = 0;
-                }
-                try {
-                    second = active_forms.get(b)["stats"]["output"]["avg"]
-                }catch{
-                    let results = {};
-                    let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
-                    for (let key of keys_to_stat) {
-                        results[key] = {};
-                        results[key]["min"] = 0;
-                        results[key]["max"] = 0;
-                        results[key]["avg"] = 0;
-                        results[key]["stdev"] = 0;
-                    }
-                    active_forms.get(b)["stats"]=results;
-                    second = 0;
-                }
-                
-                return first - second;
+            let highest = [...active_forms.keys()].sort((a, b) => {                
+                return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
             });
             stacktrace_iter.push(["highest", arrmapstack(highest)]);
             last_highest.push(active_forms.get(highest[highest.length - 1])["stats"]["output"]["avg"]);
@@ -250,19 +217,9 @@ module.exports = async function () {
                         //analyze the effects of these changes
                         if (active_forms.has(mutation_ancestor)) {
                             say(`4.5 mutation ancestor found, comparing stats`,"debug");
-                            if (!Object.keys(active_forms.get(mutation_ancestor)).includes("output")){
-                                say(`4.9 Anomalous blank ancestor. Cool.`,"debug");
-                                //active_forms.delete(mutation_ancestor);
-                                let results = {};
-                                let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
-                                for (let key of keys_to_stat) {
-                                    results[key] = {};
-                                    results[key]["min"] = 0;
-                                    results[key]["max"] = 0;
-                                    results[key]["avg"] = 0;
-                                    results[key]["stdev"] = 0;
-                                }
-                                active_forms.get(mutation_ancestor)["stats"]=results;
+                            if (!Object.keys(active_forms.get(mutation_ancestor)["stats"]).includes("output")){
+                                say(`Anomalous blank ancestor. Cool.`,"verbose");
+                                active_forms.delete(mutation_ancestor);
                             }else{
                                 let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
                                 let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
