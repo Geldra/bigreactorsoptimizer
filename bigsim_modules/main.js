@@ -142,6 +142,7 @@ module.exports = async function () {
         let calltime = 0;
         let duplicate_permutation_tries = 0;//failure is duplicate
         let attempts_to_be_unique = 0;
+        let timestartmutating = Date.now();
         while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
             //repopulate
             let mutation_ancestor = seed;
@@ -186,6 +187,7 @@ module.exports = async function () {
                 }
             }
         }
+        say(`Time spent mutating: ${Date.now() - timestartmutating}ms`,"verbose");
         if (duplicate_permutation_tries > convergence_detection_count_threshold){
             report_results("explored");
             break;

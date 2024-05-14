@@ -14,6 +14,6 @@ module.exports = async function (data) {
             complete = false;
         }
     }
-    say(`givemetheresultalready() [${Date.now() - funcStart} ms]`);
+    say(`givemetheresultalready() [${Date.now() - funcStart} ms]`,"debug");
     return result;
 }

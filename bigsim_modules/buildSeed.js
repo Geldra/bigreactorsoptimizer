@@ -23,7 +23,7 @@ module.exports = function () {
     }
     let newseed = "";
     for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
-        newseed = newseed + "X";
+        newseed = newseed + "O";
     }
     say(`buildrandomseed() [${Date.now() - funcStart} ms]`);
     return newseed;
