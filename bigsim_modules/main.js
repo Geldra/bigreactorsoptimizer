@@ -118,7 +118,7 @@ module.exports = async function () {
         }
         say(`Highest stat check concluded`,"debug");
         //Culling
-        let cullmax = Math.ceil(Math.random() * 0.9 * max_forms);
+        let cullmax = Math.ceil(Math.random() * 0.5 * max_forms);
         for (let j = 0; j < cullmax; j++) {
             say(`Cull #${j} of ${cullmax}`,"debug");
             if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
