@@ -240,7 +240,7 @@ module.exports = async function () {
                         say(`4.5 mutation ancestor found, comparing stats`,"debug");
                         if (!Object.keys(active_forms.get(mutation_ancestor)).includes("output")){
                             say(`4.9 Anomalous blank ancestor. Cool.`,"debug");
-                            active_forms.delete(mutation_ancestor);
+                            //active_forms.delete(mutation_ancestor);
                         }else{
                             let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
                             let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
