@@ -189,6 +189,7 @@ module.exports = async function () {
         let attempts_to_be_unique = 0;
         let timestartmutating = Date.now();
         let repoploops = 0;
+        let repops = 0;
         let repopstacknum = 0;
         say(`Starting repopulation loop`,"verbose");
         repopstack = [];
@@ -197,7 +198,7 @@ module.exports = async function () {
                 repopstacknum++;
                 say(`Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
-                say(`Completed repopulation stack #${repopstacknum} (${repoploops} total repops) (${active_forms.size} active forms)`,"verbose");
+                say(`Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms)`,"verbose");
                 repopstack = [];
                 if (active_forms.size > max_forms - 2){
                     break;
@@ -235,7 +236,11 @@ module.exports = async function () {
                     }
                     say(`3 populating mutation information`,"debug");
                     let thiscallstarttime = Date.now();
+                    let og_af_size = active_forms.size();
                     active_forms.set(new_configuration, { "age": 0, "stats": (await get_stats(new_configuration)), "ancestor": mutation_ancestor });
+                    if (active_forms.size() > og_af_size){
+                        repops++;
+                    }
                     calltime = calltime + Date.now() - thiscallstarttime;
                     say(`4 mutation data set`,"debug");
 
