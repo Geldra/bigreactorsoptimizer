@@ -31,6 +31,9 @@ const getStandardDeviation = utils.getStandardDeviation;
 const getAverage = utils.getAverage;
 const floatRound = utils.floatRound;
 
+const initcomps = index.initcomps;
+const palette = Object.keys(initcomps);
+
 var optimize_escape_split = 0.5; //if Math.round() is greater, escape. Otherwise, optimize. (high / low mutation count)
 
 const oldconfs = new Set();
@@ -51,7 +54,8 @@ module.exports = async function () {
                 say(`Attempting convergence breakout... (${breakouts}/${max_breakouts})`, "sparse");
                 let newseed = "";
                 for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
-                    newseed = newseed + "X";
+                    let addition = palette[Math.round((palette.length-1)*Math.random())];
+                    newseed = newseed + addition;
                 }
                 active_forms.clear();
                 active_forms.set(newseed, { "age": 0 });
@@ -149,11 +153,11 @@ module.exports = async function () {
         }
         say(`Weak culling concluded`,"debug");
         //Mutating
-        const permutationmult = (Math.random() + 1) * 5+20;
+        const permutationmult = (Math.random() + 1) * 50+20;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
         const current_stdev = floatRound(getStandardDeviation(last_highest), 5);
         const current_mean = getAverage(last_highest);
-        let thirdpermutationmultinterm = 1;//(current_stdev / current_mean < convergence_percent_error_threshold && last_highest.length >= max_last_highest ? 100 * (convergence_percent_error_threshold / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
+        let thirdpermutationmultinterm = (current_stdev / current_mean < convergence_percent_error_threshold && last_highest.length >= max_last_highest ? 100 * (convergence_percent_error_threshold / (current_stdev / current_mean)) : 1); //on/off switch to spam mutations on convergence
         const split_rand = Math.random();
         const thirdpermutationmult = (optimize_escape_split > split_rand ? (current_stdev == 0 ? set_parameters["zSize"] * set_parameters["xSize"] : thirdpermutationmultinterm) : 1);
         //TODO: Allow time to explore new region before calling convergence

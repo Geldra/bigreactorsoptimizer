@@ -3,6 +3,8 @@ const fs = index.fs;
 const say = index.say;
 const active_forms = index.active_forms;
 const set_parameters = index.set_parameters;
+const initcomps = index.initcomps;
+const palette = Object.keys(initcomps);
 
 module.exports = function () {
     const funcStart = Date.now();
@@ -23,7 +25,9 @@ module.exports = function () {
     }
     let newseed = "";
     for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
-        newseed = newseed + (Math.random() < 0.1 ? "X" : "O");
+        //newseed = newseed + (Math.random() < 0.1 ? "X" : "O");
+        let addition = palette[Math.round((palette.length-1)*Math.random())];
+        newseed = newseed + addition;
     }
     say(`buildrandomseed() [${Date.now() - funcStart} ms]`);
     return newseed;
