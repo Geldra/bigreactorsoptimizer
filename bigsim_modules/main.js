@@ -219,6 +219,9 @@ module.exports = async function () {
                         mutation_ancestor_race_cheat = active_forms.get(mutation_ancestor)
                         if (mutation_ancestor_race_cheat != undefined) {
                             say(`4.5 mutation ancestor found, comparing stats`,"debug");
+                            while(!Object.keys(mutation_ancestor_race_cheat).includes("stats")){
+                                await new Promise(r => setTimeout(r, 100)); //awful, I know!
+                            }
                             if (!Object.keys(mutation_ancestor_race_cheat["stats"]).includes("output")){
                                 say(`Anomalous blank ancestor. Cool.`,"verbose");
                                 active_forms.delete(mutation_ancestor);
