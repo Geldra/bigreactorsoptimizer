@@ -185,11 +185,15 @@ module.exports = async function () {
         let attempts_to_be_unique = 0;
         let timestartmutating = Date.now();
         let repoploops = 0;
+        let repopstacknum = 0;
         say(`Starting repopulation loop`,"debug");
         repopstack = [];
         while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
             if (repopstack.length > 50){
+                repopstacknum++;
+                say(`Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
+                say(`Completed repopulation stack #${repopstacknum}`,"verbose");
                 repopstack = [];
             }
             repopstack.push(repopulate(repoploops+0));
