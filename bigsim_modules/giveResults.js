@@ -11,6 +11,7 @@ module.exports = async function (data) {
             result = await post("api/simulate", data);
             complete = true;
         } catch (err) {
+            say(`Calling error: ${err}`,"debug")
             complete = false;
         }
     }

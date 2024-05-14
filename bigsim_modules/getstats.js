@@ -6,6 +6,7 @@ const givemetheresultalready = require("./giveResults");
 
 const n = 7; //number of samples to take
 module.exports = async function (configuration) {
+    say(`Attempting to get stats`,"debug");
     const funcStart = Date.now();
     let samples = [];
     for (let i = 0; i < n; i++) {

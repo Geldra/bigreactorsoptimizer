@@ -187,14 +187,14 @@ module.exports = async function () {
                 say(`4 mutation age set`,"debug");
                 let thiscallstarttime = Date.now();
                 active_forms.get(new_configuration)["stats"] = await get_stats(new_configuration);
-                say(`4 mutation stats set`,"debug");
+                say(`5 mutation stats set`,"debug");
                 calltime = calltime + Date.now() - thiscallstarttime;
                 active_forms.get(new_configuration)["ancestor"] = mutation_ancestor;
-                say(`4 mutation ancestor set`,"debug");
+                say(`6 mutation ancestor set`,"debug");
 
                 //analyze the effects of these changes
                 if (active_forms.has(mutation_ancestor)) {
-                    say(`5 mutation ancestor found, comparing stats`,"debug");
+                    say(`6.5 mutation ancestor found, comparing stats`,"debug");
                     let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
                     let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
                     for (let tile of Object.keys(new_conf_returns[1])) {
@@ -205,7 +205,7 @@ module.exports = async function () {
                         }
                     }
                 }
-                say(`6 exit repopulation #${repoploops}`,"debug");
+                say(`7 exit repopulation #${repoploops}`,"debug");
             }
         }
         say(`Time spent mutating: ${Date.now() - timestartmutating}ms`,"verbose");
