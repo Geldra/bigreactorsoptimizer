@@ -335,7 +335,7 @@ module.exports = async function () {
             }catch{
 
             }
-            return ;
+            return this_is_dumb;
         })
     }
     fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(Object.fromEntries([...active_forms.entries()]), null, 4), { encoding: false });
