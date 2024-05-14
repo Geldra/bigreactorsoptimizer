@@ -213,7 +213,7 @@ module.exports = async function () {
                 say(`1 mutation created`,"debug");
                 const start_set_search_time = Date.now();
                 if (oldconfs.has(new_conf_returns[0])) {
-                    say(`2 duplicate detected`,"debug");
+                    say(`duplicate #${conf_collisions_avoided} detected`,"verbose");
                     //do NOT recalculate duplicate confs.
                     if (active_forms.has(new_conf_returns[0])) {
                         duplicate_permutation_tries++;
