@@ -1,7 +1,7 @@
 var ii = 1;
 let breakouts = 0;
 const max_breakouts = 3; //blank resets to reconverge
-const convergence_detection_count_threshold = 5; //number of times to piddle in a local optimum before escaping global
+const convergence_detection_count_threshold = 5000; //number of times to piddle in a local optimum before escaping global
 var convergence_detection_count = 0;
 const max_last_highest = 10; //higher numbers here make it less sensitive to changes
 var highest_conf = "";
