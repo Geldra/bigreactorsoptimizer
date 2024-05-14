@@ -64,7 +64,7 @@ module.exports = async function (configuration) {
                 results[key]["avg"] = 0;
                 results[key]["stdev"] = 0;
             }
-            say(`No stats this time`,"debug");
+            say(`No stats this time: ${JSON.stringify(results)}`,"debug");
             return results;
         }
         return results;
@@ -78,7 +78,7 @@ module.exports = async function (configuration) {
             results[key]["avg"] = 0;
             results[key]["stdev"] = 0;
         }
-        say(`No stats this time`,"debug");
+        say(`No stats this time: ${JSON.stringify(results)}`,"debug");
         return results;
     }
 }
