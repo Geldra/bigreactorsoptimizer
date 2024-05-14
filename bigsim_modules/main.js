@@ -286,7 +286,12 @@ module.exports = async function () {
             if (active_forms.get(highest_conf)["stats"]["output"]["avg"] < old_highest_score) {
                 stacktrace_iter.push(["new_highest_conf320", highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
                 stacktrace_iter.push(["old_highest_conf321", old_highest_conf + "-" + old_highest_score]);
-                fs.writeFileSync("../../../whydoyoudothis" + Date.now() + ".json", JSON.stringify(stacktrace_iter, null, 4), { encoding: "utf-8" });
+                try{
+                    fs.writeFileSync("../../../whydoyoudothis" + Date.now() + ".json", JSON.stringify(stacktrace_iter, null, 4), { encoding: "utf-8" });
+                }catch (err){
+                    fs.writeFileSync("../../../whydoyoudothis" + Date.now() + ".json", `God knows, man.\n${err}\nstacktrace_iter.length = ${stacktrace_iter.length}`, { encoding: "utf-8" });
+                }
+                
             }
         }
     }
