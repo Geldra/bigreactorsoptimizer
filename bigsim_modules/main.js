@@ -162,7 +162,7 @@ module.exports = async function () {
         say(`Starting repopulation loop`,"verbose");
         repopstack = [];
         while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
-            if (repopstack.length > 500 || !(active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold)){
+            if (repopstack.length > 1000 || !(active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold)){
                 repopstacknum++;
                 say(`Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
@@ -205,9 +205,10 @@ module.exports = async function () {
                     say(`3 populating mutation information`,"debug");
                     let thiscallstarttime = Date.now();
                     let og_af_size = active_forms.size;
+                    active_forms.set(new_configuration, { "age": 0, "ancestor": mutation_ancestor }); //reserving the slot in active_forms under the assumption it will fill it
                     let stats = await get_stats(new_configuration);
                     if (!Object.keys(stats).includes("error")){
-                        active_forms.set(new_configuration, { "age": 0, "stats": stats, "ancestor": mutation_ancestor });
+                        active_forms.get(new_configuration)["stats"] = stats //filling the slot in active_forms fully
                         if (active_forms.size > og_af_size){
                             repops++;
                         }
@@ -234,6 +235,7 @@ module.exports = async function () {
                         }
                         say(`5 exit repopulation #${repopnum}`,"debug");
                     }else{
+                        active_forms.delete(new_configuration); //taksies backsies
                         errorpops++;
                     }
                 }
