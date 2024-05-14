@@ -57,6 +57,7 @@ module.exports = async function (configuration) {
         if (successes == 0){
             let results = {};
             let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
+            results["error"] = true;
             for (let key of keys_to_stat) {
                 results[key] = {};
                 results[key]["min"] = 0;
@@ -71,6 +72,7 @@ module.exports = async function (configuration) {
     }else{
         let results = {};
         let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
+        results["error"] = true;
         for (let key of keys_to_stat) {
             results[key] = {};
             results[key]["min"] = 0;

@@ -190,6 +190,7 @@ module.exports = async function () {
         let timestartmutating = Date.now();
         let repoploops = 0;
         let repops = 0;
+        let errorpops = 0;
         let repopstacknum = 0;
         say(`Starting repopulation loop`,"verbose");
         repopstack = [];
@@ -198,7 +199,7 @@ module.exports = async function () {
                 repopstacknum++;
                 say(`Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
-                say(`Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms)`,"verbose");
+                say(`Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms) (${errorpops} errors)`,"verbose");
                 repopstack = [];
                 if (active_forms.size > max_forms - 1){
                     break;
@@ -237,42 +238,47 @@ module.exports = async function () {
                     say(`3 populating mutation information`,"debug");
                     let thiscallstarttime = Date.now();
                     let og_af_size = active_forms.size;
-                    active_forms.set(new_configuration, { "age": 0, "stats": (await get_stats(new_configuration)), "ancestor": mutation_ancestor });
-                    if (active_forms.size > og_af_size){
-                        repops++;
-                    }
-                    calltime = calltime + Date.now() - thiscallstarttime;
-                    say(`4 mutation data set`,"debug");
-
-                    //analyze the effects of these changes
-                    if (active_forms.has(mutation_ancestor)) {
-                        say(`4.5 mutation ancestor found, comparing stats`,"debug");
-                        if (!Object.keys(active_forms.get(mutation_ancestor)).includes("output")){
-                            say(`4.9 Anomalous blank ancestor. Cool.`,"debug");
-                            //active_forms.delete(mutation_ancestor);
-                            let results = {};
-                            let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
-                            for (let key of keys_to_stat) {
-                                results[key] = {};
-                                results[key]["min"] = 0;
-                                results[key]["max"] = 0;
-                                results[key]["avg"] = 0;
-                                results[key]["stdev"] = 0;
-                            }
-                            active_forms.get(mutation_ancestor)["stats"]=results;
-                        }else{
-                            let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
-                            let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
-                            for (let tile of Object.keys(new_conf_returns[1])) {
-                                components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
-                                if (components[tile]["weight"] <= 0) {
-                                    //weight at or under 0 prevents items from appearing
-                                    components[tile]["weight"] = 1;
+                    let stats = await get_stats(new_configuration);
+                    if (!Object.keys(stats).includes("error")){
+                        active_forms.set(new_configuration, { "age": 0, "stats": stats, "ancestor": mutation_ancestor });
+                        if (active_forms.size > og_af_size){
+                            repops++;
+                        }
+                        calltime = calltime + Date.now() - thiscallstarttime;
+                        say(`4 mutation data set`,"debug");
+    
+                        //analyze the effects of these changes
+                        if (active_forms.has(mutation_ancestor)) {
+                            say(`4.5 mutation ancestor found, comparing stats`,"debug");
+                            if (!Object.keys(active_forms.get(mutation_ancestor)).includes("output")){
+                                say(`4.9 Anomalous blank ancestor. Cool.`,"debug");
+                                //active_forms.delete(mutation_ancestor);
+                                let results = {};
+                                let keys_to_stat = ["coolantTemperature", "fuelConsumption", "fuelFertility", "fuelHeat", "output", "reactorHeat"];
+                                for (let key of keys_to_stat) {
+                                    results[key] = {};
+                                    results[key]["min"] = 0;
+                                    results[key]["max"] = 0;
+                                    results[key]["avg"] = 0;
+                                    results[key]["stdev"] = 0;
+                                }
+                                active_forms.get(mutation_ancestor)["stats"]=results;
+                            }else{
+                                let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
+                                let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
+                                for (let tile of Object.keys(new_conf_returns[1])) {
+                                    components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
+                                    if (components[tile]["weight"] <= 0) {
+                                        //weight at or under 0 prevents items from appearing
+                                        components[tile]["weight"] = 1;
+                                    }
                                 }
                             }
                         }
+                        say(`5 exit repopulation #${repopnum}`,"debug");
+                    }else{
+                        errorpops++;
                     }
-                    say(`5 exit repopulation #${repopnum}`,"debug");
                 }
             }
         }
