@@ -153,59 +153,67 @@ module.exports = async function () {
         let timestartmutating = Date.now();
         let repoploops = 0;
         say(`Starting repopulation loop`,"debug");
+        repopstack = [];
         while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
-            repoploops++;
-            say(`0 Repopulation loop #${repoploops}`,"debug");
-            //repopulate
-            let mutation_ancestor = seed;
-            if (active_forms.size != 0) {
-                mutation_ancestor = [...active_forms.keys()][Math.floor(Math.random() * (active_forms.size))];
+            if (repopstack.length > 100){
+                await Promise.all(repopstack);
+                repopstack = [];
             }
-
-            let new_conf_returns = make_permutation(mutation_ancestor, productmult);
-            say(`1 mutation created`,"debug");
-            const start_set_search_time = Date.now();
-            if (oldconfs.has(new_conf_returns[0])) {
-                say(`2 duplicate detected`,"debug");
-                //do NOT recalculate duplicate confs.
-                if (active_forms.has(new_conf_returns[0])) {
-                    duplicate_permutation_tries++;
+            repopstack.push(repopulate(repoploops+0));
+            repoploops++;
+            async function repopulate(repopnum){
+                say(`Repopulation #${repopnum}`,"debug");
+                //repopulate
+                let mutation_ancestor = seed;
+                if (active_forms.size != 0) {
+                    mutation_ancestor = [...active_forms.keys()][Math.floor(Math.random() * (active_forms.size))];
                 }
-                conf_collisions_avoided++;
-                stacktrace_iter.push(["duplicategen281", new_conf_returns]);
-                attempts_to_be_unique++;
-            } else {
-                say(`2 mutation is unique`,"debug");
-                let new_configuration = new_conf_returns[0];
-                oldconfs.add(new_configuration);
-                const calc_set_search_time = Date.now() - start_set_search_time;
-                if (calc_set_search_time > 10) {
-                    say(`conf collisions report:\n  Tracking = ${oldconfs.size}\n  Avoided = ${conf_collisions_avoided}\n  Search time = ${Date.now() - start_set_search_time}ms`, "verbose");
-                }
-                say(`3 populating mutation information`,"debug");
-                active_forms.set(new_configuration, { "age": 0 });
-                say(`4 mutation age set`,"debug");
-                let thiscallstarttime = Date.now();
-                active_forms.get(new_configuration)["stats"] = await get_stats(new_configuration);
-                say(`5 mutation stats set`,"debug");
-                calltime = calltime + Date.now() - thiscallstarttime;
-                active_forms.get(new_configuration)["ancestor"] = mutation_ancestor;
-                say(`6 mutation ancestor set`,"debug");
 
-                //analyze the effects of these changes
-                if (active_forms.has(mutation_ancestor)) {
-                    say(`6.5 mutation ancestor found, comparing stats`,"debug");
-                    let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
-                    let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
-                    for (let tile of Object.keys(new_conf_returns[1])) {
-                        components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
-                        if (components[tile]["weight"] <= 0) {
-                            //weight at or under 0 prevents items from appearing
-                            components[tile]["weight"] = 1;
+                let new_conf_returns = make_permutation(mutation_ancestor, productmult);
+                say(`1 mutation created`,"debug");
+                const start_set_search_time = Date.now();
+                if (oldconfs.has(new_conf_returns[0])) {
+                    say(`2 duplicate detected`,"debug");
+                    //do NOT recalculate duplicate confs.
+                    if (active_forms.has(new_conf_returns[0])) {
+                        duplicate_permutation_tries++;
+                    }
+                    conf_collisions_avoided++;
+                    stacktrace_iter.push(["duplicategen281", new_conf_returns]);
+                    attempts_to_be_unique++;
+                } else {
+                    say(`2 mutation is unique`,"debug");
+                    let new_configuration = new_conf_returns[0];
+                    oldconfs.add(new_configuration);
+                    const calc_set_search_time = Date.now() - start_set_search_time;
+                    if (calc_set_search_time > 10) {
+                        say(`conf collisions report:\n  Tracking = ${oldconfs.size}\n  Avoided = ${conf_collisions_avoided}\n  Search time = ${Date.now() - start_set_search_time}ms`, "verbose");
+                    }
+                    say(`3 populating mutation information`,"debug");
+                    active_forms.set(new_configuration, { "age": 0 });
+                    say(`4 mutation age set`,"debug");
+                    let thiscallstarttime = Date.now();
+                    active_forms.get(new_configuration)["stats"] = await get_stats(new_configuration);
+                    say(`5 mutation stats set`,"debug");
+                    calltime = calltime + Date.now() - thiscallstarttime;
+                    active_forms.get(new_configuration)["ancestor"] = mutation_ancestor;
+                    say(`6 mutation ancestor set`,"debug");
+
+                    //analyze the effects of these changes
+                    if (active_forms.has(mutation_ancestor)) {
+                        say(`6.5 mutation ancestor found, comparing stats`,"debug");
+                        let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
+                        let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
+                        for (let tile of Object.keys(new_conf_returns[1])) {
+                            components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
+                            if (components[tile]["weight"] <= 0) {
+                                //weight at or under 0 prevents items from appearing
+                                components[tile]["weight"] = 1;
+                            }
                         }
                     }
+                    say(`7 exit repopulation #${repopnum}`,"debug");
                 }
-                say(`7 exit repopulation #${repoploops}`,"debug");
             }
         }
         say(`Time spent mutating: ${Date.now() - timestartmutating}ms`,"verbose");
