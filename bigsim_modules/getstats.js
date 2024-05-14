@@ -8,7 +8,7 @@ const n = 7; //number of samples to take
 module.exports = async function (configuration) {
     say(`Attempting to get stats`,"debug");
     if (configuration.replaceAll("O","").length > 0){
-        say(`Why do you do this ${configuration.replaceAll("O","").length}`,"debug");
+        //say(`Why do you do this ${configuration.replaceAll("O","").length}`,"debug");
         const funcStart = Date.now();
         let samples = [];
         for (let i = 0; i < n; i++) {
@@ -60,6 +60,7 @@ module.exports = async function (configuration) {
             results[key]["avg"] = 0;
             results[key]["stdev"] = 0;
         }
+        say(`No stats this time`,"debug");
         return results;
-    }   
+    }
 }
