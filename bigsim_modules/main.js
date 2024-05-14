@@ -1,7 +1,7 @@
 var ii = 1;
 let breakouts = 0;
 const max_breakouts = 3; //blank resets to reconverge
-const convergence_detection_count_threshold = 75000; //number of times to try escaping the local optimum
+const convergence_detection_count_threshold = 5; //number of times to piddle in a local optimum before escaping global
 var convergence_detection_count = 0;
 const max_last_highest = 10; //higher numbers here make it less sensitive to changes
 var highest_conf = "";
@@ -189,7 +189,7 @@ module.exports = async function () {
         say(`Starting repopulation loop`,"verbose");
         repopstack = [];
         while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
-            if (repopstack.length > 1000){
+            if (repopstack.length > 5000 || active_forms.size > max_forms - 2 /*not sure how many to subtract, precision is still fine*/){
                 repopstacknum++;
                 say(`Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
