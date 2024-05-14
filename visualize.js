@@ -23,7 +23,8 @@ const sidohorg_reactor_bounds = {
 }
 const users_to_notify_upon_completion = [
     "317799838362370070",
-    "283435626844389376"
+    "283435626844389376",
+    "822300578872033281"
 ]
 const reactor_width = 30;
 const reactor_length = 30;
