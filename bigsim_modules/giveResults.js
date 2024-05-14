@@ -13,7 +13,7 @@ module.exports = async function (data) {
             complete = true;
         } catch (err) {
             failures++;
-            //say(`Calling error: ${err}`,"debug")
+            say(`Calling error: ${err}`,"debug")
             complete = false;
         }
     }
