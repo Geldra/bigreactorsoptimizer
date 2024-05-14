@@ -216,14 +216,15 @@ module.exports = async function () {
                         say(`4 mutation data set`,"debug");
     
                         //analyze the effects of these changes
-                        if (active_forms.has(mutation_ancestor)) {
+                        mutation_ancestor_race_cheat = active_forms.get(mutation_ancestor)
+                        if (mutation_ancestor_race_cheat != undefined) {
                             say(`4.5 mutation ancestor found, comparing stats`,"debug");
-                            if (!Object.keys(active_forms.get(mutation_ancestor)["stats"]).includes("output")){
+                            if (!Object.keys(mutation_ancestor_race_cheat["stats"]).includes("output")){
                                 say(`Anomalous blank ancestor. Cool.`,"verbose");
                                 active_forms.delete(mutation_ancestor);
                             }else{
-                                let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
-                                let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
+                                let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - mutation_ancestor_race_cheat["stats"]["output"]["avg"];
+                                let score_diff_percent = score_diff / mutation_ancestor_race_cheat["stats"]["output"]["avg"];
                                 for (let tile of Object.keys(new_conf_returns[1])) {
                                     components[tile]["weight"] = components[tile]["weight"] + score_diff_percent * new_conf_returns[1][tile] * Math.log(ii) / (max_forms * 100);
                                     if (components[tile]["weight"] <= 0) {
