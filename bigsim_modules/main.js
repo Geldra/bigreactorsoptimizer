@@ -110,6 +110,8 @@ module.exports = async function () {
                 say(`   2: ${active_forms.get(weakest)["stats"]["output"]["avg"] <= active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]} (${active_forms.get(weakest)["stats"]["output"]["avg"]} <= ${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]})`, "debug");
                 say(`   3: ${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"] < active_forms.get(highest_conf)["stats"]["output"]["avg"]} (${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]} < ${active_forms.get(highest_conf)["stats"]["output"]["avg"]})`, "debug");
                 active_forms.delete(weakest);
+            }else{
+                break;
             }
         }
         say(`Weak culling concluded`,"debug");
@@ -180,14 +182,19 @@ module.exports = async function () {
                 if (calc_set_search_time > 10) {
                     say(`conf collisions report:\n  Tracking = ${oldconfs.size}\n  Avoided = ${conf_collisions_avoided}\n  Search time = ${Date.now() - start_set_search_time}ms`, "verbose");
                 }
+                say(`3 populating mutation information`,"debug");
                 active_forms.set(new_configuration, { "age": 0 });
+                say(`4 mutation age set`,"debug");
                 let thiscallstarttime = Date.now();
                 active_forms.get(new_configuration)["stats"] = await get_stats(new_configuration);
+                say(`4 mutation stats set`,"debug");
                 calltime = calltime + Date.now() - thiscallstarttime;
                 active_forms.get(new_configuration)["ancestor"] = mutation_ancestor;
+                say(`4 mutation ancestor set`,"debug");
 
                 //analyze the effects of these changes
                 if (active_forms.has(mutation_ancestor)) {
+                    say(`5 mutation ancestor found, comparing stats`,"debug");
                     let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
                     let score_diff_percent = score_diff / active_forms.get(mutation_ancestor)["stats"]["output"]["avg"];
                     for (let tile of Object.keys(new_conf_returns[1])) {
@@ -198,6 +205,7 @@ module.exports = async function () {
                         }
                     }
                 }
+                say(`6 exit repopulation #${repoploops}`,"debug");
             }
         }
         say(`Time spent mutating: ${Date.now() - timestartmutating}ms`,"verbose");

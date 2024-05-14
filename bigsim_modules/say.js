@@ -37,7 +37,7 @@ module.exports = function (message, level = "functions") {
     if (shouldlog) {
         let timedelta = "";
         if (lastsay != 0){
-            timedelta = ` [${Date.now() - lastsay}ms]`;
+            timedelta = ` [+${Date.now() - lastsay}ms]`;
         }
         lastsay = Date.now();
         console.log(`[${level.substring(0, 1)}]${timedelta} ${message}`);
