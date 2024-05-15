@@ -98,7 +98,7 @@ async function updateloop() {
             inittestrun = true;
             last_update = Date.now();
             const stats = getHighestStats();
-            let buildgraphoutput = await buildgraph("output", 1000);
+            let buildgraphoutput = await buildgraph("output", 200);
             if (!buildgraphoutput && (!sent_convergence_message)) {
                 console.log("False from buildgraph so no changes in files!");
                 await spamchan.send("No changes since last update. Convergence is likely!\nView the last update to see the latest.\n<@" + users_to_notify_upon_completion.join("><@") + ">");
