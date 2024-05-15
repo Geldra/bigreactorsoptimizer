@@ -133,7 +133,7 @@ module.exports = async function () {
         // to the point where a given random configuration in it is better.
         say("Convergence is " + convergence_detection_count + " / " + convergence_detection_count_threshold + " (stdev " + current_stdev + ") [" + breakouts + "/" + max_breakouts + " breakouts]", "debug");
         if (current_stdev == 0) {
-            if (convergence_detection_count / convergence_detection_count_threshold > 0.5){
+            if (convergence_detection_count / convergence_detection_count_threshold > (6/1000)){ //attempts to give a jolt to a suboptimal optimization slope
                 for (let key of Object.keys(components)) {
                     components[key]["weight"] = 1;
                 }
