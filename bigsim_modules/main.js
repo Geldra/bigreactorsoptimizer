@@ -85,7 +85,7 @@ module.exports = async function () {
             last_highest.push(contenders.get(highest_conf)["stats"]["output"]["avg"]);
             highest_stats = contenders.get(highest_conf);
             contenders.clear();
-            contenders.set(highest_conf,winner_stats);
+            contenders.set(highest_conf,highest_stats);
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
             }
