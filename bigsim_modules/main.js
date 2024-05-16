@@ -96,7 +96,7 @@ module.exports = async function () {
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
             return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
         });
-        say(`weakest_arr is ${weakest_arr.length} long`,"verbose");
+        say(`Culling. active_forms is ${active_forms.size}\nweakest_arr is ${weakest_arr.length}`,"verbose");
         for (let j = 0; j < cullmax; j++) {
             say(`Cull #${j} of ${cullmax}`,"debug");
             if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
@@ -128,7 +128,7 @@ module.exports = async function () {
                 break;
             }
         }
-        say(`Weak culling concluded`,"debug");
+        say(`Weak culling concluded. active_forms is ${active_forms.size}`,"debug");
         //Mutating
         say(`(mutating) Contenders in highest eval: ${contenders.size}`,"verbose");
         const permutationmult = (Math.random() + 1) * 50+100;
