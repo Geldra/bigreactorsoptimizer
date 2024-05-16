@@ -116,7 +116,7 @@ module.exports = async function () {
                     }
                 }*/
                 //stacktrace_iter.push(["weakest_arr225-" + j, arrmapstack(weakest_arr)]);
-                let weakest = weakest_arr.splice(magicnumber,1);
+                let weakest = weakest_arr.splice(magicnumber,1)[0];
                 say(`Ok here I go. Culling this reactor conf:\n${weakest}`,"debug");
                 say(`Is it possible to cull this? ${active_forms.has(weakest)}`);
                 //stacktrace_iter.push(["weakest227-" + j, weakest + "-" + active_forms.get(weakest)["stats"]["output"]["avg"]]);
