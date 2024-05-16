@@ -220,6 +220,8 @@ module.exports = async function () {
                     let stats = await get_stats(new_configuration);
                     if (!Object.keys(stats).includes("error")){
                         active_forms.get(new_configuration)["stats"] = stats //filling the slot in active_forms fully
+                        contenders.set(new_configuration, {});
+                        Object.assign(contenders.get(new_configuration),active_forms.get(new_configuration)); //making a copy of the dict in active_forms
                         if (active_forms.size > og_af_size){
                             repops++;
                         }
@@ -249,7 +251,6 @@ module.exports = async function () {
                             }
                         }
                         say(`5 exit repopulation #${repopnum}`,"debug");
-                        contenders.set(new_configuration, active_forms.get(new_configuration));
                     }else{
                         active_forms.delete(new_configuration); //taksies backsies
                         errorpops++;
