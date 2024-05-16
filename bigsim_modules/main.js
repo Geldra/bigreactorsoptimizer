@@ -319,6 +319,7 @@ module.exports = async function () {
         })
     }
     fs.writeFileSync("../../../reactorsaves/final.json", JSON.stringify(Object.fromEntries([...active_forms.entries()]), null, 4), { encoding: false });
+    say(`I am under the illusion that my job is done.`,"sparse")
 }
 
 function report_results(condition) {
