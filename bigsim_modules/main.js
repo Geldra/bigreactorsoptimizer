@@ -50,10 +50,10 @@ module.exports = async function () {
         stacktrace_iter.push(["old_highest_conf165", old_highest_conf + "-" + old_highest_score]);
         //Check if convergence has been reached
         if (convergence_detection_count > convergence_detection_count_threshold) {
-            say("Convergence detected.", "sparse");
+            say("  Convergence detected.", "sparse");
             if (breakouts < max_breakouts) {
                 //Breakout
-                say(`Attempting convergence breakout... (${breakouts}/${max_breakouts})`, "sparse");
+                say(`    Attempting convergence breakout... (${breakouts}/${max_breakouts})`, "sparse");
                 let newseed = "";
                 for (let i = 0; i < (set_parameters["xSize"] - 2) * (set_parameters["zSize"] - 2); i++) {
                     let addition = palette[Math.round((palette.length-1)*Math.random())];
@@ -71,7 +71,7 @@ module.exports = async function () {
                 break;
             }
         }
-        say(`Convergence check concluded`,"debug");
+        say(`  Convergence check concluded`,"debug");
         const startitertime = Date.now();
         //Getting the stats on the leader configuration in contenders
         if (contenders.size > 0) {
@@ -90,13 +90,13 @@ module.exports = async function () {
             }
             
         }
-        say(`Highest stat check concluded`,"debug");
+        say(`  Highest stat check concluded`,"debug");
         //Culling
         let cullmax = Math.ceil(Math.random() * 0.8 * max_forms);
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
             return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
         });
-        say(`Starting cull. afrm=${active_forms.size} warr=${weakest_arr.length}`,"verbose");
+        say(`  Starting cull. afrm=${active_forms.size} warr=${weakest_arr.length}`,"verbose");
         for (let j = 0; j < cullmax; j++) {
             say(`Cull #${j} of ${cullmax}`,"debug");
             if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
@@ -107,7 +107,7 @@ module.exports = async function () {
                 break;
             }
         }
-        say(`Completed cull. afrm=${active_forms.size} warr=${weakest_arr.length}`,"verbose");
+        say(`  Completed cull. afrm=${active_forms.size} warr=${weakest_arr.length}`,"verbose");
         //Mutating
         //say(`(mutating) Contenders in highest eval: ${contenders.size}`,"verbose");
         const permutationmult = (Math.random() + 1) * 50+100;
@@ -121,7 +121,7 @@ module.exports = async function () {
         // Currently just using "convergence_detection_count_threshold" as a buffer time to poke around randomly.
         // This is only useful if I find regions that are substantially better than the local optimum, 
         // to the point where a given random configuration in it is better.
-        say("Convergence is " + convergence_detection_count + " / " + convergence_detection_count_threshold + " (stdev " + current_stdev + ") [" + breakouts + "/" + max_breakouts + " breakouts]", "debug");
+        say("  Convergence is " + convergence_detection_count + " / " + convergence_detection_count_threshold + " (stdev " + current_stdev + ") [" + breakouts + "/" + max_breakouts + " breakouts]", "debug");
         if (current_stdev == 0) {
             if (convergence_detection_count / convergence_detection_count_threshold > (6/1000)){ //attempts to give a jolt to a suboptimal optimization slope
                 for (let key of Object.keys(components)) {
@@ -129,13 +129,13 @@ module.exports = async function () {
                 }
             }
             convergence_detection_count = convergence_detection_count + 1;
-            say("Increasing convergence to " + convergence_detection_count + " / " + convergence_detection_count_threshold, "normal");
+            say("    Increasing convergence to " + convergence_detection_count + " / " + convergence_detection_count_threshold, "normal");
         } else if (convergence_detection_count > 0) {
             convergence_detection_count = 0;
-            say("Resetting convergence to " + convergence_detection_count, "normal");
+            say("    Resetting convergence to " + convergence_detection_count, "normal");
         }
         const productmult = Math.round(permutationmult * secondpermutationmult * thirdpermutationmult);
-        say(`Mutation multipliers:
+        say(`  Mutation multipliers:
    avg:${current_mean}
    stdev:${current_stdev}
    1= ${permutationmult}
@@ -151,14 +151,14 @@ module.exports = async function () {
         let repops = 0;
         let errorpops = 0;
         let repopstacknum = 0;
-        say(`Starting repopulation loop`,"verbose");
+        say(`  Starting repopulation loop`,"verbose");
         repopstack = [];
         while (active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold) {
             if (repopstack.length > 1000 || !(active_forms.size < max_forms && duplicate_permutation_tries < convergence_detection_count_threshold && attempts_to_be_unique < convergence_detection_count_threshold)){
                 repopstacknum++;
-                say(`Completing repopulation stack #${repopstacknum}`,"verbose");
+                say(`    Completing repopulation stack #${repopstacknum}`,"verbose");
                 await Promise.all(repopstack);
-                say(`Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms) (${errorpops} errors)`,"verbose");
+                say(`    Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms) (${errorpops} errors)`,"verbose");
                 repopstack = [];
                 if (active_forms.size > max_forms - 1){
                     break;
@@ -167,7 +167,7 @@ module.exports = async function () {
             repopstack.push(repopulate(repoploops+0));
             repoploops++;
             async function repopulate(repopnum){
-                say(`Repopulation #${repopnum}`,"debug");
+                say(`      Repopulation #${repopnum}`,"debug");
                 //repopulate
                 let mutation_ancestor = seed;
                 if (active_forms.size != 0) {
@@ -175,10 +175,10 @@ module.exports = async function () {
                 }
 
                 let new_conf_returns = make_permutation(mutation_ancestor, productmult);
-                say(`1 mutation created`,"debug");
+                say(`      1 mutation created`,"debug");
                 const start_set_search_time = Date.now();
                 if (oldconfs.has(new_conf_returns[0])) {
-                    say(`duplicate #${conf_collisions_avoided} detected (library size = ${oldconfs.size})`,"debug");
+                    say(`        duplicate #${conf_collisions_avoided} detected (library size = ${oldconfs.size})`,"debug");
                     //do NOT recalculate duplicate confs.
                     if (active_forms.has(new_conf_returns[0])) {
                         duplicate_permutation_tries++;
@@ -187,14 +187,14 @@ module.exports = async function () {
                     stacktrace_iter.push(["duplicategen281", new_conf_returns]);
                     attempts_to_be_unique++;
                 } else {
-                    say(`2 mutation is unique`,"debug");
+                    say(`        2 mutation is unique`,"debug");
                     let new_configuration = new_conf_returns[0];
                     oldconfs.add(new_configuration);
                     const calc_set_search_time = Date.now() - start_set_search_time;
                     if (calc_set_search_time > 10) {
-                        say(`conf collisions report:\n  Tracking = ${oldconfs.size}\n  Avoided = ${conf_collisions_avoided}\n  Search time = ${Date.now() - start_set_search_time}ms`, "verbose");
+                        say(`          conf collisions report:\n  Tracking = ${oldconfs.size}\n  Avoided = ${conf_collisions_avoided}\n  Search time = ${Date.now() - start_set_search_time}ms`, "verbose");
                     }
-                    say(`3 populating mutation information`,"debug");
+                    say(`        3 populating mutation information`,"debug");
                     let thiscallstarttime = Date.now();
                     let og_af_size = active_forms.size;
                     active_forms.set(new_configuration, { "age": 0, "ancestor": mutation_ancestor }); //reserving the slot in active_forms under the assumption it will fill it
@@ -207,17 +207,17 @@ module.exports = async function () {
                             repops++;
                         }
                         calltime = calltime + Date.now() - thiscallstarttime;
-                        say(`4 mutation data set`,"debug");
+                        say(`        4 mutation data set`,"debug");
     
                         //analyze the effects of these changes
                         mutation_ancestor_race_cheat = active_forms.get(mutation_ancestor)
                         if (mutation_ancestor_race_cheat != undefined) {
-                            say(`4.5 mutation ancestor found, comparing stats`,"debug");
+                            say(`        4.5 mutation ancestor found, comparing stats`,"debug");
                             while(!Object.keys(mutation_ancestor_race_cheat).includes("stats")){
                                 await new Promise(r => setTimeout(r, 100)); //awful, I know!
                             }
                             if (!Object.keys(mutation_ancestor_race_cheat["stats"]).includes("output")){
-                                say(`Anomalous blank ancestor. Cool.`,"verbose");
+                                say(`        Anomalous blank ancestor. Cool.`,"verbose");
                                 active_forms.delete(mutation_ancestor);
                             }else{
                                 let score_diff = active_forms.get(new_configuration)["stats"]["output"]["avg"] - mutation_ancestor_race_cheat["stats"]["output"]["avg"];
@@ -231,7 +231,7 @@ module.exports = async function () {
                                 }
                             }
                         }
-                        say(`5 exit repopulation #${repopnum}`,"debug");
+                        say(`        5 exit repopulation #${repopnum}`,"debug");
                     }else{
                         active_forms.delete(new_configuration); //taksies backsies
                         errorpops++;
@@ -240,12 +240,12 @@ module.exports = async function () {
             }
         }
         repopstacknum++;
-        say(`Completing repopulation stack #${repopstacknum}`,"verbose");
+        say(`  Completing repopulation stack #${repopstacknum}`,"normal");
         await Promise.all(repopstack);
-        say(`Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms) (${errorpops} errors)`,"verbose");
-        say(`Duplicates report: ${conf_collisions_avoided} detected (library = ${oldconfs.size})`,"debug");
+        say(`  Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms) (${errorpops} errors)`,"normal");
+        say(`  Duplicates report: ${conf_collisions_avoided} detected (library = ${oldconfs.size})`,"normal");
         repopstack = [];
-        say(`Time spent mutating: ${Date.now() - timestartmutating}ms`,"verbose");
+        say(`  Time spent mutating: ${Date.now() - timestartmutating}ms`,"verbose");
         if (duplicate_permutation_tries > convergence_detection_count_threshold){
             report_results("explored");
             break;
