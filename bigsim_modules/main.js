@@ -81,8 +81,8 @@ module.exports = async function () {
             });
             stacktrace_iter.push(["highest", arrmapstack(highest)]);
             highest_conf = highest[highest.length - 1];
-            last_highest.push(contenders.get(highest_conf)["stats"]["output"]["avg"]);
             highest_stats = contenders.get(highest_conf);
+            last_highest.push(highest_stats["stats"]["output"]["avg"]);
             contenders.clear();
             contenders.set(highest_conf,highest_stats);
             if (last_highest.length > max_last_highest) {
@@ -96,9 +96,11 @@ module.exports = async function () {
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
             return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
         });
+        say(`weakest_arr is ${weakest_arr.length} long`,"verbose");
         for (let j = 0; j < cullmax; j++) {
             say(`Cull #${j} of ${cullmax}`,"debug");
             if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
+                say(`Cull will actually run on this iteration`,"debug");
                 /*stacktrace_iter.push(["weakest_arr213-" + j, arrmapstack(weakest_arr)]);
                 highest_conf = weakest_arr[weakest_arr.length - 1];
                 stacktrace_iter.push(["highest_conf215-" + j, highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
