@@ -178,7 +178,7 @@ module.exports = async function () {
                 say(`1 mutation created`,"debug");
                 const start_set_search_time = Date.now();
                 if (oldconfs.has(new_conf_returns[0])) {
-                    say(`duplicate #${conf_collisions_avoided} detected (library size = ${oldconfs.size})`,"verbose");
+                    say(`duplicate #${conf_collisions_avoided} detected (library size = ${oldconfs.size})`,"debug");
                     //do NOT recalculate duplicate confs.
                     if (active_forms.has(new_conf_returns[0])) {
                         duplicate_permutation_tries++;
@@ -243,6 +243,7 @@ module.exports = async function () {
         say(`Completing repopulation stack #${repopstacknum}`,"verbose");
         await Promise.all(repopstack);
         say(`Completed repopulation stack #${repopstacknum} (${repops}/${repoploops} successful repops) (${active_forms.size} active forms) (${errorpops} errors)`,"verbose");
+        say(`Duplicates report: ${conf_collisions_avoided} detected (library = ${oldconfs.size})`,"debug");
         repopstack = [];
         say(`Time spent mutating: ${Date.now() - timestartmutating}ms`,"verbose");
         if (duplicate_permutation_tries > convergence_detection_count_threshold){
