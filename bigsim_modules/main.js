@@ -39,6 +39,8 @@ var optimize_escape_split = 0.5; //if Math.round() is greater, escape. Otherwise
 const oldconfs = new Set();
 var conf_collisions_avoided = 0;
 
+const contenders = new Map();
+
 module.exports = async function () {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
         say(`Starting iteration ${ii} of ${iterations}...`,"verbose");
@@ -71,28 +73,32 @@ module.exports = async function () {
         }
         say(`Convergence check concluded`,"debug");
         const startitertime = Date.now();
-        //Getting the stats on the leader configuration in active_forms
-        if (active_forms.size > 0) {
-            let highest = [...active_forms.keys()].sort((a, b) => {                
-                return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
+        //Getting the stats on the leader configuration in contenders
+        if (contenders.size > 0) {
+            let highest = [...contenders.keys()].sort((a, b) => {                
+                return contenders.get(a)["stats"]["output"]["avg"] - contenders.get(b)["stats"]["output"]["avg"];
             });
             stacktrace_iter.push(["highest", arrmapstack(highest)]);
-            last_highest.push(active_forms.get(highest[highest.length - 1])["stats"]["output"]["avg"]);
-            highest = null;
+            highest_conf = highest[highest.length - 1];
+            last_highest.push(contenders.get(highest_conf)["stats"]["output"]["avg"]);
+            let winner_stats = contenders.get(highest_conf);
+            contenders.clear();
+            contenders.set(highest_conf,winner_stats);
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
             }
+            
         }
         say(`Highest stat check concluded`,"debug");
         //Culling
         let cullmax = Math.ceil(Math.random() * 0.8 * max_forms);
+        let weakest_arr = [...active_forms.keys()].sort((a, b) => {
+            return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
+        });
         for (let j = 0; j < cullmax; j++) {
             say(`Cull #${j} of ${cullmax}`,"debug");
             if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
-                let weakest_arr = [...active_forms.keys()].sort((a, b) => {
-                    return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
-                });
-                stacktrace_iter.push(["weakest_arr213-" + j, arrmapstack(weakest_arr)]);
+                /*stacktrace_iter.push(["weakest_arr213-" + j, arrmapstack(weakest_arr)]);
                 highest_conf = weakest_arr[weakest_arr.length - 1];
                 stacktrace_iter.push(["highest_conf215-" + j, highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
                 if (old_highest_conf.length > 0) {
@@ -104,15 +110,16 @@ module.exports = async function () {
                                 , null, 4), { encoding: "utf-8" });
                         }
                     }
-                }
-                weakest_arr = weakest_arr.slice(0, Math.floor(weakest_arr.length / 10));
-                stacktrace_iter.push(["weakest_arr225-" + j, arrmapstack(weakest_arr)]);
-                let weakest = weakest_arr[Math.floor(Math.random() * weakest_arr.length)];
+                }*/
+                //stacktrace_iter.push(["weakest_arr225-" + j, arrmapstack(weakest_arr)]);
+                let weakest = weakest_arr.splice(Math.floor(Math.random() * (weakest_arr.length / 10)),1);
                 stacktrace_iter.push(["weakest227-" + j, weakest + "-" + active_forms.get(weakest)["stats"]["output"]["avg"]]);
+                /*
                 say(`Culling checkstack:`, "debug");
                 say(`   1: ${active_forms.get(weakest_arr[0])["stats"]["output"]["avg"] <= active_forms.get(weakest)["stats"]["output"]["avg"]} (${active_forms.get(weakest_arr[0])["stats"]["output"]["avg"]} <= ${active_forms.get(weakest)["stats"]["output"]["avg"]})`, "debug");
                 say(`   2: ${active_forms.get(weakest)["stats"]["output"]["avg"] <= active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]} (${active_forms.get(weakest)["stats"]["output"]["avg"]} <= ${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]})`, "debug");
                 say(`   3: ${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"] < active_forms.get(highest_conf)["stats"]["output"]["avg"]} (${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]} < ${active_forms.get(highest_conf)["stats"]["output"]["avg"]})`, "debug");
+                */
                 active_forms.delete(weakest);
             }else{
                 break;
@@ -240,6 +247,7 @@ module.exports = async function () {
                             }
                         }
                         say(`5 exit repopulation #${repopnum}`,"debug");
+                        contenders.set(new_configuration, active_forms.get(new_configuration));
                     }else{
                         active_forms.delete(new_configuration); //taksies backsies
                         errorpops++;
