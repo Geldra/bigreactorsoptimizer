@@ -7,6 +7,9 @@ fs.mkdirSync("../../../reactorvars/compweights", { recursive: true });
 const active_forms = new Map();
 module.exports.active_forms = active_forms;
 
+const contenders = new Map();
+module.exports.contenders = contenders;
+
 const max_forms = 2500;
 module.exports.max_forms = max_forms;
 

@@ -21,6 +21,7 @@ const index = require("../index");
 var init_iteration = index.init_iteration;
 const iterations = index.iterations;
 const active_forms = index.active_forms;
+const contenders = index.contenders;
 const max_forms = index.max_forms;
 const set_parameters = index.set_parameters;
 const components = index.components;
@@ -39,8 +40,6 @@ var optimize_escape_split = 0.5; //if Math.round() is greater, escape. Otherwise
 
 const oldconfs = new Set();
 var conf_collisions_avoided = 0;
-
-const contenders = new Map();
 
 module.exports = async function () {
     for (ii = init_iteration; ii < iterations + 1; ii++) {

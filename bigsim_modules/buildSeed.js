@@ -2,6 +2,7 @@ const index = require("../index");
 const fs = index.fs;
 const say = index.say;
 const active_forms = index.active_forms;
+const contenders = index.contenders;
 const set_parameters = index.set_parameters;
 const initcomps = index.initcomps;
 const palette = Object.keys(initcomps);
@@ -20,6 +21,7 @@ module.exports = function () {
         let import_forms = JSON.parse(fs.readFileSync("../../../reactorsaves/current.json"));
         for (let key of Object.keys(import_forms)) {
             active_forms.set(key, import_forms[key]);
+            contenders.set(key, import_forms[key]);
         }
         say("Imported from file", "normal");
     }
