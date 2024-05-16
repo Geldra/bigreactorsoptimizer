@@ -113,7 +113,7 @@ module.exports = async function () {
                 }*/
                 //stacktrace_iter.push(["weakest_arr225-" + j, arrmapstack(weakest_arr)]);
                 let weakest = weakest_arr.splice(Math.floor(Math.random() * (weakest_arr.length / 10)),1);
-                stacktrace_iter.push(["weakest227-" + j, weakest + "-" + active_forms.get(weakest)["stats"]["output"]["avg"]]);
+                //stacktrace_iter.push(["weakest227-" + j, weakest + "-" + active_forms.get(weakest)["stats"]["output"]["avg"]]);
                 /*
                 say(`Culling checkstack:`, "debug");
                 say(`   1: ${active_forms.get(weakest_arr[0])["stats"]["output"]["avg"] <= active_forms.get(weakest)["stats"]["output"]["avg"]} (${active_forms.get(weakest_arr[0])["stats"]["output"]["avg"]} <= ${active_forms.get(weakest)["stats"]["output"]["avg"]})`, "debug");
