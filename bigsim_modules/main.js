@@ -96,44 +96,20 @@ module.exports = async function () {
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
             return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
         });
-        say(`Culling. active_forms is ${active_forms.size}\nweakest_arr is ${weakest_arr.length}`,"verbose");
+        say(`Starting cull. afrm=${active_forms.size} warr=${weakest_arr.length}`,"verbose");
         for (let j = 0; j < cullmax; j++) {
             say(`Cull #${j} of ${cullmax}`,"debug");
             if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
                 let magicnumber = Math.floor(Math.random() * (weakest_arr.length / 10));
-                say(`Cull will actually run on this iteration for #${magicnumber}`,"debug");
-                /*stacktrace_iter.push(["weakest_arr213-" + j, arrmapstack(weakest_arr)]);
-                highest_conf = weakest_arr[weakest_arr.length - 1];
-                stacktrace_iter.push(["highest_conf215-" + j, highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
-                if (old_highest_conf.length > 0) {
-                    if (active_forms.has(old_highest_conf)) {
-                        if (active_forms.get(highest_conf)["stats"]["output"]["avg"] < active_forms.get(old_highest_conf)["stats"]["output"]["avg"]) {
-                            //nonsense situation where highest is not the highest.
-                            fs.writeFileSync("../../../whywhywhywhy" + Date.now() + ".json", JSON.stringify(
-                                [[highest_conf, active_forms.get(highest_conf)["stats"]["output"]["avg"]], [old_highest_conf, active_forms.get(old_highest_conf)["stats"]["output"]["avg"]]]
-                                , null, 4), { encoding: "utf-8" });
-                        }
-                    }
-                }*/
-                //stacktrace_iter.push(["weakest_arr225-" + j, arrmapstack(weakest_arr)]);
                 let weakest = weakest_arr.splice(magicnumber,1)[0];
-                say(`Ok here I go. Culling this reactor conf:\n${weakest}`,"debug");
-                say(`Is it possible to cull this? ${active_forms.has(weakest)}`);
-                //stacktrace_iter.push(["weakest227-" + j, weakest + "-" + active_forms.get(weakest)["stats"]["output"]["avg"]]);
-                /*
-                say(`Culling checkstack:`, "debug");
-                say(`   1: ${active_forms.get(weakest_arr[0])["stats"]["output"]["avg"] <= active_forms.get(weakest)["stats"]["output"]["avg"]} (${active_forms.get(weakest_arr[0])["stats"]["output"]["avg"]} <= ${active_forms.get(weakest)["stats"]["output"]["avg"]})`, "debug");
-                say(`   2: ${active_forms.get(weakest)["stats"]["output"]["avg"] <= active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]} (${active_forms.get(weakest)["stats"]["output"]["avg"]} <= ${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]})`, "debug");
-                say(`   3: ${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"] < active_forms.get(highest_conf)["stats"]["output"]["avg"]} (${active_forms.get(weakest_arr[weakest_arr.length - 1])["stats"]["output"]["avg"]} < ${active_forms.get(highest_conf)["stats"]["output"]["avg"]})`, "debug");
-                */
                 active_forms.delete(weakest);
             }else{
                 break;
             }
         }
-        say(`Weak culling concluded. active_forms is ${active_forms.size}`,"debug");
+        say(`Completed cull. afrm=${active_forms.size} warr=${weakest_arr.length}`,"verbose");
         //Mutating
-        say(`(mutating) Contenders in highest eval: ${contenders.size}`,"verbose");
+        //say(`(mutating) Contenders in highest eval: ${contenders.size}`,"verbose");
         const permutationmult = (Math.random() + 1) * 50+100;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
         const current_stdev = floatRound(getStandardDeviation(last_highest), 5);
