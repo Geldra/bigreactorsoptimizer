@@ -100,7 +100,8 @@ module.exports = async function () {
         for (let j = 0; j < cullmax; j++) {
             say(`Cull #${j} of ${cullmax}`,"debug");
             if (active_forms.size >= max_forms / 3) { //prevent population from dropping too much (/shouldn't/ be needed after startup)
-                say(`Cull will actually run on this iteration`,"debug");
+                let magicnumber = Math.floor(Math.random() * (weakest_arr.length / 10));
+                say(`Cull will actually run on this iteration for #${magicnumber}`,"debug");
                 /*stacktrace_iter.push(["weakest_arr213-" + j, arrmapstack(weakest_arr)]);
                 highest_conf = weakest_arr[weakest_arr.length - 1];
                 stacktrace_iter.push(["highest_conf215-" + j, highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
@@ -115,7 +116,7 @@ module.exports = async function () {
                     }
                 }*/
                 //stacktrace_iter.push(["weakest_arr225-" + j, arrmapstack(weakest_arr)]);
-                let weakest = weakest_arr.splice(Math.floor(Math.random() * (weakest_arr.length / 10)),1);
+                let weakest = weakest_arr.splice(magicnumber,1);
                 say(`Ok here I go. Culling this reactor conf:\n${weakest}`,"debug");
                 say(`Is it possible to cull this? ${active_forms.has(weakest)}`);
                 //stacktrace_iter.push(["weakest227-" + j, weakest + "-" + active_forms.get(weakest)["stats"]["output"]["avg"]]);
