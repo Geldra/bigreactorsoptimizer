@@ -76,7 +76,7 @@ module.exports = async function () {
         const startitertime = Date.now();
         //Getting the stats on the leader configuration in contenders
         if (contenders.size > 0) {
-            say(`Contenders in highest eval: ${contenders.size}`,"verbose");
+            say(`(adding) Contenders in highest eval: ${contenders.size}`,"verbose");
             let highest = [...contenders.keys()].sort((a, b) => {                
                 return contenders.get(a)["stats"]["output"]["avg"] - contenders.get(b)["stats"]["output"]["avg"];
             });
@@ -129,6 +129,7 @@ module.exports = async function () {
         }
         say(`Weak culling concluded`,"debug");
         //Mutating
+        say(`(mutating) Contenders in highest eval: ${contenders.size}`,"verbose");
         const permutationmult = (Math.random() + 1) * 50+100;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
         const current_stdev = floatRound(getStandardDeviation(last_highest), 5);
