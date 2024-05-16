@@ -5,6 +5,7 @@ const convergence_detection_count_threshold = 1000; //number of times to piddle 
 var convergence_detection_count = 0;
 const max_last_highest = 10; //higher numbers here make it less sensitive to changes
 var highest_conf = "";
+var highest_stats = {};
 var last_highest = [];
 var loggedinit = false;
 
@@ -75,13 +76,14 @@ module.exports = async function () {
         const startitertime = Date.now();
         //Getting the stats on the leader configuration in contenders
         if (contenders.size > 0) {
+            say(`Contenders in highest eval: ${contenders.size}`,"verbose");
             let highest = [...contenders.keys()].sort((a, b) => {                
                 return contenders.get(a)["stats"]["output"]["avg"] - contenders.get(b)["stats"]["output"]["avg"];
             });
             stacktrace_iter.push(["highest", arrmapstack(highest)]);
             highest_conf = highest[highest.length - 1];
             last_highest.push(contenders.get(highest_conf)["stats"]["output"]["avg"]);
-            let winner_stats = contenders.get(highest_conf);
+            highest_stats = contenders.get(highest_conf);
             contenders.clear();
             contenders.set(highest_conf,winner_stats);
             if (last_highest.length > max_last_highest) {
@@ -331,7 +333,7 @@ function report_results(condition) {
             say("Solution space explored. Results:", "sparse");
             break;
     }
-    const highest_stats = active_forms.get(highest_conf)["stats"];
+    //const highest_stats = active_forms.get(highest_conf)["stats"];
     for (let key of Object.keys(highest_stats)) {
         say("   " + key + "= " + highest_stats[key]["avg"] + " +- " + highest_stats[key]["stdev"], "sparse");
     }
