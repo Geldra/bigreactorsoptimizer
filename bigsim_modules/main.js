@@ -189,6 +189,9 @@ module.exports = async function () {
                 } else {
                     say(`        2 mutation is unique`,"debug");
                     let new_configuration = new_conf_returns[0];
+                    if (oldconfs.size > 10000000){
+                        oldconfs.clear();
+                    }
                     oldconfs.add(new_configuration);
                     const calc_set_search_time = Date.now() - start_set_search_time;
                     if (calc_set_search_time > 10) {
