@@ -45,6 +45,7 @@ var target_power = 500000;
 var target_fuel_use = 0;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
 const max_times_highest_in_stdev = convergence_detection_count_threshold/20;
+var optimization_focus = "energy" // "energy" or "fuel"
 
 module.exports = async function () {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
@@ -84,9 +85,10 @@ module.exports = async function () {
         if (times_highest_in_stdev > max_times_highest_in_stdev){
             target_power += 10000;
             times_highest_in_stdev = 0;
+            optimization_focus = "energy";
         }
         function calc_fitness(stats){
-            if (stats["stats"]["output"]["avg"] < target_power){
+            if (optimization_focus = "energy"){
                 return stats["stats"]["output"]["avg"];
             }
             let fuel_economy = stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"];
@@ -111,6 +113,7 @@ module.exports = async function () {
                 let effort_being_made = highest_stats["stats"]["output"]["avg"] - target_power != 0;
                 let powerdiff = Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) < highest_stats["stats"]["output"]["stdev"]*10;
                 let fueldiff =  target_fuel_use == 0 || (Math.abs(highest_stats["stats"]["fuelConsumption"]["avg"] - target_fuel_use) < highest_stats["stats"]["fuelConsumption"]["stdev"]*10);
+                optimization_focus = "fuel";
                 if (effort_being_made && powerdiff && fueldiff){
                     times_highest_in_stdev++;
                 }else{
@@ -119,9 +122,10 @@ module.exports = async function () {
             }else{
                 target_power = highest_stats["stats"]["output"]["avg"];
                 target_fuel_use = highest_stats["stats"]["fuelConsumption"]["avg"];
+                optimization_focus = "fuel";
             }
         }
-        say(`  Highest stat check concluded`,"debug");
+        say(`  Highest stat check concluded`,"fuel");
         //Culling
         let cullmax = Math.ceil(Math.random() * 0.8 * max_forms);
         say(`  Starting cull. afrm=${active_forms.size} warr=${weakest_arr.length}`,"verbose");
@@ -305,7 +309,7 @@ module.exports = async function () {
         const nowtime = Date.now();
         say(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${Math.ceil((calltime / (nowtime - startitertime))*10000)/100}% speedup]`, "sparse");
         if (active_forms.has(highest_conf)) {
-            say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms.get(highest_conf)["stats"]["output"]["avg"] * 100) / 100} RF/t (old ${Math.round(old_highest_score*100)/100}) (target ${Math.round(target_power*100)/100}) (idle: ${times_highest_in_stdev})\n   Eating = ${Math.round(active_forms.get(highest_conf)["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
+            say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms.get(highest_conf)["stats"]["output"]["avg"] * 100) / 100} RF/t (old ${Math.round(old_highest_score*100)/100}) (target ${Math.round(target_power*100)/100}) (idle: ${times_highest_in_stdev}) (focus: ${optimization_focus})\n   Eating = ${Math.round(active_forms.get(highest_conf)["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
             /*if (active_forms.get(highest_conf)["stats"]["output"]["avg"] < old_highest_score) {
                 stacktrace_iter.push(["new_highest_conf320", highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
                 stacktrace_iter.push(["old_highest_conf321", old_highest_conf + "-" + old_highest_score]);
