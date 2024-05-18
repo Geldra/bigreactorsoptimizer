@@ -21,11 +21,11 @@ const index = require("../index");
 var init_iteration = index.init_iteration;
 const iterations = index.iterations;
 const active_forms = index.active_forms;
-const contenders = index.contenders;
 const max_forms = index.max_forms;
 const set_parameters = index.set_parameters;
 const components = index.components;
 const log_interval = index.log_interval;
+const target_fuel_use = index.target_fuel_use;
 const say = index.say;
 
 const utils = index.utils;
@@ -48,6 +48,7 @@ module.exports = async function () {
         const old_highest_conf = highest_conf;
         const old_highest_score = active_forms.has(old_highest_conf) ? active_forms.get(old_highest_conf)["stats"]["output"]["avg"] : 0;
         stacktrace_iter.push(["old_highest_conf165", old_highest_conf + "-" + old_highest_score]);
+
         //Check if convergence has been reached
         if (convergence_detection_count > convergence_detection_count_threshold) {
             say("  Convergence detected.", "sparse");
@@ -73,18 +74,20 @@ module.exports = async function () {
         }
         say(`  Convergence check concluded`,"debug");
         const startitertime = Date.now();
-        //Getting the stats on the leader configuration in contenders
-        if (contenders.size > 0) {
-            say(`(adding) Contenders in highest eval: ${contenders.size}`,"verbose");
-            let highest = [...contenders.keys()].sort((a, b) => {                
-                return contenders.get(a)["stats"]["output"]["avg"] - contenders.get(b)["stats"]["output"]["avg"];
-            });
-            stacktrace_iter.push(["highest", arrmapstack(highest)]);
-            highest_conf = highest[highest.length - 1];
-            highest_stats = contenders.get(highest_conf);
+
+        // Sort the current data
+        let weakest_arr = [...active_forms.keys()].sort((a, b) => {
+            let a_value = Math.pow(active_forms.get(a)["stats"]["output"]["avg"],1+Math.log((active_forms.get(a)["stats"]["output"]["avg"]/active_forms.get(a)["stats"]["fuelConsumption"]["avg"])/(target_fuel_use))); // active_forms.get(a)["stats"]["output"]["avg"]
+            let b_value = Math.pow(active_forms.get(b)["stats"]["output"]["avg"],1+Math.log((active_forms.get(b)["stats"]["output"]["avg"]/active_forms.get(b)["stats"]["fuelConsumption"]["avg"])/(target_fuel_use))); // active_forms.get(b)["stats"]["output"]["avg"]
+            return a_value - b_value;
+        });
+
+        //Getting the stats on the leader configuration in weakest_arr
+        if (weakest_arr.length > 0) {
+            say(`(adding) Contenders in weakest_arr: ${weakest_arr.length}`,"debug");
+            highest_conf = weakest_arr[weakest_arr.length - 1];
+            highest_stats = active_forms.get(highest_conf);
             last_highest.push(highest_stats["stats"]["output"]["avg"]);
-            contenders.clear();
-            contenders.set(highest_conf,highest_stats);
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
             }
@@ -93,9 +96,6 @@ module.exports = async function () {
         say(`  Highest stat check concluded`,"debug");
         //Culling
         let cullmax = Math.ceil(Math.random() * 0.8 * max_forms);
-        let weakest_arr = [...active_forms.keys()].sort((a, b) => {
-            return active_forms.get(a)["stats"]["output"]["avg"] - active_forms.get(b)["stats"]["output"]["avg"];
-        });
         say(`  Starting cull. afrm=${active_forms.size} warr=${weakest_arr.length}`,"verbose");
         for (let j = 0; j < cullmax; j++) {
             say(`Cull #${j} of ${cullmax}`,"debug");
@@ -109,7 +109,6 @@ module.exports = async function () {
         }
         say(`  Completed cull. afrm=${active_forms.size} warr=${weakest_arr.length}`,"verbose");
         //Mutating
-        //say(`(mutating) Contenders in highest eval: ${contenders.size}`,"verbose");
         const permutationmult = (Math.random() + 1) * 50+100;
         const secondpermutationmult = (Date.now() % (set_parameters["zSize"] * set_parameters["xSize"] * 100) + 10 * Math.sqrt(set_parameters["xSize"] * set_parameters["zSize"])) / (10000) + 1;
         const current_stdev = floatRound(getStandardDeviation(last_highest), 5);
@@ -204,8 +203,6 @@ module.exports = async function () {
                     let stats = await get_stats(new_configuration);
                     if (!Object.keys(stats).includes("error")){
                         active_forms.get(new_configuration)["stats"] = stats //filling the slot in active_forms fully
-                        contenders.set(new_configuration, {});
-                        Object.assign(contenders.get(new_configuration),active_forms.get(new_configuration)); //making a copy of the dict in active_forms
                         if (active_forms.size > og_af_size){
                             repops++;
                         }
@@ -281,16 +278,15 @@ module.exports = async function () {
         say(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${Math.ceil((calltime / (nowtime - startitertime))*10000)/100}% speedup]`, "sparse");
         if (active_forms.has(highest_conf)) {
             say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms.get(highest_conf)["stats"]["output"]["avg"] * 100) / 100} RF/t (old ${old_highest_score})\n   Eating = ${Math.round(active_forms.get(highest_conf)["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
-            if (active_forms.get(highest_conf)["stats"]["output"]["avg"] < old_highest_score) {
+            /*if (active_forms.get(highest_conf)["stats"]["output"]["avg"] < old_highest_score) {
                 stacktrace_iter.push(["new_highest_conf320", highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
                 stacktrace_iter.push(["old_highest_conf321", old_highest_conf + "-" + old_highest_score]);
                 try{
                     fs.writeFileSync("../../../whydoyoudothis" + Date.now() + ".json", JSON.stringify(stacktrace_iter, null, 4), { encoding: "utf-8" });
                 }catch (err){
                     fs.writeFileSync("../../../whydoyoudothis" + Date.now() + ".json", `God knows, man.\n${err}\nstacktrace_iter.length = ${stacktrace_iter.length}`, { encoding: "utf-8" });
-                }
-                
-            }
+                } 
+            }*/
         }
     }
     function arrmapstack(conf_arr) {

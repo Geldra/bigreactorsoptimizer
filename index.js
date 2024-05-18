@@ -22,10 +22,13 @@ module.exports.log_interval = log_interval;
 const readout_level = process.argv[3];
 module.exports.readout_level = readout_level;
 
+const target_fuel_use = 430006/2.85; // [(RF/t) / (mB/t)]
+module.exports.target_fuel_use = target_fuel_use;
+
 const set_parameters = {
-    "xSize": 30,
-    "zSize": 30,
-    "height": 10,
+    "xSize": 32,
+    "zSize": 32,
+    "height": 20,
     "isActivelyCooled": false,
     "controlRodInsertion": 0
 }
