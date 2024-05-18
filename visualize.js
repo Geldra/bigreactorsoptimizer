@@ -123,7 +123,7 @@ async function updateloop() {
                 .addFields(
                     { name: "Generation", value: `${floatRound(stats["output"]["avg"] / 1000, 2)} ±${floatRound(stats["output"]["stdev"] / 1000, 2)} kRF/t`, inline: true },
                     { name: "Consumption", value: `${floatRound(stats["fuelConsumption"]["avg"], 2)} ±${floatRound(stats["fuelConsumption"]["stdev"], 2)} mB/t`, inline: true },
-                    { name: "Fuel Economy", value: `${floatRound((stats["output"]["avg"] / 1000) / stats["fuelConsumption"]["avg"], 2)} ±${floatRound(Math.sqrt(Math.pow((stats["output"]["stdev"] / 1000)/stats["fuelConsumption"]["avg"],2)+Math.pow((stats["output"]["avg"] / 1000)*stats["fuelConsumption"]["stdev"]*Math.log(stats["fuelConsumption"]["avg"]),2)), 2)} kRF/mB`, inline: true },
+                    { name: "Fuel Economy", value: `${floatRound((stats["output"]["avg"] / 1000) / stats["fuelConsumption"]["avg"], 2)} ±${floatRound(Math.sqrt(Math.pow((stats["output"]["stdev"] / 1000)/stats["fuelConsumption"]["avg"],2)+Math.pow(((stats["output"]["avg"] / 1000)*(stats["fuelConsumption"]["stdev"]))/Math.pow(stats["fuelConsumption"]["avg"],2),2)), 2)} kRF/mB`, inline: true },
                     { name: "Iteration", value: `${maxx}`, inline: true }
                 )
                 .setTimestamp()
@@ -140,7 +140,7 @@ async function updateloop() {
                     .addFields(
                         { name: "Generation", value: `${floatRound(stats["output"]["avg"] / 1000, 3)} ±${floatRound(stats["output"]["stdev"] / 1000, 3)} kRF/t`, inline: true },
                         { name: "Consumption", value: `${floatRound(stats["fuelConsumption"]["avg"], 3)} ±${floatRound(stats["fuelConsumption"]["stdev"], 3)} mB/t`, inline: true },
-                        { name: "Fuel Economy", value: `${floatRound((stats["output"]["avg"] / 1000) / stats["fuelConsumption"]["avg"], 2)} ±${floatRound(Math.sqrt(Math.pow((stats["output"]["stdev"] / 1000)/stats["fuelConsumption"]["avg"],2)+Math.pow((stats["output"]["avg"] / 1000)*stats["fuelConsumption"]["stdev"]*Math.log(stats["fuelConsumption"]["avg"]),2)), 2)} kRF/mB`, inline: true }, //https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Simplification
+                        { name: "Fuel Economy", value: `${floatRound((stats["output"]["avg"] / 1000) / stats["fuelConsumption"]["avg"], 2)} ±${floatRound(Math.sqrt(Math.pow((stats["output"]["stdev"] / 1000)/stats["fuelConsumption"]["avg"],2)+Math.pow(((stats["output"]["avg"] / 1000)*(stats["fuelConsumption"]["stdev"]))/Math.pow(stats["fuelConsumption"]["avg"],2),2)), 2)} kRF/mB`, inline: true }, //https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Simplification
                         { name: "Iteration", value: `${maxx}`, inline: true }
                     )
                     .setTimestamp()
