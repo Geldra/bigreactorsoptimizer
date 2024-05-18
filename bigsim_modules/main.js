@@ -109,10 +109,12 @@ module.exports = async function () {
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
             }
-            if (Math.abs(highest_stats["stats"]["output"]["avg"] - prev_highest_stats["stats"]["output"]["avg"]) < highest_stats["stats"]["output"]["stdev"]){
-                times_highest_in_stdev++;
-            }else{
-                times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0);
+            if (Object.keys(highest_stats).includes("stats")){
+                if (Math.abs(highest_stats["stats"]["output"]["avg"] - prev_highest_stats["stats"]["output"]["avg"]) < highest_stats["stats"]["output"]["stdev"]){
+                    times_highest_in_stdev++;
+                }else{
+                    times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0);
+                }
             }
         }
         say(`  Highest stat check concluded`,"debug");
