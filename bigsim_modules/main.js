@@ -146,6 +146,7 @@ module.exports = async function () {
                 }
                 if (fueldiff){
                     times_highest_in_stdev = 0; // Massively reward improving fuel economy by reseting chances
+                    target_fuel_use = highest_stats["stats"]["fuelConsumption"]["avg"];
                 }
             }else{
                 // we are below the power envelope
