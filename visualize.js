@@ -118,7 +118,7 @@ async function updateloop() {
                 .setTitle("Your bihourly reactor update!")
                 .setColor('#DFFF00')
                 .setDescription("I maeked dis:" + ((reactor_width <= sidohorg_reactor_bounds["width"] && reactor_length <= sidohorg_reactor_bounds["width"] && reactor_length <= sidohorg_reactor_bounds["height"]) ? `\n[View on br.sidoh.org](https://br.sidoh.org/#reactor-design?length=${reactor_length - 2}&width=${reactor_width - 2}&height=${reactor_height - 2}&activelyCooled=false&controlRodInsertion=0&layout=${compressConf(highestconf)})` : ""))
-                .setImage("attachment://output.png")
+                .setImage("attachment://fuel_economy.png")
                 .setThumbnail("attachment://reactor.png")
                 .addFields(
                     { name: "Generation", value: `${floatRound(stats["output"]["avg"] / 1000, 2)} ±${floatRound(stats["output"]["stdev"] / 1000, 2)} kRF/t`, inline: true },
@@ -128,13 +128,13 @@ async function updateloop() {
                 .setTimestamp()
                 .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
             try {
-                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds ${reactor_width}x${reactor_length}`), embeds: [theEmbed], files: ["./visualizations/output.png", "./visualizations/reactor.png"] });
+                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds ${reactor_width}x${reactor_length}`), embeds: [theEmbed], files: ["./visualizations/fuel_economy.png", "./visualizations/reactor.png"] });
             } catch {
                 const theFallbackEmbed = new EmbedBuilder()
                     .setTitle("Your bihourly reactor update!")
                     .setColor('#DFFF00')
                     .setDescription("Thumbnail was too big or some other stupid excuse by discord:")
-                    .setImage("attachment://output.png")
+                    .setImage("attachment://fuel_economy.png")
                     .addFields(
                         { name: "Generation", value: `${floatRound(stats["output"]["avg"] / 1000, 3)} ±${floatRound(stats["output"]["stdev"] / 1000, 3)} kRF/t`, inline: true },
                         { name: "Consumption", value: `${floatRound(stats["fuelConsumption"]["avg"], 3)} ±${floatRound(stats["fuelConsumption"]["stdev"], 3)} mB/t`, inline: true },
@@ -142,7 +142,7 @@ async function updateloop() {
                     )
                     .setTimestamp()
                     .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
-                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds ${reactor_width}x${reactor_length}`), embeds: [theFallbackEmbed], files: ["./visualizations/output.png"] });
+                await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds ${reactor_width}x${reactor_length}`), embeds: [theFallbackEmbed], files: ["./visualizations/fuel_economy.png"] });
             }
 
             try { //https://stackoverflow.com/a/30654451
@@ -228,7 +228,9 @@ async function buildgraph(stat = "output", last_iterations = 400) {
                 let thisone = (new mh(666)).update(conf).digest();
                 let ancestor = (new mh(666)).update(data[conf]["ancestor"]).digest();
                 let stats = {};
+                let fuel_stats = {};
                 Object.assign(stats, data[conf]["stats"][stat]);
+                Object.assign(fuel_stats, data[conf]["stats"]["fuelConsumption"]);
                 data[conf] = null;
                 delete data[conf];
                 const objkeystart = Date.now();
@@ -238,14 +240,14 @@ async function buildgraph(stat = "output", last_iterations = 400) {
                         "color": ("#" + Math.floor(Math.random() * 16777215).toString(16)),
                         "coords": [[
                             iteration,
-                            stats["avg"] + 0,
+                            stats["avg"]/fuel_stats["avg"],
                             file
                         ]]
                     });
                 } else {
                     relations.get(thisone)["coords"].push([
                         iteration,
-                        stats["avg"] + 0,
+                        stats["avg"]/fuel_stats["avg"],
                         file
                     ])
                 }
@@ -275,10 +277,10 @@ async function buildgraph(stat = "output", last_iterations = 400) {
     `);
     try{
         svgelms.push(`
-            <ellipse cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"])}" rx="${point_radius * 10}" ry="${Math.round(((last_max_iteration_high_stats[stat]["stdev"]) / (maxy - miny)) * image_height)}" fill="#520000" />
-            <line x1="${getx(minx)}" y1="${gety(last_max_iteration_high_stats[stat]["avg"])}" x2="${getx(maxx)}" y2="${gety(last_max_iteration_high_stats[stat]["avg"])}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
+            <ellipse cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"]/last_max_iteration_high_stats["fuelConsumption"]["avg"])}" rx="${point_radius * 10}" ry="${Math.round(((last_max_iteration_high_stats[stat]["stdev"]/last_max_iteration_high_stats["fuelConsumption"]["stdev"]) / (maxy - miny)) * image_height)}" fill="#520000" />
+            <line x1="${getx(minx)}" y1="${gety(last_max_iteration_high_stats[stat]["avg"])}" x2="${getx(maxx)}" y2="${gety(last_max_iteration_high_stats[stat]["avg"]/last_max_iteration_high_stats["fuelConsumption"]["avg"])}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
             <line x1="${getx(last_max_iteration)}" y1="${gety(miny)}" x2="${getx(last_max_iteration)}" y2="${gety(maxy)}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
-            <circle cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"])}" r="${point_radius * 4}" fill="#FF0000" />`
+            <circle cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"]/last_max_iteration_high_stats["fuelConsumption"]["avg"])}" r="${point_radius * 4}" fill="#FF0000" />`
         );
     }catch{
         console.log("No data available? Skipping this embed.")
