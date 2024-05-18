@@ -40,7 +40,7 @@ var optimize_escape_split = 0.5; //if Math.round() is greater, escape. Otherwise
 const oldconfs = new Set();
 var conf_collisions_avoided = 0;
 
-var target_power = 700000;
+var target_power = 600000;
 var target_fuel_use = 0;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
 const max_times_highest_in_stdev = 150;
@@ -90,9 +90,9 @@ module.exports = async function () {
             optimization_focus = "energy";
         }*/
         function calc_fitness(stats){
-            if (optimization_focus == "energy"){
+            /*if (optimization_focus == "energy"){
                 return Math.min(Math.max((stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"])/(target_power/target_fuel_use),0.95),1)*stats["stats"]["output"]["avg"];
-            }
+            }*/
             let fuel_economy = (stats["stats"]["output"]["avg"]/target_power)*(stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"]);
             
             return fuel_economy;
