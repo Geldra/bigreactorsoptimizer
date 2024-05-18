@@ -43,7 +43,7 @@ var conf_collisions_avoided = 0;
 
 var target_power = 500000;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
-const max_times_highest_in_stdev = 20;
+const max_times_highest_in_stdev = 50;
 
 module.exports = async function () {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
@@ -102,19 +102,15 @@ module.exports = async function () {
         if (weakest_arr.length > 0) {
             say(`(adding) Contenders in weakest_arr: ${weakest_arr.length}`,"debug");
             highest_conf = weakest_arr[weakest_arr.length - 1];
-            let prev_highest_stats = {};
-            Object.assign(prev_highest_stats,highest_stats);
             highest_stats = active_forms.get(highest_conf);
             last_highest.push(highest_stats["stats"]["output"]["avg"]);
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
             }
-            if (Object.keys(prev_highest_stats).includes("stats")){
-                if (Math.abs(highest_stats["stats"]["output"]["avg"] - prev_highest_stats["stats"]["output"]["avg"]) < highest_stats["stats"]["output"]["stdev"]){
-                    times_highest_in_stdev++;
-                }else{
-                    times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0);
-                }
+            if (Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) < highest_stats["stats"]["output"]["stdev"]){
+                times_highest_in_stdev++;
+            }else{
+                times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0);
             }
         }
         say(`  Highest stat check concluded`,"debug");
