@@ -41,7 +41,7 @@ var optimize_escape_split = 0.5; //if Math.round() is greater, escape. Otherwise
 const oldconfs = new Set();
 var conf_collisions_avoided = 0;
 
-var target_power = 400000;
+var target_power = 500000;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
 const max_times_highest_in_stdev = 20;
 
