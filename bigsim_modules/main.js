@@ -109,9 +109,10 @@ module.exports = async function () {
                 last_highest = last_highest.slice(1);
             }
             if (Math.abs(highest_stats["stats"]["output"]["avg"] < target_power - highest_stats["stats"]["output"]["stdev"]*100)){
+                let effort_being_made = highest_stats["stats"]["output"]["avg"] - target_power != 0;
                 let powerdiff = Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) < highest_stats["stats"]["output"]["stdev"]*10;
                 let fueldiff =  target_fuel_use == 0 || (Math.abs(highest_stats["stats"]["fuelConsumption"]["avg"] - target_fuel_use) < highest_stats["stats"]["fuelConsumption"]["stdev"]*10);
-                if (powerdiff && fueldiff){
+                if (effort_being_made && powerdiff && fueldiff){
                     times_highest_in_stdev++;
                 }else{
                     times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0);
