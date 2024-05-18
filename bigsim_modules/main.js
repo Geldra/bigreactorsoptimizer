@@ -25,7 +25,6 @@ const max_forms = index.max_forms;
 const set_parameters = index.set_parameters;
 const components = index.components;
 const log_interval = index.log_interval;
-const target_fuel_economy = index.target_fuel_economy;
 const say = index.say;
 
 const utils = index.utils;
@@ -92,7 +91,7 @@ module.exports = async function () {
         }
         function calc_fitness(stats){
             if (optimization_focus == "energy"){
-                return stats["stats"]["output"]["avg"];
+                return Math.min((stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"])/(target_power/target_fuel_use))*stats["stats"]["output"]["avg"];
             }
             let fuel_economy = Math.min(stats["stats"]["output"]["avg"]/target_power,1)*(stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"]);
             return fuel_economy;

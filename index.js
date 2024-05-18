@@ -22,9 +22,6 @@ module.exports.log_interval = log_interval;
 const readout_level = process.argv[3];
 module.exports.readout_level = readout_level;
 
-const target_fuel_economy = 430006/2.85; // [(RF/t) / (mB/t)]
-module.exports.target_fuel_economy = target_fuel_economy;
-
 const set_parameters = {
     "xSize": 32,
     "zSize": 32,
