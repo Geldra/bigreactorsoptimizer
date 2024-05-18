@@ -44,7 +44,7 @@ var conf_collisions_avoided = 0;
 var target_power = 500000;
 var target_fuel_use = 0;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
-const max_times_highest_in_stdev = convergence_detection_count_threshold/20;
+const max_times_highest_in_stdev = Math.ceil(convergence_detection_count_threshold/20);
 var optimization_focus = "energy" // "energy" or "fuel"
 
 module.exports = async function () {
@@ -322,7 +322,7 @@ module.exports = async function () {
         const nowtime = Date.now();
         say(`Iteration ${ii} complete. (${nowtime - startitertime} ms) {${calltime} ms calling} [${Math.ceil((calltime / (nowtime - startitertime))*10000)/100}% speedup]`, "sparse");
         if (active_forms.has(highest_conf)) {
-            say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms.get(highest_conf)["stats"]["output"]["avg"] * 100) / 100} RF/t (old ${Math.round(old_highest_score*100)/100}) (target ${Math.round(target_power*100)/100}) (idle: ${times_highest_in_stdev}) (focus: ${optimization_focus})\n   Eating = ${Math.round(active_forms.get(highest_conf)["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
+            say(`Iteration ${ii} highest score: \n   Output = ${Math.round(active_forms.get(highest_conf)["stats"]["output"]["avg"] * 100) / 100} RF/t (old ${Math.round(old_highest_score*100)/100}) (target ${Math.round(target_power*100)/100}, idle: ${times_highest_in_stdev}/${max_times_highest_in_stdev}, focus: ${optimization_focus})\n   Eating = ${Math.round(active_forms.get(highest_conf)["stats"]["fuelConsumption"]["avg"] * 100) / 100} mB/t`, "normal");
             /*if (active_forms.get(highest_conf)["stats"]["output"]["avg"] < old_highest_score) {
                 stacktrace_iter.push(["new_highest_conf320", highest_conf + "-" + active_forms.get(highest_conf)["stats"]["output"]["avg"]]);
                 stacktrace_iter.push(["old_highest_conf321", old_highest_conf + "-" + old_highest_score]);
