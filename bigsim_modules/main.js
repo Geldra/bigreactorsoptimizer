@@ -89,9 +89,8 @@ module.exports = async function () {
             if (stats["stats"]["output"]["avg"] < target_power){
                 return stats["stats"]["output"]["avg"];
             }
-            let small_fuel_use_check = stats["stats"]["fuelConsumption"]["avg"];
-            let fuel_economy = stats["stats"]["output"]["avg"]/(Math.max(small_fuel_use_check));
-            return stats["stats"]["output"]["avg"] + Math.pow(stats["stats"]["output"]["avg"],Math.log((fuel_economy)/(target_fuel_economy)));
+            let fuel_economy = stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"];
+            return fuel_economy;
         }
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
             let a_value = calc_fitness(active_forms.get(a)); // active_forms.get(a)["stats"]["output"]["avg"]
@@ -108,7 +107,7 @@ module.exports = async function () {
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
             }
-            if (Math.abs(highest_stats["stats"]["output"]["avg"] < target_power - highest_stats["stats"]["output"]["stdev"]*100)){
+            if (Math.abs(highest_stats["stats"]["output"]["avg"] - highest_stats["stats"]["output"]["stdev"]*100) < target_power){
                 let effort_being_made = highest_stats["stats"]["output"]["avg"] - target_power != 0;
                 let powerdiff = Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) < highest_stats["stats"]["output"]["stdev"]*10;
                 let fueldiff =  target_fuel_use == 0 || (Math.abs(highest_stats["stats"]["fuelConsumption"]["avg"] - target_fuel_use) < highest_stats["stats"]["fuelConsumption"]["stdev"]*10);
