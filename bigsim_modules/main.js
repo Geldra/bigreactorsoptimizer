@@ -94,7 +94,7 @@ module.exports = async function () {
             if (optimization_focus == "energy"){
                 return stats["stats"]["output"]["avg"];
             }
-            let fuel_economy = stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"];
+            let fuel_economy = Math.min(stats["stats"]["output"]["avg"]/target_power,1)*(stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"]);
             return fuel_economy;
         }
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
