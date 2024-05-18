@@ -47,7 +47,7 @@ var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power ou
 const max_times_highest_in_stdev = 150;
 var optimization_focus = "fuel" // "energy" or "fuel"
 var iterations_since_last_focus_switch = 0;
-const min_iterations_since_last_focus_switch = 100;
+const min_iterations_since_last_focus_switch = 20;
 
 module.exports = async function () {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
