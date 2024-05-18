@@ -25,7 +25,7 @@ const max_forms = index.max_forms;
 const set_parameters = index.set_parameters;
 const components = index.components;
 const log_interval = index.log_interval;
-const target_fuel_use = index.target_fuel_use;
+const target_fuel_economy = index.target_fuel_economy;
 const say = index.say;
 
 const utils = index.utils;
@@ -42,6 +42,7 @@ const oldconfs = new Set();
 var conf_collisions_avoided = 0;
 
 var target_power = 500000;
+var target_fuel_use = 0;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
 const max_times_highest_in_stdev = 50;
 
@@ -90,7 +91,7 @@ module.exports = async function () {
             }
             let small_fuel_use_check = stats["stats"]["fuelConsumption"]["avg"];
             let fuel_economy = stats["stats"]["output"]["avg"]/(Math.max(small_fuel_use_check));
-            return stats["stats"]["output"]["avg"] + Math.pow(stats["stats"]["output"]["avg"],Math.log((fuel_economy)/(target_fuel_use)));
+            return stats["stats"]["output"]["avg"] + Math.pow(stats["stats"]["output"]["avg"],Math.log((fuel_economy)/(target_fuel_economy)));
         }
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
             let a_value = calc_fitness(active_forms.get(a)); // active_forms.get(a)["stats"]["output"]["avg"]
@@ -107,14 +108,17 @@ module.exports = async function () {
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
             }
-            if (Math.abs(highest_stats["stats"]["output"]["avg"] < target_power)){
-                if (Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) < highest_stats["stats"]["output"]["stdev"]){
+            if (Math.abs(highest_stats["stats"]["output"]["avg"] < target_power - highest_stats["stats"]["output"]["stdev"]*100)){
+                let powerdiff = Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) < highest_stats["stats"]["output"]["stdev"]*10;
+                let fueldiff =  target_fuel_use == 0 || (Math.abs(highest_stats["stats"]["fuelConsumption"]["avg"] - target_fuel_use) < highest_stats["stats"]["fuelConsumption"]["stdev"]*10);
+                if (powerdiff && fueldiff){
                     times_highest_in_stdev++;
                 }else{
                     times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0);
                 }
             }else{
                 target_power = highest_stats["stats"]["output"]["avg"];
+                target_fuel_use = highest_stats["stats"]["fuelConsumption"]["avg"];
             }
         }
         say(`  Highest stat check concluded`,"debug");
