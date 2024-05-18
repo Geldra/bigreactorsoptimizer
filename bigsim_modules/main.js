@@ -109,12 +109,12 @@ module.exports = async function () {
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
             }
-            if (highest_stats["stats"]["output"]["avg"] > target_power + highest_stats["stats"]["output"]["stdev"]*100){
+            if (highest_stats["stats"]["output"]["avg"] > target_power*1.1){
                 // Enter here if significant improvement in power is made
                 target_power = highest_stats["stats"]["output"]["avg"];
                 target_fuel_use = highest_stats["stats"]["fuelConsumption"]["avg"];
                 optimization_focus = "fuel";
-            }else if (highest_stats["stats"]["output"]["avg"] > target_power - highest_stats["stats"]["output"]["stdev"]*100){
+            }else if (highest_stats["stats"]["output"]["avg"] > target_power*0.9){
                 // Enter here if we are within power envelope.
                 optimization_focus = "fuel";
                     // Passes true if no real power difference
@@ -124,7 +124,7 @@ module.exports = async function () {
                 let powerdiff = Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) > highest_stats["stats"]["output"]["stdev"]*10;
 
                     // Passes true if fuel economy has improved from target
-                let fueldiff =  target_fuel_use == 0 || ((highest_stats["stats"]["output"]["avg"]/highest_stats["stats"]["fuelConsumption"]["avg"]) - (target_power/target_fuel_use) < 0);
+                let fueldiff =  target_fuel_use == 0 || ((highest_stats["stats"]["output"]["avg"]/highest_stats["stats"]["fuelConsumption"]["avg"]) - (target_power/target_fuel_use) > 0);
 
                 if (no_effort_being_made){
                     times_highest_in_stdev++; // One more step towards convergence
