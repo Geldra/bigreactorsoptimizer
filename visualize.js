@@ -26,9 +26,9 @@ const users_to_notify_upon_completion = [
     "283435626844389376",
     "822300578872033281"
 ]
-const reactor_width = 30;
-const reactor_length = 30;
-const reactor_height = 10;
+const reactor_width = 32;
+const reactor_length = 32;
+const reactor_height = 20;
 const tile_size = 7; //pixels width
 const point_radius = 3;
 let last_update = 0;
