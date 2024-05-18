@@ -76,9 +76,12 @@ module.exports = async function () {
         const startitertime = Date.now();
 
         // Sort the current data
+        function calc_fitness(stats){
+            stats["stats"]["output"]["avg"] + Math.pow(stats["stats"]["output"]["avg"],Math.log((stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"])/(target_fuel_use)));
+        }
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
-            let a_value = active_forms.get(a)["stats"]["output"]["avg"] + Math.pow(active_forms.get(a)["stats"]["output"]["avg"],Math.log((active_forms.get(a)["stats"]["output"]["avg"]/active_forms.get(a)["stats"]["fuelConsumption"]["avg"])/(target_fuel_use))); // active_forms.get(a)["stats"]["output"]["avg"]
-            let b_value = active_forms.get(a)["stats"]["output"]["avg"] + Math.pow(active_forms.get(b)["stats"]["output"]["avg"],Math.log((active_forms.get(b)["stats"]["output"]["avg"]/active_forms.get(b)["stats"]["fuelConsumption"]["avg"])/(target_fuel_use))); // active_forms.get(b)["stats"]["output"]["avg"]
+            let a_value = calc_fitness(active_forms.get(a)); // active_forms.get(a)["stats"]["output"]["avg"]
+            let b_value = calc_fitness(active_forms.get(b)); // active_forms.get(b)["stats"]["output"]["avg"]
             return a_value - b_value;
         });
 
