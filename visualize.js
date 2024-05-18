@@ -123,6 +123,7 @@ async function updateloop() {
                 .addFields(
                     { name: "Generation", value: `${floatRound(stats["output"]["avg"] / 1000, 2)} ±${floatRound(stats["output"]["stdev"] / 1000, 2)} kRF/t`, inline: true },
                     { name: "Consumption", value: `${floatRound(stats["fuelConsumption"]["avg"], 2)} ±${floatRound(stats["fuelConsumption"]["stdev"], 2)} mB/t`, inline: true },
+                    { name: "Fuel Economy", value: `${floatRound((stats["output"]["avg"] / 1000) / stats["fuelConsumption"]["avg"], 2)} ±${floatRound((stats["output"]["avg"] / 1000) / stats["fuelConsumption"]["stdev"], 2)} kRF/mB`, inline: true },
                     { name: "Iteration", value: `${maxx}`, inline: true }
                 )
                 .setTimestamp()
@@ -139,6 +140,7 @@ async function updateloop() {
                     .addFields(
                         { name: "Generation", value: `${floatRound(stats["output"]["avg"] / 1000, 3)} ±${floatRound(stats["output"]["stdev"] / 1000, 3)} kRF/t`, inline: true },
                         { name: "Consumption", value: `${floatRound(stats["fuelConsumption"]["avg"], 3)} ±${floatRound(stats["fuelConsumption"]["stdev"], 3)} mB/t`, inline: true },
+                        { name: "Fuel Economy", value: `${floatRound((stats["output"]["avg"] / 1000) / stats["fuelConsumption"]["avg"], 2)} ±${floatRound((stats["output"]["avg"] / 1000) / stats["fuelConsumption"]["stdev"], 2)} kRF/mB`, inline: true },
                         { name: "Iteration", value: `${maxx}`, inline: true }
                     )
                     .setTimestamp()
@@ -168,8 +170,8 @@ function getHighestStats(file = "current.json") {
     let highestpower = 0;
     let highestpowerstats = {};
     for (let conf of Object.keys(data)) {
-        if (data[conf]["stats"]["output"]["avg"] > highestpower) {
-            highestpower = data[conf]["stats"]["output"]["avg"];
+        if (data[conf]["stats"]["output"]["avg"]/data[conf]["stats"]["fuelConsumption"]["avg"] > highestpower) {
+            highestpower = data[conf]["stats"]["output"]["avg"]/data[conf]["stats"]["fuelConsumption"]["avg"];
             highestconf = conf;
             highestpowerstats = {};
             Object.assign(highestpowerstats, data[conf]["stats"]);
@@ -253,11 +255,11 @@ async function buildgraph(stat = "output", last_iterations = 400) {
                     ])
                 }
                 //console.log("   objkeydelta = " + (Date.now() - objkeystart) + " ms");
-                if (stats["avg"] < miny) {
-                    miny = stats["avg"] + 0;
+                if (stats["avg"]/fuel_stats["avg"] < miny) {
+                    miny = stats["avg"]/fuel_stats["avg"];
                 }
-                if (stats["avg"] > maxy) {
-                    maxy = stats["avg"] + 0;
+                if (stats["avg"]/fuel_stats["avg"] > maxy) {
+                    maxy = stats["avg"]/fuel_stats["avg"];
                 }
                 stats = null;
                 //console.log(`${thisone} (${this_file_parse}/${files_length}) (${Date.now() - startConfTime} ms) (${thisconfid}/${conflength})`);
@@ -279,7 +281,7 @@ async function buildgraph(stat = "output", last_iterations = 400) {
     try{
         svgelms.push(`
             <ellipse cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"]/last_max_iteration_high_stats["fuelConsumption"]["avg"])}" rx="${point_radius * 10}" ry="${Math.round(((last_max_iteration_high_stats[stat]["stdev"]/last_max_iteration_high_stats["fuelConsumption"]["stdev"]) / (maxy - miny)) * image_height)}" fill="#520000" />
-            <line x1="${getx(minx)}" y1="${gety(last_max_iteration_high_stats[stat]["avg"])}" x2="${getx(maxx)}" y2="${gety(last_max_iteration_high_stats[stat]["avg"]/last_max_iteration_high_stats["fuelConsumption"]["avg"])}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
+            <line x1="${getx(minx)}" y1="${gety(last_max_iteration_high_stats[stat]["avg"]/last_max_iteration_high_stats["fuelConsumption"]["avg"])}" x2="${getx(maxx)}" y2="${gety(last_max_iteration_high_stats[stat]["avg"]/last_max_iteration_high_stats["fuelConsumption"]["avg"])}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
             <line x1="${getx(last_max_iteration)}" y1="${gety(miny)}" x2="${getx(last_max_iteration)}" y2="${gety(maxy)}" stroke-width="${Math.ceil(point_radius * 4)}" stroke="#FF0000" />
             <circle cx="${getx((last_max_iteration))}" cy="${gety(last_max_iteration_high_stats[stat]["avg"]/last_max_iteration_high_stats["fuelConsumption"]["avg"])}" r="${point_radius * 4}" fill="#FF0000" />`
         );
