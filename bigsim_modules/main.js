@@ -44,7 +44,7 @@ var conf_collisions_avoided = 0;
 var target_power = 500000;
 var target_fuel_use = 0;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
-const max_times_highest_in_stdev = Math.ceil(convergence_detection_count_threshold/20);
+const max_times_highest_in_stdev = 150;
 var optimization_focus = "energy" // "energy" or "fuel"
 
 module.exports = async function () {
@@ -120,18 +120,21 @@ module.exports = async function () {
                     // Passes true if highest has changed since last eval
                 let no_effort_being_made = highest_stats["stats"]["output"]["avg"] - target_power == 0;
 
-                    // Passes true if highest has remained within margin of target
-                let powerdiff = Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) < highest_stats["stats"]["output"]["stdev"]*10;
+                    // Passes true if highest has left target margin
+                let powerdiff = Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) > highest_stats["stats"]["output"]["stdev"]*10;
 
                     // Passes true if fuel economy has improved from target
                 let fueldiff =  target_fuel_use == 0 || ((highest_stats["stats"]["output"]["avg"]/highest_stats["stats"]["fuelConsumption"]["avg"]) - (target_power/target_fuel_use) < 0);
 
                 if (no_effort_being_made){
                     times_highest_in_stdev++; // One more step towards convergence
-                }else if (powerdiff){
-                    times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0); // Marginally reward changes in power output
-                }else if (fueldiff){
-                    times_highest_in_stdev = 0; // Massively reward improving fuel economy by reseting chances
+                }else {
+                    if (powerdiff){
+                        times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0); // Marginally reward changes in power output
+                    }
+                    if (fueldiff){
+                        times_highest_in_stdev = 0; // Massively reward improving fuel economy by reseting chances
+                    }
                 }
             }else{
                 // we are below the power envelope
