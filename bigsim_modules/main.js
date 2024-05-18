@@ -109,7 +109,7 @@ module.exports = async function () {
             if (last_highest.length > max_last_highest) {
                 last_highest = last_highest.slice(1);
             }
-            if (Object.keys(highest_stats).includes("stats")){
+            if (Object.keys(prev_highest_stats).includes("stats")){
                 if (Math.abs(highest_stats["stats"]["output"]["avg"] - prev_highest_stats["stats"]["output"]["avg"]) < highest_stats["stats"]["output"]["stdev"]){
                     times_highest_in_stdev++;
                 }else{
