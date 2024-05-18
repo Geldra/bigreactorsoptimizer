@@ -77,8 +77,8 @@ module.exports = async function () {
 
         // Sort the current data
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
-            let a_value = active_forms.get(a)["stats"]["output"]["avg"] + Math.pow(active_forms.get(a)["stats"]["output"]["avg"]/100,Math.log((active_forms.get(a)["stats"]["output"]["avg"]/active_forms.get(a)["stats"]["fuelConsumption"]["avg"])/(target_fuel_use))); // active_forms.get(a)["stats"]["output"]["avg"]
-            let b_value = active_forms.get(a)["stats"]["output"]["avg"] + Math.pow(active_forms.get(b)["stats"]["output"]["avg"]/100,Math.log((active_forms.get(b)["stats"]["output"]["avg"]/active_forms.get(b)["stats"]["fuelConsumption"]["avg"])/(target_fuel_use))); // active_forms.get(b)["stats"]["output"]["avg"]
+            let a_value = active_forms.get(a)["stats"]["output"]["avg"] + Math.pow(active_forms.get(a)["stats"]["output"]["avg"],Math.log((active_forms.get(a)["stats"]["output"]["avg"]/active_forms.get(a)["stats"]["fuelConsumption"]["avg"])/(target_fuel_use))); // active_forms.get(a)["stats"]["output"]["avg"]
+            let b_value = active_forms.get(a)["stats"]["output"]["avg"] + Math.pow(active_forms.get(b)["stats"]["output"]["avg"],Math.log((active_forms.get(b)["stats"]["output"]["avg"]/active_forms.get(b)["stats"]["fuelConsumption"]["avg"])/(target_fuel_use))); // active_forms.get(b)["stats"]["output"]["avg"]
             return a_value - b_value;
         });
 
