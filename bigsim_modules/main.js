@@ -124,7 +124,7 @@ module.exports = async function () {
                 }
             }else if (highest_stats["stats"]["output"]["avg"] > target_power*0.9){
                 // Enter here if we are within power envelope.
-                if (iterations_since_last_focus_switch > min_iterations_since_last_focus_switch){
+                if (iterations_since_last_focus_switch > min_iterations_since_last_focus_switch && highest_stats["stats"]["output"]["avg"] > target_power){
                     if (optimization_focus != "fuel"){
                         iterations_since_last_focus_switch = 0;
                     }
