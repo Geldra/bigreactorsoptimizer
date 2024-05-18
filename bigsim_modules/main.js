@@ -117,8 +117,8 @@ module.exports = async function () {
             }else if (highest_stats["stats"]["output"]["avg"] > target_power - highest_stats["stats"]["output"]["stdev"]*100){
                 // Enter here if we are within power envelope.
                 optimization_focus = "fuel";
-                    // Passes true if highest has changed since last eval
-                let no_effort_being_made = highest_stats["stats"]["output"]["avg"] - target_power == 0;
+                    // Passes true if no real power difference
+                let no_effort_being_made = Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) < highest_stats["stats"]["output"]["stdev"]/10;
 
                     // Passes true if highest has left target margin
                 let powerdiff = Math.abs(highest_stats["stats"]["output"]["avg"] - target_power) > highest_stats["stats"]["output"]["stdev"]*10;
@@ -128,13 +128,12 @@ module.exports = async function () {
 
                 if (no_effort_being_made){
                     times_highest_in_stdev++; // One more step towards convergence
-                }else {
-                    if (powerdiff){
-                        times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0); // Marginally reward changes in power output
-                    }
-                    if (fueldiff){
-                        times_highest_in_stdev = 0; // Massively reward improving fuel economy by reseting chances
-                    }
+                }
+                if (powerdiff){
+                    times_highest_in_stdev = Math.max(times_highest_in_stdev - 1, 0); // Marginally reward changes in power output
+                }
+                if (fueldiff){
+                    times_highest_in_stdev = 0; // Massively reward improving fuel economy by reseting chances
                 }
             }else{
                 // we are below the power envelope
