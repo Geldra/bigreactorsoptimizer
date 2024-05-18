@@ -129,7 +129,8 @@ async function updateloop() {
                 .setFooter({ text: 'I will continue spamming this until I get it right', iconURL: 'https://cdn.discordapp.com/attachments/985240563131506818/986367128674377758/unknown.png' });
             try {
                 await spamchan.send({ content: (`${Math.floor((Date.now() - last_update) / 1000)} seconds ${reactor_width}x${reactor_length}`), embeds: [theEmbed], files: ["./visualizations/fuel_economy.png", "./visualizations/reactor.png"] });
-            } catch {
+            } catch (err){
+                console.log(`Failure in sending normal update.\n${err}`);
                 const theFallbackEmbed = new EmbedBuilder()
                     .setTitle("Your bihourly reactor update!")
                     .setColor('#DFFF00')
@@ -312,7 +313,7 @@ async function buildgraph(stat = "output", last_iterations = 400) {
     });
     console.log(`-- Building complete, moving to export (${Date.now() - fullstart} ms)`);
     let fullsvg = `<svg>${svgelms.join("")}</svg>`;
-    fs.writeFileSync("./visualizations/" + stat + ".png", await sharp(Buffer.from(fullsvg), { unlimited: true }).png().toBuffer());
+    fs.writeFileSync("./visualizations/fuel_economy.png", await sharp(Buffer.from(fullsvg), { unlimited: true }).png().toBuffer());
     function getx(rawx) {
         rawx = rawx < minx ? minx : rawx;
         rawx = rawx > maxx ? maxx : rawx;

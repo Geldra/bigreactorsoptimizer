@@ -77,9 +77,12 @@ module.exports = async function () {
 
         // Sort the current data
         function calc_fitness(stats){
+            if (stats["stats"]["output"]["avg"] < 400000){
+                return stats["stats"]["output"]["avg"];
+            }
             let small_fuel_use_check = stats["stats"]["fuelConsumption"]["avg"]*stats["stats"]["fuelConsumption"]["stdev"];
             let fuel_economy = stats["stats"]["output"]["avg"]/(Math.max([small_fuel_use_check,0.5])/stats["stats"]["fuelConsumption"]["stdev"]);
-            stats["stats"]["output"]["avg"] + Math.pow(stats["stats"]["output"]["avg"],Math.log((fuel_economy)/(target_fuel_use)));
+            return stats["stats"]["output"]["avg"] + Math.pow(stats["stats"]["output"]["avg"],Math.log((fuel_economy)/(target_fuel_use)));
         }
         let weakest_arr = [...active_forms.keys()].sort((a, b) => {
             let a_value = calc_fitness(active_forms.get(a)); // active_forms.get(a)["stats"]["output"]["avg"]
