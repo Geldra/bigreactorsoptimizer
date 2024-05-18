@@ -88,7 +88,7 @@ module.exports = async function () {
             optimization_focus = "energy";
         }
         function calc_fitness(stats){
-            if (optimization_focus = "energy"){
+            if (optimization_focus == "energy"){
                 return stats["stats"]["output"]["avg"];
             }
             let fuel_economy = stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"];
