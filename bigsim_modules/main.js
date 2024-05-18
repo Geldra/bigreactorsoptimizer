@@ -45,7 +45,7 @@ var target_power = 500000;
 var target_fuel_use = 0;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
 const max_times_highest_in_stdev = 150;
-var optimization_focus = "energy" // "energy" or "fuel"
+var optimization_focus = "fuel" // "energy" or "fuel"
 var iterations_since_last_focus_switch = 0;
 const min_iterations_since_last_focus_switch = 100;
 
