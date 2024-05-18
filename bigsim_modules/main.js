@@ -40,7 +40,7 @@ var optimize_escape_split = 0.5; //if Math.round() is greater, escape. Otherwise
 const oldconfs = new Set();
 var conf_collisions_avoided = 0;
 
-var target_power = 500000;
+var target_power = 700000;
 var target_fuel_use = 0;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
 const max_times_highest_in_stdev = 150;
@@ -84,11 +84,11 @@ module.exports = async function () {
         const startitertime = Date.now();
 
         // Sort the current data
-        if (times_highest_in_stdev > max_times_highest_in_stdev){
+        /*if (times_highest_in_stdev > max_times_highest_in_stdev){
             target_power += 10000;
             times_highest_in_stdev = 0;
             optimization_focus = "energy";
-        }
+        }*/
         function calc_fitness(stats){
             if (optimization_focus == "energy"){
                 return ((stats["stats"]["output"]["avg"]/stats["stats"]["fuelConsumption"]["avg"])/(target_power/target_fuel_use))*stats["stats"]["output"]["avg"];
@@ -113,7 +113,7 @@ module.exports = async function () {
             }
             if (highest_stats["stats"]["output"]["avg"] > target_power*1.1){
                 // Enter here if significant improvement in power is made
-                target_power = highest_stats["stats"]["output"]["avg"];
+                //target_power = highest_stats["stats"]["output"]["avg"];
                 target_fuel_use = highest_stats["stats"]["fuelConsumption"]["avg"];
                 if (iterations_since_last_focus_switch > min_iterations_since_last_focus_switch){
                     if (optimization_focus != "fuel"){
@@ -152,7 +152,7 @@ module.exports = async function () {
                 if (optimization_focus != "energy"){
                     iterations_since_last_focus_switch = 0;
                 }
-                optimization_focus = "energy";
+                //optimization_focus = "energy";
             }
         }
         say(`  Highest stat check concluded`,"fuel");
