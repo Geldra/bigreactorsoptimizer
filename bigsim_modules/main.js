@@ -44,7 +44,7 @@ var conf_collisions_avoided = 0;
 var target_power = 500000;
 var target_fuel_use = 0;
 var times_highest_in_stdev = 0; // Iterates when highest fitness conf's power output stays within its stdev of last most fit power.
-const max_times_highest_in_stdev = 50;
+const max_times_highest_in_stdev = convergence_detection_count_threshold/20;
 
 module.exports = async function () {
     for (ii = init_iteration; ii < iterations + 1; ii++) {
